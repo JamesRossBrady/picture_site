@@ -11,31 +11,26 @@
       color: #e0e0e0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       overflow: hidden;
     }
 
     #carousel {
       position: relative;
-      width: 86vw;
-      max-width: 1100px;
-      height: 70vh;
-      display: flex;
-      align-items: center;
+      width: 100vw;
+      height: 100vh;
     }
 
     .slide {
       position: absolute;
-      width: 100%;
-      height: 100%;
+      inset: 0;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       opacity: 0;
       transition: opacity 0.4s ease;
       pointer-events: none;
+      padding: 60px 80px 50px;
     }
 
     .slide.active {
@@ -43,45 +38,57 @@
       pointer-events: auto;
     }
 
-    .slide a {
+    .slide-content {
+      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
       width: 100%;
-      height: 100%;
-      text-decoration: none;
+      overflow: hidden;
     }
 
-    .slide img {
+    .slide-content img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
       border-radius: 4px;
     }
 
-    .slide-label {
-      position: absolute;
-      bottom: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 14px;
-      color: #888;
-      background: rgba(13, 13, 13, 0.85);
-      padding: 6px 16px;
+    .slide-content iframe {
+      width: 100%;
+      height: 100%;
+      border: 1px solid #333;
       border-radius: 4px;
-      letter-spacing: 0.5px;
+      background: #0d0d0d;
     }
+
+    .slide-title {
+      flex-shrink: 0;
+      font-size: 15px;
+      color: #888;
+      padding: 14px 0 0;
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+
+    .slide-title a {
+      color: #aaa;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .slide-title a:hover { color: #fff; }
 
     .arrow {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      width: 48px;
-      height: 48px;
+      width: 52px;
+      height: 52px;
       border: none;
-      background: rgba(255, 255, 255, 0.06);
-      color: #888;
-      font-size: 28px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #777;
+      font-size: 30px;
       cursor: pointer;
       z-index: 10;
       display: flex;
@@ -90,21 +97,19 @@
       transition: background 0.2s, color 0.2s;
     }
 
-    .arrow:hover {
-      background: rgba(255, 255, 255, 0.14);
-      color: #fff;
-    }
+    .arrow:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
 
-    .arrow-left  { left: 0;   border-radius: 50% 0 0 50%; }
-    .arrow-right { right: 0;  border-radius: 0 50% 50% 0; }
+    .arrow-left  { left: 12px;  border-radius: 50%; }
+    .arrow-right { right: 12px; border-radius: 50%; }
 
     .dots {
       position: absolute;
-      bottom: -32px;
+      bottom: 18px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
       gap: 10px;
+      z-index: 10;
     }
 
     .dot {
@@ -125,17 +130,17 @@
     <button class="arrow arrow-right" id="next">&#8594;</button>
 
     <div class="slide active" id="slide-0">
-      <a href="Epstein_Reams/">
+      <div class="slide-content">
         <img src="Epstein_Reams/Epstein_Reams.png" alt="Epstein Reams">
-      </a>
-      <div class="slide-label">Epstein Reams</div>
+      </div>
+      <div class="slide-title"><a href="Epstein_Reams/">Epstein Reams</a></div>
     </div>
 
     <div class="slide" id="slide-1">
-      <a href="TrumpCorruptionAndPardons/">
-        <img src="TrumpCorruptionAndPardons/TrumpCorruptionAndPardons.png" alt="Trump Corruption and Pardons">
-      </a>
-      <div class="slide-label">Trump Corruption &amp; Pardons</div>
+      <div class="slide-content">
+        <iframe src="TrumpCorruptionAndPardons/index.html" title="Trump Corruption and Pardons"></iframe>
+      </div>
+      <div class="slide-title"><a href="TrumpCorruptionAndPardons/" target="_blank">Trump Corruption &amp; Pardons &#8599;</a></div>
     </div>
   </div>
 
@@ -159,11 +164,7 @@
 
     document.getElementById('prev').addEventListener('click', () => show(current - 1));
     document.getElementById('next').addEventListener('click', () => show(current + 1));
-
-    dots.forEach(dot => {
-      dot.addEventListener('click', () => show(parseInt(dot.getAttribute('data-index'))));
-    });
-
+    dots.forEach(dot => dot.addEventListener('click', () => show(parseInt(dot.getAttribute('data-index')))));
     document.addEventListener('keydown', e => {
       if (e.key === 'ArrowLeft') show(current - 1);
       if (e.key === 'ArrowRight') show(current + 1);
