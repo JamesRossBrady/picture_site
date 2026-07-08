@@ -320,6 +320,21 @@
       font-style: italic;
     }
 
+    .card-body .uscode-links {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid #333;
+      font-size: 11px;
+    }
+
+    .card-body .uscode-links a {
+      color: #7eb8da;
+      text-decoration: none;
+      font-family: monospace;
+    }
+
+    .card-body .uscode-links a:hover { text-decoration: underline; }
+
     #legend {
       position: fixed;
       right: 0;
@@ -335,12 +350,18 @@
       color: #bbb;
     }
     #legend h3 { font-size: 12px; color: #fff; margin: 0 0 8px 0; }
-    #legend .legend-category { display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid #1a1a1a; }
+    #legend .legend-category { border-bottom: 1px solid #1a1a1a; }
+    #legend .legend-header { display: flex; justify-content: space-between; padding: 3px 0; cursor: pointer; transition: background 0.15s; }
+    #legend .legend-header:hover { background: #1a1a1a; }
     #legend .legend-count { color: #888; }
     #legend .legend-total { margin-top: 6px; padding-top: 4px; border-top: 1px solid #444; font-weight: 600; color: #fff; }
-    #legend .legend-category { cursor: pointer; transition: background 0.15s; }
-    #legend .legend-category:hover { background: #1a1a1a; }
     #legend .legend-category.active { background: #222; color: #fff; }
+    #legend .legend-sublist { display: none; padding: 0 0 4px 4px; font-size: 10px; color: #999; }
+    #legend .legend-category.open .legend-sublist { display: block; }
+    #legend .legend-sublist div[data-name] { padding: 3px 0; cursor: pointer; border-bottom: 1px solid #151515; }
+    #legend .legend-sublist div[data-name]:hover { color: #fff; }
+    #legend .legend-sublist .sublist-name { display: block; color: #ccc; font-weight: 500; }
+    #legend .legend-sublist .sublist-desc { display: block; color: #666; font-size: 9px; line-height: 1.3; margin-top: 1px; }
 
     .marker-label.highlighted {
       font-size: 13px !important;
@@ -428,7 +449,6 @@
     // ── EVENTS DATA ────────────────────────────────────────────
 
     const EVENTS = [
-      // ── CORRUPTION ──
       {
         id: 'c01',
         line: 'corruption',
@@ -446,6 +466,258 @@
         summary: 'Trump sworn in for second term amid immediate concerns about foreign payments and business conflicts.',
         details: 'Trump assumed office already facing Emoluments Clause concerns. His family business empire had expanded dramatically since his first term, now including crypto ventures, Truth Social (DJT stock), and numerous licensing deals. Watchdog groups warned that the scale of potential foreign influence had multiplied compared to 2017.',
         category: 'Ethics'
+      },
+      {
+        id: 'p000',
+        line: 'pardon',
+        date: '2025-01-20',
+        title: '~1,500 Jan. 6 Defendants (Pardons + 14 Commutations)',
+        summary: 'Blanket clemency for Capitol attack defendants via presidential proclamation.',
+        details: 'Date: January 20, 2025. Type: pardon/commutation. Offense: Various offenses relating to the events at or near the United States Capitol on January 6, 2021. Approximately 1,500 individuals pardoned; 14 leaders including Oath Keepers and Proud Boys had sentences commuted to time served.',
+        category: 'Jan 6'
+      },
+      {
+        id: 'p001',
+        line: 'pardon',
+        date: '2025-01-21',
+        title: 'Ross William Ulbricht',
+        summary: 'Aiding and abetting distribution of drugs over internet; continuing criminal enterprise; computer hacking c...',
+        details: 'Date: January 21, 2025. Type: pardon. Offense: Aiding and abetting distribution of drugs over internet; continuing criminal enterprise; computer hacking conspiracy; fraud with identification documents; money laundering conspiracy.',
+        category: 'pardon'
+      },
+      {
+        id: 'p002',
+        line: 'pardon',
+        date: '2025-01-22',
+        title: 'Terence Dale Sutton, Jr.',
+        summary: 'Murder in second degree; conspiracy; obstruction of justice and aiding and abetting',
+        details: 'Date: January 22, 2025. Type: pardon. Offense: Murder in second degree; conspiracy; obstruction of justice and aiding and abetting.',
+        category: 'pardon'
+      },
+      {
+        id: 'p003',
+        line: 'pardon',
+        date: '2025-01-22',
+        title: 'Andrew Zabavsky',
+        summary: 'Conspiracy; obstruction of justice and aiding and abetting',
+        details: 'Date: January 22, 2025. Type: pardon. Offense: Conspiracy; obstruction of justice and aiding and abetting.',
+        category: 'pardon'
+      },
+      {
+        id: 'p004',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Joan Bell',
+        summary: 'Conspiracy against rights; FACE Act',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; FACE Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p005',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Coleman Boyd',
+        summary: 'Conspiracy to obstruct access to a clinic providing reproductive health services; violation of the FACE Act',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: Conspiracy to obstruct access to a clinic providing reproductive health services; violation of the FACE Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p006',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Joel Curry',
+        summary: 'Conspiracy against rights; clinic access obstruction',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; clinic access obstruction.',
+        category: 'pardon'
+      },
+      {
+        id: 'p007',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Jonathan Darnel',
+        summary: 'Conspiracy against rights; FACE Act',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; FACE Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p008',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Caroline Davis',
+        summary: '1. Conspiracy to interfere with access to clinic entrances; aiding and abetting interference with access to...',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: 1. Conspiracy to interfere with access to clinic entrances; aiding and abetting interference with access to clinic entrances2. Conspiracy; interference with clinic access.',
+        category: 'pardon'
+      },
+      {
+        id: 'p009',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Eva Edl',
+        summary: '1. Violation of the FACE Act2. Conspiracy against rights; clinic access obstruction',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: 1. Violation of the FACE Act2. Conspiracy against rights; clinic access obstruction.',
+        category: 'pardon'
+      },
+      {
+        id: 'p010',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Chester Gallagher',
+        summary: '1. Conspiracy to obstruct access to a clinic providing reproductive health services; violation of the FACE ...',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: 1. Conspiracy to obstruct access to a clinic providing reproductive health services; violation of the FACE Act2. Conspiracy against rights; clinic access obstruction.',
+        category: 'pardon'
+      },
+      {
+        id: 'p011',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Herb Geraghty',
+        summary: 'Conspiracy against rights; FACE Act',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; FACE Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p012',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'William Goodman',
+        summary: 'Conspiracy against rights; FACE Act',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; FACE Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p013',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Dennis Green',
+        summary: 'Conspiracy to obstruct access to a clinic providing reproductive health services; violation of the FACE Act',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: Conspiracy to obstruct access to a clinic providing reproductive health services; violation of the FACE Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p014',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Lauren Handy',
+        summary: 'Conspiracy against rights; FACE Act',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; FACE Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p015',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Paula Harlow',
+        summary: 'Conspiracy against rights; FACE Act',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; FACE Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p016',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'John Hinshaw',
+        summary: 'Conspiracy against rights; FACE Act',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; FACE Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p017',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Heather Idoni',
+        summary: '1. Conspiracy against rights; FACE Act2. Conspiracy against rights; clinic access obstruction3. Conspiracy ...',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: 1. Conspiracy against rights; FACE Act2. Conspiracy against rights; clinic access obstruction3. Conspiracy against rights; FACE Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p018',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Jean Marshall',
+        summary: 'Conspiracy against rights; FACE Act',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; FACE Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p019',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Christopher Moscinski',
+        summary: 'Interference with freedom of access to reproductive health services',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: Interference with freedom of access to reproductive health services.',
+        category: 'pardon'
+      },
+      {
+        id: 'p020',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Justin Phillips',
+        summary: 'Conspiracy against rights; clinic access obstruction',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; clinic access obstruction.',
+        category: 'pardon'
+      },
+      {
+        id: 'p021',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Paul Place',
+        summary: 'Violation of the FACE Act',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: Violation of the FACE Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p022',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Jay Smith',
+        summary: 'FACE Act',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: FACE Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p023',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Paul Vaughn',
+        summary: 'Conspiracy to obstruct access to a clinic providing reproductive health services; violation of the FACE Act',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: Conspiracy to obstruct access to a clinic providing reproductive health services; violation of the FACE Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p024',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Bevelyn Beatty Williams',
+        summary: 'Violating FACE Act',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: Violating FACE Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p025',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Calvin Zastrow',
+        summary: '1. Conspiracy to obstruct access to clinic providing reproductive health services; violation of the FACE Ac...',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: 1. Conspiracy to obstruct access to clinic providing reproductive health services; violation of the FACE Act2. Conspiracy against rights; clinic access obstruction.',
+        category: 'pardon'
+      },
+      {
+        id: 'p026',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'Eva Zastrow',
+        summary: '1. Violation of the FACE Act2. Conspiracy against rights; clinic access obstruction',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: 1. Violation of the FACE Act2. Conspiracy against rights; clinic access obstruction.',
+        category: 'pardon'
+      },
+      {
+        id: 'p027',
+        line: 'pardon',
+        date: '2025-01-23',
+        title: 'James Zastrow',
+        summary: 'Violation of the FACE Act',
+        details: 'Date: January 23, 2025. Type: pardon. Offense: Violation of the FACE Act.',
+        category: 'pardon'
       },
       {
         id: 'c03',
@@ -475,6 +747,15 @@
         category: 'Oversight'
       },
       {
+        id: 'p028',
+        line: 'pardon',
+        date: '2025-02-10',
+        title: 'Rod R. Blagojevich',
+        summary: 'Wire fraud under color of official right (eight counts); conspiracy/attempted; attempt to commit extortion ...',
+        details: 'Date: February 10, 2025. Type: pardon. Offense: Wire fraud under color of official right (eight counts); conspiracy/attempted; attempt to commit extortion under color of official right; conspiracy to solicit and solicitation of bribe (three counts); making false statements.',
+        category: 'pardon'
+      },
+      {
         id: 'c06',
         line: 'corruption',
         date: '2025-02-20',
@@ -482,6 +763,15 @@
         summary: '25 of 30 lawyers removed from the DOJ office that prosecutes public corruption cases.',
         details: 'The Department of Justice\'s Public Integrity Section — the unit responsible for prosecuting corruption by public officials — was decimated. 25 of its 30 lawyers were reassigned or removed, and the section\'s authority to open new corruption cases was stripped. Former prosecutors called it the effective end of federal public corruption enforcement.',
         category: 'Oversight'
+      },
+      {
+        id: 'p029',
+        line: 'pardon',
+        date: '2025-03-04',
+        title: 'Jean Pinkard [Commutation]',
+        summary: 'Conspiracy to possess with intent to distribute and to distribute controlled substances',
+        details: 'Date: March 4, 2025. Type: commutation. Offense: Conspiracy to possess with intent to distribute and to distribute controlled substances.',
+        category: 'commutation'
       },
       {
         id: 'c07',
@@ -493,6 +783,114 @@
         category: 'Crypto'
       },
       {
+        id: 'p030',
+        line: 'pardon',
+        date: '2025-03-11',
+        title: 'Brian Kelsey',
+        summary: 'Conspiracy to defraud the United States; aiding and abetting the acceptance of excessive contributions',
+        details: 'Date: March 11, 2025. Type: pardon. Offense: Conspiracy to defraud the United States; aiding and abetting the acceptance of excessive contributions.',
+        category: 'pardon'
+      },
+      {
+        id: 'p031',
+        line: 'pardon',
+        date: '2025-03-20',
+        title: 'Thomas Edward Caldwell',
+        summary: 'Tampering with documents or proceedings',
+        details: 'Date: March 20, 2025. Type: pardon. Offense: Tampering with documents or proceedings.',
+        category: 'pardon'
+      },
+      {
+        id: 'p032',
+        line: 'pardon',
+        date: '2025-03-25',
+        title: 'Devon Archer',
+        summary: 'Conspiracy to commit securities fraud; securities fraud',
+        details: 'Date: March 25, 2025. Type: pardon. Offense: Conspiracy to commit securities fraud; securities fraud.',
+        category: 'pardon'
+      },
+      {
+        id: 'p033',
+        line: 'pardon',
+        date: '2025-03-27',
+        title: 'Benjamin Delo',
+        summary: 'Violation of the Bank Secrecy Act',
+        details: 'Date: March 27, 2025. Type: pardon. Offense: Violation of the Bank Secrecy Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p034',
+        line: 'pardon',
+        date: '2025-03-27',
+        title: 'Gregory Dwyer',
+        summary: 'Violating the Bank Secrecy Act',
+        details: 'Date: March 27, 2025. Type: pardon. Offense: Violating the Bank Secrecy Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p035',
+        line: 'pardon',
+        date: '2025-03-27',
+        title: 'Arthur Hayes',
+        summary: 'Violation of the Bank Secrecy Act',
+        details: 'Date: March 27, 2025. Type: pardon. Offense: Violation of the Bank Secrecy Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p036',
+        line: 'pardon',
+        date: '2025-03-27',
+        title: 'HDR Global Trading Limited',
+        summary: 'Violation of Bank Secrecy Act',
+        details: 'Date: March 27, 2025. Type: pardon. Offense: Violation of Bank Secrecy Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p037',
+        line: 'pardon',
+        date: '2025-03-27',
+        title: 'Trevor Milton',
+        summary: 'Securities fraud; wire fraud (two counts)',
+        details: 'Date: March 27, 2025. Type: pardon. Offense: Securities fraud; wire fraud (two counts).',
+        category: 'pardon'
+      },
+      {
+        id: 'p038',
+        line: 'pardon',
+        date: '2025-03-27',
+        title: 'Samuel Reed',
+        summary: 'Violation of the Bank Secrecy Act',
+        details: 'Date: March 27, 2025. Type: pardon. Offense: Violation of the Bank Secrecy Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p039',
+        line: 'pardon',
+        date: '2025-03-28',
+        title: 'Jason Galanis [Commutation]',
+        summary: '1. Conspiracy to commit securities fraud (two counts); securities fraud; investment adviser fraud2. Conspir...',
+        details: 'Date: March 28, 2025. Type: commutation. Offense: 1. Conspiracy to commit securities fraud (two counts); securities fraud; investment adviser fraud2. Conspiracy to commit securities fraud; securities fraud; conspiracy to commit investment adviser fraud.',
+        category: 'commutation'
+      },
+      {
+        id: 'p040',
+        line: 'pardon',
+        date: '2025-03-28',
+        title: 'Ozy Media, Inc. [Commutation]',
+        summary: 'Conspiracy to commit securities fraud; conspiracy to commit wire fraud',
+        details: 'Date: March 28, 2025. Type: commutation. Offense: Conspiracy to commit securities fraud; conspiracy to commit wire fraud.',
+        category: 'commutation'
+      },
+      {
+        id: 'p041',
+        line: 'pardon',
+        date: '2025-03-28',
+        title: 'Carlos Roy Watson [Commutation]',
+        summary: 'Conspiracy to commit securities fraud; conspiracy to commit wire fraud; aggravated identity theft',
+        details: 'Date: March 28, 2025. Type: commutation. Offense: Conspiracy to commit securities fraud; conspiracy to commit wire fraud; aggravated identity theft.',
+        category: 'commutation'
+      },
+      {
         id: 'c08',
         line: 'corruption',
         date: '2025-04-01',
@@ -502,6 +900,15 @@
         category: 'IRS'
       },
       {
+        id: 'c21',
+        line: 'corruption',
+        date: '2025-04-07',
+        title: 'Blanche Memo: DOJ Ends Crypto Enforcement',
+        summary: 'Deputy AG Todd Blanche (Trump\'s former personal defense attorney) issues memo disbanding the crypto crimes unit.',
+        details: 'Deputy Attorney General Todd Blanche — Trump\'s former personal criminal defense attorney — issued an April 7, 2025 memo titled "Ending Regulation by Prosecution." The memo disbanded the National Cryptocurrency Enforcement Team (NCET), directed prosecutors to stop pursuing cases against crypto exchanges, mixers, and wallet providers, and declared the DOJ "is not a digital assets regulator." Blanche held $159,000–$485,000 in personal crypto assets (BTC, ETH, SOL, ADA) when he signed the memo, potentially violating his divestiture pledge. The memo directly benefited the crypto industry that had enriched the Trump family through World Liberty Financial and $TRUMP coin. Source: justice.gov/dag/media/1395781/dl.',
+        category: 'Oversight'
+      },
+      {
         id: 'c09',
         line: 'corruption',
         date: '2025-04-15',
@@ -509,6 +916,33 @@
         summary: 'Administration kills free tax-filing program, benefiting tax prep software companies.',
         details: 'The IRS Direct File program, which allowed Americans to file taxes for free directly with the government, was terminated. The move was widely seen as a gift to tax preparation software giants like Intuit (TurboTax) and H&R Block, which have spent millions lobbying against free government filing options.',
         category: 'IRS'
+      },
+      {
+        id: 'p042',
+        line: 'pardon',
+        date: '2025-04-23',
+        title: 'Michele Fiore',
+        summary: 'Conspiracy to commit wire fraud; wire fraud (six counts)',
+        details: 'Date: April 23, 2025. Type: pardon. Offense: Conspiracy to commit wire fraud; wire fraud (six counts).',
+        category: 'pardon'
+      },
+      {
+        id: 'p043',
+        line: 'pardon',
+        date: '2025-04-23',
+        title: 'Paul Walczak',
+        summary: 'Willful failure to pay trust fund taxes; failure to file return/information',
+        details: 'Date: April 23, 2025. Type: pardon. Offense: Willful failure to pay trust fund taxes; failure to file return/information.',
+        category: 'pardon'
+      },
+      {
+        id: 'c22',
+        line: 'corruption',
+        date: '2025-04-30',
+        title: 'USDA Reverses Salmonella Rule for Trump Donor',
+        summary: 'Pilgrim\'s Pride donated $5M to Trump inauguration — USDA reverses a salmonella safety rule they wanted eliminated.',
+        details: 'Pilgrim\'s Pride, a major poultry producer, donated $5 million to Trump\'s inauguration fund — more than Amazon, Meta, or Exxon. The USDA subsequently reversed a salmonella safety regulation that Pilgrim\'s Pride had specifically requested be eliminated. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        category: 'Pay-to-Play'
       },
       {
         id: 'c10',
@@ -527,6 +961,249 @@
         summary: 'UAE-linked firm deposits $2B in World Liberty Financial; two weeks later UAE gets advanced AI chips access.',
         details: 'An investment firm linked to the United Arab Emirates\' ruling family deposited $2 billion into Trump\'s World Liberty Financial crypto platform. Two weeks later, the Trump administration granted the UAE access to hundreds of thousands of advanced AI computer chips, overriding national security concerns that the technology could be shared with China.',
         category: 'Foreign'
+      },
+      {
+        id: 'p044',
+        line: 'pardon',
+        date: '2025-05-27',
+        title: 'Scott Howard Jenkins',
+        summary: 'Conspiracy to commit bribery concerning programs receiving Federal funds, honest services mail fraud, and h...',
+        details: 'Date: May 27, 2025. Type: pardon. Offense: Conspiracy to commit bribery concerning programs receiving Federal funds, honest services mail fraud, and honest service wire fraud; honest services mail fraud; honest services wire fraud (three counts); bribery concerning programs receiving federal funds (seven counts).',
+        category: 'pardon'
+      },
+      {
+        id: 'p045',
+        line: 'pardon',
+        date: '2025-05-27',
+        title: 'James Callahan',
+        summary: 'Filing false labor union reports',
+        details: 'Date: May 27, 2025. Type: pardon. Offense: Filing false labor union reports.',
+        category: 'pardon'
+      },
+      {
+        id: 'p046',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Kevin Eric Baisden',
+        summary: '1. Shoplifting2. Second degree theft3. Bail reform act4. Second degree theft',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: 1. Shoplifting2. Second degree theft3. Bail reform act4. Second degree theft.',
+        category: 'pardon'
+      },
+      {
+        id: 'p047',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Mark Bashaw',
+        summary: 'Violation of lawful orders',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Violation of lawful orders.',
+        category: 'pardon'
+      },
+      {
+        id: 'p048',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Julie Chrisley',
+        summary: 'Conspiracy to commit bank fraud; bank fraud (five counts); wire fraud; conspiracy to defraud the U.S. to ob...',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to commit bank fraud; bank fraud (five counts); wire fraud; conspiracy to defraud the U.S. to obstruct and impede the Internal Revenue Laws; tax evasion; obstruction of justice.',
+        category: 'pardon'
+      },
+      {
+        id: 'p049',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Todd Chrisley',
+        summary: 'Conspiracy to commit bank fraud; bank fraud (five counts); conspiracy to defraud the U.S. to obstruct and i...',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to commit bank fraud; bank fraud (five counts); conspiracy to defraud the U.S. to obstruct and impede the Internal Revenue Laws; tax evasion.',
+        category: 'pardon'
+      },
+      {
+        id: 'p050',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Lawrence S. Duran',
+        summary: 'Conspiracy to commit health care fraud; health care fraud (11 counts); conspiracy to defraud the United Sta...',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to commit health care fraud; health care fraud (11 counts); conspiracy to defraud the United States and to receive and pay health care kickbacks; conspiracy to commit money laundering; money laundering (18 counts); structuring to avoid reporting requirements (six counts).',
+        category: 'pardon'
+      },
+      {
+        id: 'p051',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Kentrell D. Gaulden',
+        summary: 'Felon in possession of a firearm',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Felon in possession of a firearm.',
+        category: 'pardon'
+      },
+      {
+        id: 'p052',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Michael Gerard Grimm',
+        summary: 'Aiding and assisting in the preparation of false and fraudulent tax returns',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Aiding and assisting in the preparation of false and fraudulent tax returns.',
+        category: 'pardon'
+      },
+      {
+        id: 'p053',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Michael Ray Harris',
+        summary: 'Conspiracy to possess with intent to distribute and to aid and abet possession and distribution of cocaine;...',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to possess with intent to distribute and to aid and abet possession and distribution of cocaine; aiding and abetting possession with intent to distribute cocaine; possession with intent to distribute cocaine.',
+        category: 'pardon'
+      },
+      {
+        id: 'p054',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Larry Hoover',
+        summary: 'Narcotics conspiracy; continuing criminal enterprise; use of persons under age 18; distribution of cocaine;...',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Narcotics conspiracy; continuing criminal enterprise; use of persons under age 18; distribution of cocaine; use of a communication facility in committing the narcotics conspiracy; distribution of cocaine (two counts) use of a firearm in the commission of a drug trafficking crime.',
+        category: 'pardon'
+      },
+      {
+        id: 'p055',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'James M. Kernan',
+        summary: 'Knowingly and willfully permitting a convicted felon to be engaged in the business of insurance',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Knowingly and willfully permitting a convicted felon to be engaged in the business of insurance.',
+        category: 'pardon'
+      },
+      {
+        id: 'p056',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Marlene Mary Kernan',
+        summary: 'Permitting a convicted felon to engage in the business of insurance',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Permitting a convicted felon to engage in the business of insurance.',
+        category: 'pardon'
+      },
+      {
+        id: 'p057',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Tanner J. Mansell',
+        summary: 'Theft of property within special maritime jurisdiction',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Theft of property within special maritime jurisdiction.',
+        category: 'pardon'
+      },
+      {
+        id: 'p058',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'John R. Moore, Jr.',
+        summary: 'Theft of property within special maritime jurisdiction',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Theft of property within special maritime jurisdiction.',
+        category: 'pardon'
+      },
+      {
+        id: 'p059',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Marian I Morgan',
+        summary: 'Conspiracy to defraud the United States; wire fraud (7 counts); transfer of funds taken by fraud (5 counts)...',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to defraud the United States; wire fraud (7 counts); transfer of funds taken by fraud (5 counts); money laundering (6 counts); making false statements on income tax returns (3 counts).',
+        category: 'pardon'
+      },
+      {
+        id: 'p060',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'John G. Rowland',
+        summary: '1. Conspiracy to defraud the United States2. Falsification of records in a federal investigation; conspirac...',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: 1. Conspiracy to defraud the United States2. Falsification of records in a federal investigation; conspiracy; causing false statements (two counts); illegal campaign contributions (two counts).',
+        category: 'pardon'
+      },
+      {
+        id: 'p061',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Charles Overton Scott',
+        summary: 'Conspiracy to commit securities fraud; securities fraud',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to commit securities fraud; securities fraud.',
+        category: 'pardon'
+      },
+      {
+        id: 'p062',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Alexander Sittenfeld',
+        summary: 'Bribery concerning programs receiving federal funds; attempted extortion under color of official right',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Bribery concerning programs receiving federal funds; attempted extortion under color of official right.',
+        category: 'pardon'
+      },
+      {
+        id: 'p063',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Earl Lamont Smith',
+        summary: 'Theft of government property',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Theft of government property.',
+        category: 'pardon'
+      },
+      {
+        id: 'p064',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Garnett Gilbert Smith',
+        summary: 'Conspiracy to distribute and possess with intent to distribute cocaine',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to distribute and possess with intent to distribute cocaine.',
+        category: 'pardon'
+      },
+      {
+        id: 'p065',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Charles Lavar Tanner',
+        summary: 'Conspiracy to possess with intent to distribute five kilograms or more of cocaine; attempt to possess with ...',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to possess with intent to distribute five kilograms or more of cocaine; attempt to possess with intent to distribute five kilograms or more of cocaine.',
+        category: 'pardon'
+      },
+      {
+        id: 'p066',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Anabel Valenzuela',
+        summary: 'Conspiracy to distribute and possess with intent to distribute 50 grams or more of methamphetamine; conspir...',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to distribute and possess with intent to distribute 50 grams or more of methamphetamine; conspiracy to commit money laundering; criminal forfeiture (two counts).',
+        category: 'pardon'
+      },
+      {
+        id: 'p067',
+        line: 'pardon',
+        date: '2025-05-28',
+        title: 'Imaad Shah Zuberi',
+        summary: 'Violations of the Foreign Agents Registration Act; tax evasion; foreign, conduit, and other illegal campaig...',
+        details: 'Date: May 28, 2025. Type: pardon. Offense: Violations of the Foreign Agents Registration Act; tax evasion; foreign, conduit, and other illegal campaign contributions; tampering with a witness, victim or informant (obstruction of justice).',
+        category: 'pardon'
+      },
+      {
+        id: 'p068',
+        line: 'pardon',
+        date: '2025-05-29',
+        title: 'Jeremy Young Hutchinson',
+        summary: '1. Conspiracy to commit bribery2. Aiding and abetting filing of false income tax return3. Conspiracy; crimi...',
+        details: 'Date: May 29, 2025. Type: pardon. Offense: 1. Conspiracy to commit bribery2. Aiding and abetting filing of false income tax return3. Conspiracy; criminal forfeiture of property.',
+        category: 'pardon'
+      },
+      {
+        id: 'p069',
+        line: 'pardon',
+        date: '2025-05-29',
+        title: 'Edward Ruben Sotelo',
+        summary: 'Conspiracy; continuing criminal enterprise; possession with intent to distribute 1 kilogram of cocaine, aid...',
+        details: 'Date: May 29, 2025. Type: pardon. Offense: Conspiracy; continuing criminal enterprise; possession with intent to distribute 1 kilogram of cocaine, aiding and abetting (two counts); use of telephone to facilitate commission of a felony (three counts); possession with intent to distribute 10 pounds of marijuana, and aiding and abetting; distribution of more than five kilograms of cocaine and aiding and abetting.',
+        category: 'pardon'
+      },
+      {
+        id: 'p070',
+        line: 'pardon',
+        date: '2025-05-29',
+        title: 'Joe Angelo Sotelo',
+        summary: 'Conspiracy; possession with intent to distribute one kilogram of cocaine and aiding and abetting',
+        details: 'Date: May 29, 2025. Type: pardon. Offense: Conspiracy; possession with intent to distribute one kilogram of cocaine and aiding and abetting.',
+        category: 'pardon'
       },
       {
         id: 'c12',
@@ -556,6 +1233,15 @@
         category: 'Legal'
       },
       {
+        id: 'c23',
+        line: 'corruption',
+        date: '2025-06-24',
+        title: 'Stephen Miller\'s Palantir Stock & ICE No-Bid Contract',
+        summary: 'Stephen Miller owned up to $250K in Palantir stock; ICE awarded Palantir a $30M no-bid surveillance contract.',
+        details: 'White House advisor Stephen Miller held up to $250,000 in Palantir stock while overseeing ICE, which awarded Palantir a $30 million no-bid contract for surveillance technology. The financial conflict raises serious ethics concerns given Miller\'s role in immigration policy. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        category: 'Conflict of Interest'
+      },
+      {
         id: 'c15',
         line: 'corruption',
         date: '2025-07-01',
@@ -583,6 +1269,24 @@
         category: 'Legal'
       },
       {
+        id: 'c24',
+        line: 'corruption',
+        date: '2025-09-18',
+        title: 'Trump Crypto Sold to Iran, Russia, North Korea Entities',
+        summary: 'Trump made $57M selling crypto tokens to entities tied to regimes in North Korea, Iran, and Russia.',
+        details: 'President Trump\'s cryptocurrency ventures generated $57 million from token sales to entities linked to adversarial regimes in North Korea, Iran, and Russia — creating what critics described as a direct pipeline for foreign money flowing to a sitting president in violation of the Emoluments Clause. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        category: 'Foreign'
+      },
+      {
+        id: 'c25',
+        line: 'corruption',
+        date: '2025-09-23',
+        title: 'FBI Investigation Into Tom Homan Closed',
+        summary: 'Border czar Tom Homan caught on video accepting $50K cash from undercover agents — investigation "made to go away."',
+        details: 'Tom Homan, Trump\'s border czar, was reportedly caught on video accepting $50,000 in cash from undercover agents in exchange for government contracts. The administration allegedly made the FBI investigation "go away." Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        category: 'Abuse of Power'
+      },
+      {
         id: 'c18',
         line: 'corruption',
         date: '2025-10-01',
@@ -590,6 +1294,429 @@
         summary: 'Company backed by Trump\'s sons sells drone interceptors to Persian Gulf countries.',
         details: 'Powerus, a defense startup backed by Donald Trump Jr. and Eric Trump, began selling drone interceptor systems to Persian Gulf countries heavily dependent on U.S. military leadership under President Trump. Ethics experts noted that foreign governments could view purchases from Trump family-linked businesses as a means of securing favorable U.S. policy.',
         category: 'Family'
+      },
+      {
+        id: 'p071',
+        line: 'pardon',
+        date: '2025-10-01',
+        title: 'Imaad Shah Zuberi [Commutation]',
+        summary: 'Violations of the Foreign Agents Registration Act; tax evasion; foreign, conduit, and other illegal campaig...',
+        details: 'Date: October 1, 2025. Type: commutation. Offense: Violations of the Foreign Agents Registration Act; tax evasion; foreign, conduit, and other illegal campaign contributions; tampering with a witness, victim or informant (obstruction of justice).',
+        category: 'commutation'
+      },
+      {
+        id: 'c26',
+        line: 'corruption',
+        date: '2025-10-15',
+        title: 'White House Ballroom Donors Get $50B in Contracts',
+        summary: 'Over half of donors to Trump\'s White House ballroom project received $50B+ in new or expanded federal contracts.',
+        details: 'An analysis revealed that more than half of publicly identified donors to Trump\'s White House ballroom renovation project received new or expanded federal contracts totaling over $50 billion, creating what critics called a direct pay-to-play pipeline. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        category: 'Pay-to-Play'
+      },
+      {
+        id: 'p072',
+        line: 'pardon',
+        date: '2025-10-17',
+        title: 'George Anthony Devolder Santos [Commutation]',
+        summary: 'Wire Fraud - The Party Program Scheme; aggravated identity theft',
+        details: 'Date: October 17, 2025. Type: commutation. Offense: Wire Fraud - The Party Program Scheme; aggravated identity theft.',
+        category: 'commutation'
+      },
+      {
+        id: 'p073',
+        line: 'pardon',
+        date: '2025-10-21',
+        title: 'Changpeng Zhao',
+        summary: 'Failure to maintain an effective anti-money laundering program',
+        details: 'Date: October 21, 2025. Type: pardon. Offense: Failure to maintain an effective anti-money laundering program.',
+        category: 'pardon'
+      },
+      {
+        id: 'p074',
+        line: 'pardon',
+        date: '2025-11-07',
+        title: 'Glen Casada',
+        summary: 'Conspiracy to defraud the United States; honest services wire fraud (four counts); use of a fictitious name...',
+        details: 'Date: November 7, 2025. Type: pardon. Offense: Conspiracy to defraud the United States; honest services wire fraud (four counts); use of a fictitious name to carry out a fraud; conspiracy to commit money laundering; money laundering (eight counts).',
+        category: 'pardon'
+      },
+      {
+        id: 'p075',
+        line: 'pardon',
+        date: '2025-11-07',
+        title: 'Cade Cothren',
+        summary: 'Conspiracy to defraud the United States; honest services wire fraud (six counts); use of fictitious name to...',
+        details: 'Date: November 7, 2025. Type: pardon. Offense: Conspiracy to defraud the United States; honest services wire fraud (six counts); use of fictitious name to carry out unlawful business; conspiracy to commit money laundering; money laundering (seven counts).',
+        category: 'pardon'
+      },
+      {
+        id: 'p076',
+        line: 'pardon',
+        date: '2025-11-07',
+        title: 'Robert Henry Harshbarger, Jr.',
+        summary: 'Introducing misbranded drugs into Interstate commerce; health care fraud',
+        details: 'Date: November 7, 2025. Type: pardon. Offense: Introducing misbranded drugs into Interstate commerce; health care fraud.',
+        category: 'pardon'
+      },
+      {
+        id: 'p077',
+        line: 'pardon',
+        date: '2025-11-07',
+        title: 'Troy Lake',
+        summary: 'Conspiracy to violate the Clean Air Act',
+        details: 'Date: November 7, 2025. Type: pardon. Offense: Conspiracy to violate the Clean Air Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p078',
+        line: 'pardon',
+        date: '2025-11-07',
+        title: 'Michael McMahon',
+        summary: 'Acting as an agent of a foreign government without prior notification to the Attorney General; conspiracy t...',
+        details: 'Date: November 7, 2025. Type: pardon. Offense: Acting as an agent of a foreign government without prior notification to the Attorney General; conspiracy to engage in interstate stalking; stalking.',
+        category: 'pardon'
+      },
+      {
+        id: 'p079',
+        line: 'pardon',
+        date: '2025-11-07',
+        title: 'Darryl Strawberry, Sr.',
+        summary: 'Income tax evasion',
+        details: 'Date: November 7, 2025. Type: pardon. Offense: Income tax evasion.',
+        category: 'pardon'
+      },
+      {
+        id: 'p080',
+        line: 'pardon',
+        date: '2025-11-07',
+        title: 'Michelino Sunseri',
+        summary: 'Leaving the Garnet Canyon Trail to use the shortcut of the Old Climber\'s Trail in violation of the Superin...',
+        details: 'Date: November 7, 2025. Type: pardon. Offense: Leaving the Garnet Canyon Trail to use the shortcut of the Old Climber\'s Trail in violation of the Superintendent\'s 2024 Compendium.',
+        category: 'pardon'
+      },
+      {
+        id: 'c27',
+        line: 'corruption',
+        date: '2025-11-07',
+        title: 'Coast Guard Bases Ordered to Sell Trump-Branded Products',
+        summary: 'Trump ordered U.S. Coast Guard base markets to stock his personally branded wine and cider.',
+        details: 'The Trump administration ordered U.S. Coast Guard base commissaries and exchanges to stock Trump-branded wine and cider, using government retail outlets to directly boost the president\'s personal business revenue. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        category: 'Self-Dealing'
+      },
+      {
+        id: 'p081',
+        line: 'pardon',
+        date: '2025-11-12',
+        title: 'Joseph Lewis',
+        summary: 'Conspiracy to commit securities fraud; securities fraud (two counts)',
+        details: 'Date: November 12, 2025. Type: pardon. Offense: Conspiracy to commit securities fraud; securities fraud (two counts).',
+        category: 'pardon'
+      },
+      {
+        id: 'p082',
+        line: 'pardon',
+        date: '2025-11-14',
+        title: 'Suzanne Kaye',
+        summary: 'Interstate Communications - Threats',
+        details: 'Date: November 14, 2025. Type: pardon. Offense: Interstate Communications - Threats.',
+        category: 'pardon'
+      },
+      {
+        id: 'p083',
+        line: 'pardon',
+        date: '2025-11-14',
+        title: 'Joseph Schwartz',
+        summary: 'Willful failure to pay over employment taxes; failure to file the Annual 5500 Report',
+        details: 'Date: November 14, 2025. Type: pardon. Offense: Willful failure to pay over employment taxes; failure to file the Annual 5500 Report.',
+        category: 'pardon'
+      },
+      {
+        id: 'p084',
+        line: 'pardon',
+        date: '2025-11-14',
+        title: 'Daniel Edwin Wilson',
+        summary: 'Possession of a firearm by a prohibited person; possession of an unregistered firearm',
+        details: 'Date: November 14, 2025. Type: pardon. Offense: Possession of a firearm by a prohibited person; possession of an unregistered firearm.',
+        category: 'pardon'
+      },
+      {
+        id: 'p085',
+        line: 'pardon',
+        date: '2025-11-26',
+        title: 'David Gentile [Commutation]',
+        summary: 'Conspiracy to commit securities fraud; conspiracy to commit wire fraud; securities fraud; wire fraud (two c...',
+        details: 'Date: November 26, 2025. Type: commutation. Offense: Conspiracy to commit securities fraud; conspiracy to commit wire fraud; securities fraud; wire fraud (two counts).',
+        category: 'commutation'
+      },
+      {
+        id: 'p086',
+        line: 'pardon',
+        date: '2025-12-01',
+        title: 'Juan Orlando Hernandez',
+        summary: 'Conspiracy to import cocaine into the United States; possessing machine guns and destructive devices in fur...',
+        details: 'Date: December 1, 2025. Type: pardon. Offense: Conspiracy to import cocaine into the United States; possessing machine guns and destructive devices in furtherance of the cocaine importation conspiracy; conspiracy to use and carry machine guns and destructive devices.',
+        category: 'pardon'
+      },
+      {
+        id: 'p087',
+        line: 'pardon',
+        date: '2025-12-02',
+        title: 'Enrique Roberto Cuellar',
+        summary: 'Conspiracy (two counts); bribery (two counts); honest services wire fraud; honest services wire fraud consp...',
+        details: 'Date: December 2, 2025. Type: pardon. Offense: Conspiracy (two counts); bribery (two counts); honest services wire fraud; honest services wire fraud conspiracy; money laundering conspiracy; money laundering (five counts).',
+        category: 'pardon'
+      },
+      {
+        id: 'p088',
+        line: 'pardon',
+        date: '2025-12-02',
+        title: 'Imelda Rios Cuellar',
+        summary: 'Conspiracy (two counts); bribery (two counts); honest services wire fraud; honest services wire fraud consp...',
+        details: 'Date: December 2, 2025. Type: pardon. Offense: Conspiracy (two counts); bribery (two counts); honest services wire fraud; honest services wire fraud conspiracy; money laundering conspiracy; money laundering (five counts).',
+        category: 'pardon'
+      },
+      {
+        id: 'p089',
+        line: 'pardon',
+        date: '2025-12-02',
+        title: 'Timothy Joseph Leiweke',
+        summary: 'Conspiracy to restrain trade',
+        details: 'Date: December 2, 2025. Type: pardon. Offense: Conspiracy to restrain trade.',
+        category: 'pardon'
+      },
+      {
+        id: 'c28',
+        line: 'corruption',
+        date: '2025-12-02',
+        title: 'Nursing Home Staffing Rule Revoked After Donor Lunch',
+        summary: 'Nursing home executives paid for a private lunch with Trump, then a staffing rule tied to mortality rates was rescinded.',
+        details: 'Nursing home industry executives paid for a private lunch with Trump and asked him to revoke a Biden-era staffing minimum rule. Research linked the staffing rule to lower patient mortality rates. Trump immediately ordered it rescinded after the lunch. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        category: 'Pay-to-Play'
+      },
+      {
+        id: 'p090',
+        line: 'pardon',
+        date: '2025-12-05',
+        title: 'Tina Peters',
+        summary: '“For those offenses she has or may have committed or taken part in related to election integrity and securi...',
+        details: 'Date: December 5, 2025. Type: pardon. Offense: “For those offenses she has or may have committed or taken part in related to election integrity and security during the period from January 1, 2020 through December 31, 2021”.',
+        category: 'pardon'
+      },
+      {
+        id: 'p091',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'Jimmy Ray Barnett [Commutation]',
+        summary: 'Conspiracy and aiding and abetting; possession with intent to distribute 50 grams or more of methamphetamin...',
+        details: 'Date: January 15, 2026. Type: commutation. Offense: Conspiracy and aiding and abetting; possession with intent to distribute 50 grams or more of methamphetamine; possession with intent to distribute 50 grams or more of amphetamine; possession with intent to distribute methamphetamine; convicted felon in possession of firearms.',
+        category: 'commutation'
+      },
+      {
+        id: 'p092',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'Zechariah Benjamin [Commutation]',
+        summary: 'Distribute and aid and abet the distribution of 5 grams or more of cocaine base after having been convicted...',
+        details: 'Date: January 15, 2026. Type: commutation. Offense: Distribute and aid and abet the distribution of 5 grams or more of cocaine base after having been convicted of two felony drug offenses; distribute 5 grams or more of cocaine base after having been convicted of two felony drug offenses; conspiracy to distribute and possess with intent to distribute 50 grams or more of cocaine base after two prior felony drug offenses.',
+        category: 'commutation'
+      },
+      {
+        id: 'p093',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'Angela Wannette Cupit [Commutation]',
+        summary: 'Conspiracy to possess with intent to distribute a controlled substance',
+        details: 'Date: January 15, 2026. Type: commutation. Offense: Conspiracy to possess with intent to distribute a controlled substance.',
+        category: 'commutation'
+      },
+      {
+        id: 'p094',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'Jacob Deutsch [Commutation]',
+        summary: 'Conspiracy to commit mail fraud and wire fraud',
+        details: 'Date: January 15, 2026. Type: commutation. Offense: Conspiracy to commit mail fraud and wire fraud.',
+        category: 'commutation'
+      },
+      {
+        id: 'p095',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'Juan Mercado, III [Commutation]',
+        summary: '1. Conspiracy to possess, with intent to distribute, 2160.02 kilograms of marijuana2. Supervised release vi...',
+        details: 'Date: January 15, 2026. Type: commutation. Offense: 1. Conspiracy to possess, with intent to distribute, 2160.02 kilograms of marijuana2. Supervised release violation (conspiracy to possess with intent to distribute five kilograms or more of cocaine).',
+        category: 'commutation'
+      },
+      {
+        id: 'p096',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'Angela Reynolds [Commutation]',
+        summary: 'Conspiracy to possess with intent to distribute a controlled substance',
+        details: 'Date: January 15, 2026. Type: commutation. Offense: Conspiracy to possess with intent to distribute a controlled substance.',
+        category: 'commutation'
+      },
+      {
+        id: 'p097',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'Andre Donnell Routt [Commutation]',
+        summary: 'Did knowingly and intentionally conspire, combine, confederate and agree together, with each other and with...',
+        details: 'Date: January 15, 2026. Type: commutation. Offense: Did knowingly and intentionally conspire, combine, confederate and agree together, with each other and with other persons to knowingly and intentionally distribute and possess with intent to distribute five kilograms or more of cocaine.',
+        category: 'commutation'
+      },
+      {
+        id: 'p098',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'James Phillip Womack [Commutation]',
+        summary: 'Distribution of more than five grams of actual methamphetamine',
+        details: 'Date: January 15, 2026. Type: commutation. Offense: Distribution of more than five grams of actual methamphetamine.',
+        category: 'commutation'
+      },
+      {
+        id: 'p099',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'Adriana Isabel Camberos',
+        summary: 'Conspiracy to commit wire and mail fraud; wire fraud and aiding and abetting (seven counts)',
+        details: 'Date: January 15, 2026. Type: pardon. Offense: Conspiracy to commit wire and mail fraud; wire fraud and aiding and abetting (seven counts).',
+        category: 'pardon'
+      },
+      {
+        id: 'p100',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'Andres Enrique Camberos',
+        summary: 'Conspiracy to commit wire and mail fraud; wire fraud and aiding and abetting (seven counts)',
+        details: 'Date: January 15, 2026. Type: pardon. Offense: Conspiracy to commit wire and mail fraud; wire fraud and aiding and abetting (seven counts).',
+        category: 'pardon'
+      },
+      {
+        id: 'p101',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'Danny Preston Conrad',
+        summary: 'Embezzling by postal employee',
+        details: 'Date: January 15, 2026. Type: pardon. Offense: Embezzling by postal employee.',
+        category: 'pardon'
+      },
+      {
+        id: 'p102',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'Arie Eric De Jong, III',
+        summary: 'Conspiracy',
+        details: 'Date: January 15, 2026. Type: pardon. Offense: Conspiracy.',
+        category: 'pardon'
+      },
+      {
+        id: 'p103',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'Russell John Flint, Jr.',
+        summary: 'Aiding and abetting the making of false Selective Service Registration Certificates',
+        details: 'Date: January 15, 2026. Type: pardon. Offense: Aiding and abetting the making of false Selective Service Registration Certificates.',
+        category: 'pardon'
+      },
+      {
+        id: 'p104',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'Julio M. Herrera Velutini',
+        summary: 'Conspiracy (two counts); federal program bribery (two counts); honest services wire fraud (two counts)',
+        details: 'Date: January 15, 2026. Type: pardon. Offense: Conspiracy (two counts); federal program bribery (two counts); honest services wire fraud (two counts).',
+        category: 'pardon'
+      },
+      {
+        id: 'p105',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'Kenneth Caprist Kelly',
+        summary: 'Armed bank robbery; assault during armed bank robbery; use of firearm during a crime of violence',
+        details: 'Date: January 15, 2026. Type: pardon. Offense: Armed bank robbery; assault during armed bank robbery; use of firearm during a crime of violence.',
+        category: 'pardon'
+      },
+      {
+        id: 'p106',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'James Michael Klos',
+        summary: 'Possession of an unregistered firearm',
+        details: 'Date: January 15, 2026. Type: pardon. Offense: Possession of an unregistered firearm.',
+        category: 'pardon'
+      },
+      {
+        id: 'p107',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'David Levy',
+        summary: 'Conspiracy to commit securities fraud; securities fraud',
+        details: 'Date: January 15, 2026. Type: pardon. Offense: Conspiracy to commit securities fraud; securities fraud.',
+        category: 'pardon'
+      },
+      {
+        id: 'p108',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'Hollie Ann Nadel',
+        summary: 'Conspiracy to commit money laundering and bank fraud',
+        details: 'Date: January 15, 2026. Type: pardon. Offense: Conspiracy to commit money laundering and bank fraud.',
+        category: 'pardon'
+      },
+      {
+        id: 'p109',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'Mark T. Rossini',
+        summary: 'Conspiracy; federal program bribery; honest services wire fraud',
+        details: 'Date: January 15, 2026. Type: pardon. Offense: Conspiracy; federal program bribery; honest services wire fraud.',
+        category: 'pardon'
+      },
+      {
+        id: 'p110',
+        line: 'pardon',
+        date: '2026-01-15',
+        title: 'Wanda Vazquez Garced',
+        summary: 'Conspiracy; federal program bribery; honest services wire fraud',
+        details: 'Date: January 15, 2026. Type: pardon. Offense: Conspiracy; federal program bribery; honest services wire fraud.',
+        category: 'pardon'
+      },
+      {
+        id: 'p111',
+        line: 'pardon',
+        date: '2026-01-16',
+        title: 'Terren Scott Peizer',
+        summary: 'Securities fraud; insider trading (two counts)',
+        details: 'Date: January 16, 2026. Type: pardon. Offense: Securities fraud; insider trading (two counts).',
+        category: 'pardon'
+      },
+      {
+        id: 'p112',
+        line: 'pardon',
+        date: '2026-01-20',
+        title: 'Julio M. Herrera Velutini',
+        summary: 'Contribution by a foreign national',
+        details: 'Date: January 20, 2026. Type: pardon. Offense: Contribution by a foreign national.',
+        category: 'pardon'
+      },
+      {
+        id: 'p113',
+        line: 'pardon',
+        date: '2026-01-20',
+        title: 'Mark T. Rossini',
+        summary: 'Contribution by a foreign national',
+        details: 'Date: January 20, 2026. Type: pardon. Offense: Contribution by a foreign national.',
+        category: 'pardon'
+      },
+      {
+        id: 'p114',
+        line: 'pardon',
+        date: '2026-01-20',
+        title: 'Wanda Vazquez Garced',
+        summary: 'Contribution by a foreign national',
+        details: 'Date: January 20, 2026. Type: pardon. Offense: Contribution by a foreign national.',
+        category: 'pardon'
       },
       {
         id: 'c19',
@@ -601,6 +1728,132 @@
         category: 'Abuse of Power'
       },
       {
+        id: 'c29',
+        line: 'corruption',
+        date: '2026-02-10',
+        title: 'Trump Blocks Detroit-Canada Bridge After Donor Meeting',
+        summary: 'Bridge owner donated $1M for a meeting with Commerce Secretary Lutnick; within hours Trump blocked a competing bridge.',
+        details: 'The owner of an existing international bridge donated $1 million for a meeting with Commerce Secretary Howard Lutnick. Within hours of that meeting, Trump announced he would block the opening of a competing bridge connecting Detroit to Canada that was ready to open. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        category: 'Pay-to-Play'
+      },
+      {
+        id: 'p115',
+        line: 'pardon',
+        date: '2026-02-12',
+        title: 'Travis Henry',
+        summary: 'Conspiracy to possess with intent to distribute cocaine',
+        details: 'Date: February 12, 2026. Type: pardon. Offense: Conspiracy to possess with intent to distribute cocaine.',
+        category: 'pardon'
+      },
+      {
+        id: 'p116',
+        line: 'pardon',
+        date: '2026-02-12',
+        title: 'Timothy S. Smith',
+        summary: 'Conspiring to defraud the Internal Revenue Service',
+        details: 'Date: February 12, 2026. Type: pardon. Offense: Conspiring to defraud the Internal Revenue Service.',
+        category: 'pardon'
+      },
+      {
+        id: 'p117',
+        line: 'pardon',
+        date: '2026-02-12',
+        title: 'Nathaniel Newton, Jr.',
+        summary: 'Conspiracy to possess with intent to distribute marijuana',
+        details: 'Date: February 12, 2026. Type: pardon. Offense: Conspiracy to possess with intent to distribute marijuana.',
+        category: 'pardon'
+      },
+      {
+        id: 'p118',
+        line: 'pardon',
+        date: '2026-02-12',
+        title: 'Joseph Klecko',
+        summary: 'Perjury',
+        details: 'Date: February 12, 2026. Type: pardon. Offense: Perjury.',
+        category: 'pardon'
+      },
+      {
+        id: 'p119',
+        line: 'pardon',
+        date: '2026-02-12',
+        title: 'Jamal Lewis',
+        summary: 'Use of telephone to facilitate an attempt to possess with intent to distribute cocaine',
+        details: 'Date: February 12, 2026. Type: pardon. Offense: Use of telephone to facilitate an attempt to possess with intent to distribute cocaine.',
+        category: 'pardon'
+      },
+      {
+        id: 'p120',
+        line: 'pardon',
+        date: '2026-02-12',
+        title: 'Elite Diesel Service, Inc.',
+        summary: 'Conspiracy to violate the Clean Air Act',
+        details: 'Date: February 12, 2026. Type: pardon. Offense: Conspiracy to violate the Clean Air Act.',
+        category: 'pardon'
+      },
+      {
+        id: 'p121',
+        line: 'pardon',
+        date: '2026-02-12',
+        title: 'Dr. Billy A. Cannon',
+        summary: 'Conspiracy',
+        details: 'Date: February 12, 2026. Type: pardon. Offense: Conspiracy.',
+        category: 'pardon'
+      },
+      {
+        id: 'c30',
+        line: 'corruption',
+        date: '2026-03-19',
+        title: 'Corey Lewandowski\'s DHS Contractor Extortion Scheme',
+        summary: 'Trump advisor Lewandowski demanded direct payments from DHS contractors for "protection" — those who refused lost contracts.',
+        details: 'Corey Lewandowski, a special advisor at the Department of Homeland Security, allegedly demanded direct payments from DHS contractors in exchange for "protection." Companies that refused to pay saw their DHS contracts dry up. The scheme was confirmed by a DHS employee. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        category: 'Abuse of Power'
+      },
+      {
+        id: 'c31',
+        line: 'corruption',
+        date: '2026-04-05',
+        title: 'DOJ Reverses Handgun Mail Ban, Benefiting Don Jr.\'s Company',
+        summary: 'A 100-year-old ban on shipping handguns by mail was declared unconstitutional, clearing the way for Don Jr.\'s gun mail-order venture.',
+        details: 'Trump\'s DOJ suddenly declared unconstitutional a century-old ban on shipping handguns through the U.S. mail system. The ruling cleared the regulatory path for a company Donald Trump Jr. had invested in — which specialized in mail-order gun sales. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        category: 'Family'
+      },
+      {
+        id: 'c32',
+        line: 'corruption',
+        date: '2026-04-08',
+        title: 'War Profiteering via Insider Trading on Prediction Markets',
+        summary: '~$950M in bets placed hours before Trump announced an Iran ceasefire; oil dropped 15%, netting massive profits.',
+        details: 'Hours before Trump announced an Iran ceasefire, investors — likely with inside White House knowledge — placed approximately $950 million in bets on prediction markets that oil prices would fall. Oil dropped 15% after the announcement, generating massive profits for those with advance knowledge. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        category: 'Insider Trading'
+      },
+      {
+        id: 'c33',
+        line: 'corruption',
+        date: '2026-04-10',
+        title: 'Trump Promises Blanket Pardons for "Everyone Near White House"',
+        summary: 'Trump publicly declares "I will pardon everyone within 200 feet of the White House" — signaling total impunity.',
+        details: 'Trump explicitly stated: "I will pardon everyone within 200 feet of the White House" — an open declaration that those around him would face no legal consequences regardless of their actions. The statement was characterized as a green light for unchecked corruption within the administration. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        category: 'Abuse of Power'
+      },
+      {
+        id: 'c34',
+        line: 'corruption',
+        date: '2026-04-22',
+        title: 'No-Bid $17M Contract for White House Fountains',
+        summary: 'Trump gave a friend a no-bid $17M fountain contract — 5x the cost of a competitive bid (~$3M).',
+        details: 'Trump awarded a no-bid contract worth $17 million to a personal friend for refurbishing fountains near the White House. The National Park Service had planned to competitively bid the project at approximately one-fifth the cost (~$3 million). Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        category: 'Self-Dealing'
+      },
+      {
+        id: 'c35',
+        line: 'corruption',
+        date: '2026-05-01',
+        title: 'Big Tobacco Buys Reversal of FDA Flavored Vape Ban',
+        summary: 'Tobacco lobbyists made a $5M donation, secured a Trump lunch, and got FDA flavored vape regulations reversed.',
+        details: 'Tobacco industry lobbyists made a $5 million donation, secured a private lunch with Trump, and subsequently got FDA regulations blocking flavored vape products — which were marketed to children — reversed by the administration. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        category: 'Pay-to-Play'
+      },
+      {
         id: 'c20',
         line: 'corruption',
         date: '2026-05-21',
@@ -609,131 +1862,15 @@
         details: 'The New York Times published a landmark op-ed analyzing the cumulative scale of Trump second-term corruption, concluding that the combination of crypto profiteering, foreign payments, oversight dismantling, and the slush fund scheme represented a level of self-dealing "the country had never been before." The piece noted $2.25 billion in realized profits and up to $9.72 billion including unrealized gains.',
         category: 'Analysis'
       },
-
-      // ── PARDONS (source: justice.gov/pardon) ──
-      { id:'p000', line:'pardon', date:'2025-01-20', title:'~1,500 Jan. 6 Defendants (Pardons + 14 Commutations)', summary:'Blanket clemency for Capitol attack defendants via presidential proclamation.', details:'Date: January 20, 2025. Type: pardon/commutation. Offense: Various offenses relating to the events at or near the United States Capitol on January 6, 2021. Approximately 1,500 individuals pardoned; 14 leaders including Oath Keepers and Proud Boys had sentences commuted to time served.', category:'Jan 6' },
-{ id:'p001', line:'pardon', date:'2025-01-21', title:'Ross William Ulbricht', summary:'Aiding and abetting distribution of drugs over internet; continuing criminal enterprise; computer hacking c...', details:'Date: January 21, 2025. Type: pardon. Offense: Aiding and abetting distribution of drugs over internet; continuing criminal enterprise; computer hacking conspiracy; fraud with identification documents; money laundering conspiracy.', category:'pardon' },
-      { id:'p002', line:'pardon', date:'2025-01-22', title:'Terence Dale Sutton, Jr.', summary:'Murder in second degree; conspiracy; obstruction of justice and aiding and abetting', details:'Date: January 22, 2025. Type: pardon. Offense: Murder in second degree; conspiracy; obstruction of justice and aiding and abetting.', category:'pardon' },
-      { id:'p003', line:'pardon', date:'2025-01-22', title:'Andrew Zabavsky', summary:'Conspiracy; obstruction of justice and aiding and abetting', details:'Date: January 22, 2025. Type: pardon. Offense: Conspiracy; obstruction of justice and aiding and abetting.', category:'pardon' },
-      { id:'p004', line:'pardon', date:'2025-01-23', title:'Joan Bell', summary:'Conspiracy against rights; FACE Act', details:'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; FACE Act.', category:'pardon' },
-      { id:'p005', line:'pardon', date:'2025-01-23', title:'Coleman Boyd', summary:'Conspiracy to obstruct access to a clinic providing reproductive health services; violation of the FACE Act', details:'Date: January 23, 2025. Type: pardon. Offense: Conspiracy to obstruct access to a clinic providing reproductive health services; violation of the FACE Act.', category:'pardon' },
-      { id:'p006', line:'pardon', date:'2025-01-23', title:'Joel Curry', summary:'Conspiracy against rights; clinic access obstruction', details:'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; clinic access obstruction.', category:'pardon' },
-      { id:'p007', line:'pardon', date:'2025-01-23', title:'Jonathan Darnel', summary:'Conspiracy against rights; FACE Act', details:'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; FACE Act.', category:'pardon' },
-      { id:'p008', line:'pardon', date:'2025-01-23', title:'Caroline Davis', summary:'1. Conspiracy to interfere with access to clinic entrances; aiding and abetting interference with access to...', details:'Date: January 23, 2025. Type: pardon. Offense: 1. Conspiracy to interfere with access to clinic entrances; aiding and abetting interference with access to clinic entrances2. Conspiracy; interference with clinic access.', category:'pardon' },
-      { id:'p009', line:'pardon', date:'2025-01-23', title:'Eva Edl', summary:'1. Violation of the FACE Act2. Conspiracy against rights; clinic access obstruction', details:'Date: January 23, 2025. Type: pardon. Offense: 1. Violation of the FACE Act2. Conspiracy against rights; clinic access obstruction.', category:'pardon' },
-      { id:'p010', line:'pardon', date:'2025-01-23', title:'Chester Gallagher', summary:'1. Conspiracy to obstruct access to a clinic providing reproductive health services; violation of the FACE ...', details:'Date: January 23, 2025. Type: pardon. Offense: 1. Conspiracy to obstruct access to a clinic providing reproductive health services; violation of the FACE Act2. Conspiracy against rights; clinic access obstruction.', category:'pardon' },
-      { id:'p011', line:'pardon', date:'2025-01-23', title:'Herb Geraghty', summary:'Conspiracy against rights; FACE Act', details:'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; FACE Act.', category:'pardon' },
-      { id:'p012', line:'pardon', date:'2025-01-23', title:'William Goodman', summary:'Conspiracy against rights; FACE Act', details:'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; FACE Act.', category:'pardon' },
-      { id:'p013', line:'pardon', date:'2025-01-23', title:'Dennis Green', summary:'Conspiracy to obstruct access to a clinic providing reproductive health services; violation of the FACE Act', details:'Date: January 23, 2025. Type: pardon. Offense: Conspiracy to obstruct access to a clinic providing reproductive health services; violation of the FACE Act.', category:'pardon' },
-      { id:'p014', line:'pardon', date:'2025-01-23', title:'Lauren Handy', summary:'Conspiracy against rights; FACE Act', details:'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; FACE Act.', category:'pardon' },
-      { id:'p015', line:'pardon', date:'2025-01-23', title:'Paula Harlow', summary:'Conspiracy against rights; FACE Act', details:'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; FACE Act.', category:'pardon' },
-      { id:'p016', line:'pardon', date:'2025-01-23', title:'John Hinshaw', summary:'Conspiracy against rights; FACE Act', details:'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; FACE Act.', category:'pardon' },
-      { id:'p017', line:'pardon', date:'2025-01-23', title:'Heather Idoni', summary:'1. Conspiracy against rights; FACE Act2. Conspiracy against rights; clinic access obstruction3. Conspiracy ...', details:'Date: January 23, 2025. Type: pardon. Offense: 1. Conspiracy against rights; FACE Act2. Conspiracy against rights; clinic access obstruction3. Conspiracy against rights; FACE Act.', category:'pardon' },
-      { id:'p018', line:'pardon', date:'2025-01-23', title:'Jean Marshall', summary:'Conspiracy against rights; FACE Act', details:'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; FACE Act.', category:'pardon' },
-      { id:'p019', line:'pardon', date:'2025-01-23', title:'Christopher Moscinski', summary:'Interference with freedom of access to reproductive health services', details:'Date: January 23, 2025. Type: pardon. Offense: Interference with freedom of access to reproductive health services.', category:'pardon' },
-      { id:'p020', line:'pardon', date:'2025-01-23', title:'Justin Phillips', summary:'Conspiracy against rights; clinic access obstruction', details:'Date: January 23, 2025. Type: pardon. Offense: Conspiracy against rights; clinic access obstruction.', category:'pardon' },
-      { id:'p021', line:'pardon', date:'2025-01-23', title:'Paul Place', summary:'Violation of the FACE Act', details:'Date: January 23, 2025. Type: pardon. Offense: Violation of the FACE Act.', category:'pardon' },
-      { id:'p022', line:'pardon', date:'2025-01-23', title:'Jay Smith', summary:'FACE Act', details:'Date: January 23, 2025. Type: pardon. Offense: FACE Act.', category:'pardon' },
-      { id:'p023', line:'pardon', date:'2025-01-23', title:'Paul Vaughn', summary:'Conspiracy to obstruct access to a clinic providing reproductive health services; violation of the FACE Act', details:'Date: January 23, 2025. Type: pardon. Offense: Conspiracy to obstruct access to a clinic providing reproductive health services; violation of the FACE Act.', category:'pardon' },
-      { id:'p024', line:'pardon', date:'2025-01-23', title:'Bevelyn Beatty Williams', summary:'Violating FACE Act', details:'Date: January 23, 2025. Type: pardon. Offense: Violating FACE Act.', category:'pardon' },
-      { id:'p025', line:'pardon', date:'2025-01-23', title:'Calvin Zastrow', summary:'1. Conspiracy to obstruct access to clinic providing reproductive health services; violation of the FACE Ac...', details:'Date: January 23, 2025. Type: pardon. Offense: 1. Conspiracy to obstruct access to clinic providing reproductive health services; violation of the FACE Act2. Conspiracy against rights; clinic access obstruction.', category:'pardon' },
-      { id:'p026', line:'pardon', date:'2025-01-23', title:'Eva Zastrow', summary:'1. Violation of the FACE Act2. Conspiracy against rights; clinic access obstruction', details:'Date: January 23, 2025. Type: pardon. Offense: 1. Violation of the FACE Act2. Conspiracy against rights; clinic access obstruction.', category:'pardon' },
-      { id:'p027', line:'pardon', date:'2025-01-23', title:'James Zastrow', summary:'Violation of the FACE Act', details:'Date: January 23, 2025. Type: pardon. Offense: Violation of the FACE Act.', category:'pardon' },
-      { id:'p028', line:'pardon', date:'2025-02-10', title:'Rod R. Blagojevich', summary:'Wire fraud under color of official right (eight counts); conspiracy/attempted; attempt to commit extortion ...', details:'Date: February 10, 2025. Type: pardon. Offense: Wire fraud under color of official right (eight counts); conspiracy/attempted; attempt to commit extortion under color of official right; conspiracy to solicit and solicitation of bribe (three counts); making false statements.', category:'pardon' },
-      { id:'p029', line:'pardon', date:'2025-03-04', title:'Jean Pinkard [Commutation]', summary:'Conspiracy to possess with intent to distribute and to distribute controlled substances', details:'Date: March 4, 2025. Type: commutation. Offense: Conspiracy to possess with intent to distribute and to distribute controlled substances.', category:'commutation' },
-      { id:'p030', line:'pardon', date:'2025-03-11', title:'Brian Kelsey', summary:'Conspiracy to defraud the United States; aiding and abetting the acceptance of excessive contributions', details:'Date: March 11, 2025. Type: pardon. Offense: Conspiracy to defraud the United States; aiding and abetting the acceptance of excessive contributions.', category:'pardon' },
-      { id:'p031', line:'pardon', date:'2025-03-20', title:'Thomas Edward Caldwell', summary:'Tampering with documents or proceedings', details:'Date: March 20, 2025. Type: pardon. Offense: Tampering with documents or proceedings.', category:'pardon' },
-      { id:'p032', line:'pardon', date:'2025-03-25', title:'Devon Archer', summary:'Conspiracy to commit securities fraud; securities fraud', details:'Date: March 25, 2025. Type: pardon. Offense: Conspiracy to commit securities fraud; securities fraud.', category:'pardon' },
-      { id:'p033', line:'pardon', date:'2025-03-27', title:'Benjamin Delo', summary:'Violation of the Bank Secrecy Act', details:'Date: March 27, 2025. Type: pardon. Offense: Violation of the Bank Secrecy Act.', category:'pardon' },
-      { id:'p034', line:'pardon', date:'2025-03-27', title:'Gregory Dwyer', summary:'Violating the Bank Secrecy Act', details:'Date: March 27, 2025. Type: pardon. Offense: Violating the Bank Secrecy Act.', category:'pardon' },
-      { id:'p035', line:'pardon', date:'2025-03-27', title:'Arthur Hayes', summary:'Violation of the Bank Secrecy Act', details:'Date: March 27, 2025. Type: pardon. Offense: Violation of the Bank Secrecy Act.', category:'pardon' },
-      { id:'p036', line:'pardon', date:'2025-03-27', title:'HDR Global Trading Limited', summary:'Violation of Bank Secrecy Act', details:'Date: March 27, 2025. Type: pardon. Offense: Violation of Bank Secrecy Act.', category:'pardon' },
-      { id:'p037', line:'pardon', date:'2025-03-27', title:'Trevor Milton', summary:'Securities fraud; wire fraud (two counts)', details:'Date: March 27, 2025. Type: pardon. Offense: Securities fraud; wire fraud (two counts).', category:'pardon' },
-      { id:'p038', line:'pardon', date:'2025-03-27', title:'Samuel Reed', summary:'Violation of the Bank Secrecy Act', details:'Date: March 27, 2025. Type: pardon. Offense: Violation of the Bank Secrecy Act.', category:'pardon' },
-      { id:'p039', line:'pardon', date:'2025-03-28', title:'Jason Galanis [Commutation]', summary:'1. Conspiracy to commit securities fraud (two counts); securities fraud; investment adviser fraud2. Conspir...', details:'Date: March 28, 2025. Type: commutation. Offense: 1. Conspiracy to commit securities fraud (two counts); securities fraud; investment adviser fraud2. Conspiracy to commit securities fraud; securities fraud; conspiracy to commit investment adviser fraud.', category:'commutation' },
-      { id:'p040', line:'pardon', date:'2025-03-28', title:'Ozy Media, Inc. [Commutation]', summary:'Conspiracy to commit securities fraud; conspiracy to commit wire fraud', details:'Date: March 28, 2025. Type: commutation. Offense: Conspiracy to commit securities fraud; conspiracy to commit wire fraud.', category:'commutation' },
-      { id:'p041', line:'pardon', date:'2025-03-28', title:'Carlos Roy Watson [Commutation]', summary:'Conspiracy to commit securities fraud; conspiracy to commit wire fraud; aggravated identity theft', details:'Date: March 28, 2025. Type: commutation. Offense: Conspiracy to commit securities fraud; conspiracy to commit wire fraud; aggravated identity theft.', category:'commutation' },
-      { id:'p042', line:'pardon', date:'2025-04-23', title:'Michele Fiore', summary:'Conspiracy to commit wire fraud; wire fraud (six counts)', details:'Date: April 23, 2025. Type: pardon. Offense: Conspiracy to commit wire fraud; wire fraud (six counts).', category:'pardon' },
-      { id:'p043', line:'pardon', date:'2025-04-23', title:'Paul Walczak', summary:'Willful failure to pay trust fund taxes; failure to file return/information', details:'Date: April 23, 2025. Type: pardon. Offense: Willful failure to pay trust fund taxes; failure to file return/information.', category:'pardon' },
-      { id:'p044', line:'pardon', date:'2025-05-27', title:'Scott Howard Jenkins', summary:'Conspiracy to commit bribery concerning programs receiving Federal funds, honest services mail fraud, and h...', details:'Date: May 27, 2025. Type: pardon. Offense: Conspiracy to commit bribery concerning programs receiving Federal funds, honest services mail fraud, and honest service wire fraud; honest services mail fraud; honest services wire fraud (three counts); bribery concerning programs receiving federal funds (seven counts).', category:'pardon' },
-      { id:'p045', line:'pardon', date:'2025-05-27', title:'James Callahan', summary:'Filing false labor union reports', details:'Date: May 27, 2025. Type: pardon. Offense: Filing false labor union reports.', category:'pardon' },
-      { id:'p046', line:'pardon', date:'2025-05-28', title:'Kevin Eric Baisden', summary:'1. Shoplifting2. Second degree theft3. Bail reform act4. Second degree theft', details:'Date: May 28, 2025. Type: pardon. Offense: 1. Shoplifting2. Second degree theft3. Bail reform act4. Second degree theft.', category:'pardon' },
-      { id:'p047', line:'pardon', date:'2025-05-28', title:'Mark Bashaw', summary:'Violation of lawful orders', details:'Date: May 28, 2025. Type: pardon. Offense: Violation of lawful orders.', category:'pardon' },
-      { id:'p048', line:'pardon', date:'2025-05-28', title:'Julie Chrisley', summary:'Conspiracy to commit bank fraud; bank fraud (five counts); wire fraud; conspiracy to defraud the U.S. to ob...', details:'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to commit bank fraud; bank fraud (five counts); wire fraud; conspiracy to defraud the U.S. to obstruct and impede the Internal Revenue Laws; tax evasion; obstruction of justice.', category:'pardon' },
-      { id:'p049', line:'pardon', date:'2025-05-28', title:'Todd Chrisley', summary:'Conspiracy to commit bank fraud; bank fraud (five counts); conspiracy to defraud the U.S. to obstruct and i...', details:'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to commit bank fraud; bank fraud (five counts); conspiracy to defraud the U.S. to obstruct and impede the Internal Revenue Laws; tax evasion.', category:'pardon' },
-      { id:'p050', line:'pardon', date:'2025-05-28', title:'Lawrence S. Duran', summary:'Conspiracy to commit health care fraud; health care fraud (11 counts); conspiracy to defraud the United Sta...', details:'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to commit health care fraud; health care fraud (11 counts); conspiracy to defraud the United States and to receive and pay health care kickbacks; conspiracy to commit money laundering; money laundering (18 counts); structuring to avoid reporting requirements (six counts).', category:'pardon' },
-      { id:'p051', line:'pardon', date:'2025-05-28', title:'Kentrell D. Gaulden', summary:'Felon in possession of a firearm', details:'Date: May 28, 2025. Type: pardon. Offense: Felon in possession of a firearm.', category:'pardon' },
-      { id:'p052', line:'pardon', date:'2025-05-28', title:'Michael Gerard Grimm', summary:'Aiding and assisting in the preparation of false and fraudulent tax returns', details:'Date: May 28, 2025. Type: pardon. Offense: Aiding and assisting in the preparation of false and fraudulent tax returns.', category:'pardon' },
-      { id:'p053', line:'pardon', date:'2025-05-28', title:'Michael Ray Harris', summary:'Conspiracy to possess with intent to distribute and to aid and abet possession and distribution of cocaine;...', details:'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to possess with intent to distribute and to aid and abet possession and distribution of cocaine; aiding and abetting possession with intent to distribute cocaine; possession with intent to distribute cocaine.', category:'pardon' },
-      { id:'p054', line:'pardon', date:'2025-05-28', title:'Larry Hoover', summary:'Narcotics conspiracy; continuing criminal enterprise; use of persons under age 18; distribution of cocaine;...', details:'Date: May 28, 2025. Type: pardon. Offense: Narcotics conspiracy; continuing criminal enterprise; use of persons under age 18; distribution of cocaine; use of a communication facility in committing the narcotics conspiracy; distribution of cocaine (two counts) use of a firearm in the commission of a drug trafficking crime.', category:'pardon' },
-      { id:'p055', line:'pardon', date:'2025-05-28', title:'James M. Kernan', summary:'Knowingly and willfully permitting a convicted felon to be engaged in the business of insurance', details:'Date: May 28, 2025. Type: pardon. Offense: Knowingly and willfully permitting a convicted felon to be engaged in the business of insurance.', category:'pardon' },
-      { id:'p056', line:'pardon', date:'2025-05-28', title:'Marlene Mary Kernan', summary:'Permitting a convicted felon to engage in the business of insurance', details:'Date: May 28, 2025. Type: pardon. Offense: Permitting a convicted felon to engage in the business of insurance.', category:'pardon' },
-      { id:'p057', line:'pardon', date:'2025-05-28', title:'Tanner J. Mansell', summary:'Theft of property within special maritime jurisdiction', details:'Date: May 28, 2025. Type: pardon. Offense: Theft of property within special maritime jurisdiction.', category:'pardon' },
-      { id:'p058', line:'pardon', date:'2025-05-28', title:'John R. Moore, Jr.', summary:'Theft of property within special maritime jurisdiction', details:'Date: May 28, 2025. Type: pardon. Offense: Theft of property within special maritime jurisdiction.', category:'pardon' },
-      { id:'p059', line:'pardon', date:'2025-05-28', title:'Marian I Morgan', summary:'Conspiracy to defraud the United States; wire fraud (7 counts); transfer of funds taken by fraud (5 counts)...', details:'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to defraud the United States; wire fraud (7 counts); transfer of funds taken by fraud (5 counts); money laundering (6 counts); making false statements on income tax returns (3 counts).', category:'pardon' },
-      { id:'p060', line:'pardon', date:'2025-05-28', title:'John G. Rowland', summary:'1. Conspiracy to defraud the United States2. Falsification of records in a federal investigation; conspirac...', details:'Date: May 28, 2025. Type: pardon. Offense: 1. Conspiracy to defraud the United States2. Falsification of records in a federal investigation; conspiracy; causing false statements (two counts); illegal campaign contributions (two counts).', category:'pardon' },
-      { id:'p061', line:'pardon', date:'2025-05-28', title:'Charles Overton Scott', summary:'Conspiracy to commit securities fraud; securities fraud', details:'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to commit securities fraud; securities fraud.', category:'pardon' },
-      { id:'p062', line:'pardon', date:'2025-05-28', title:'Alexander Sittenfeld', summary:'Bribery concerning programs receiving federal funds; attempted extortion under color of official right', details:'Date: May 28, 2025. Type: pardon. Offense: Bribery concerning programs receiving federal funds; attempted extortion under color of official right.', category:'pardon' },
-      { id:'p063', line:'pardon', date:'2025-05-28', title:'Earl Lamont Smith', summary:'Theft of government property', details:'Date: May 28, 2025. Type: pardon. Offense: Theft of government property.', category:'pardon' },
-      { id:'p064', line:'pardon', date:'2025-05-28', title:'Garnett Gilbert Smith', summary:'Conspiracy to distribute and possess with intent to distribute cocaine', details:'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to distribute and possess with intent to distribute cocaine.', category:'pardon' },
-      { id:'p065', line:'pardon', date:'2025-05-28', title:'Charles Lavar Tanner', summary:'Conspiracy to possess with intent to distribute five kilograms or more of cocaine; attempt to possess with ...', details:'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to possess with intent to distribute five kilograms or more of cocaine; attempt to possess with intent to distribute five kilograms or more of cocaine.', category:'pardon' },
-      { id:'p066', line:'pardon', date:'2025-05-28', title:'Anabel Valenzuela', summary:'Conspiracy to distribute and possess with intent to distribute 50 grams or more of methamphetamine; conspir...', details:'Date: May 28, 2025. Type: pardon. Offense: Conspiracy to distribute and possess with intent to distribute 50 grams or more of methamphetamine; conspiracy to commit money laundering; criminal forfeiture (two counts).', category:'pardon' },
-      { id:'p067', line:'pardon', date:'2025-05-28', title:'Imaad Shah Zuberi', summary:'Violations of the Foreign Agents Registration Act; tax evasion; foreign, conduit, and other illegal campaig...', details:'Date: May 28, 2025. Type: pardon. Offense: Violations of the Foreign Agents Registration Act; tax evasion; foreign, conduit, and other illegal campaign contributions; tampering with a witness, victim or informant (obstruction of justice).', category:'pardon' },
-      { id:'p068', line:'pardon', date:'2025-05-29', title:'Jeremy Young Hutchinson', summary:'1. Conspiracy to commit bribery2. Aiding and abetting filing of false income tax return3. Conspiracy; crimi...', details:'Date: May 29, 2025. Type: pardon. Offense: 1. Conspiracy to commit bribery2. Aiding and abetting filing of false income tax return3. Conspiracy; criminal forfeiture of property.', category:'pardon' },
-      { id:'p069', line:'pardon', date:'2025-05-29', title:'Edward Ruben Sotelo', summary:'Conspiracy; continuing criminal enterprise; possession with intent to distribute 1 kilogram of cocaine, aid...', details:'Date: May 29, 2025. Type: pardon. Offense: Conspiracy; continuing criminal enterprise; possession with intent to distribute 1 kilogram of cocaine, aiding and abetting (two counts); use of telephone to facilitate commission of a felony (three counts); possession with intent to distribute 10 pounds of marijuana, and aiding and abetting; distribution of more than five kilograms of cocaine and aiding and abetting.', category:'pardon' },
-      { id:'p070', line:'pardon', date:'2025-05-29', title:'Joe Angelo Sotelo', summary:'Conspiracy; possession with intent to distribute one kilogram of cocaine and aiding and abetting', details:'Date: May 29, 2025. Type: pardon. Offense: Conspiracy; possession with intent to distribute one kilogram of cocaine and aiding and abetting.', category:'pardon' },
-      { id:'p071', line:'pardon', date:'2025-10-01', title:'Imaad Shah Zuberi [Commutation]', summary:'Violations of the Foreign Agents Registration Act; tax evasion; foreign, conduit, and other illegal campaig...', details:'Date: October 1, 2025. Type: commutation. Offense: Violations of the Foreign Agents Registration Act; tax evasion; foreign, conduit, and other illegal campaign contributions; tampering with a witness, victim or informant (obstruction of justice).', category:'commutation' },
-      { id:'p072', line:'pardon', date:'2025-10-17', title:'George Anthony Devolder Santos [Commutation]', summary:'Wire Fraud - The Party Program Scheme; aggravated identity theft', details:'Date: October 17, 2025. Type: commutation. Offense: Wire Fraud - The Party Program Scheme; aggravated identity theft.', category:'commutation' },
-      { id:'p073', line:'pardon', date:'2025-10-21', title:'Changpeng Zhao', summary:'Failure to maintain an effective anti-money laundering program', details:'Date: October 21, 2025. Type: pardon. Offense: Failure to maintain an effective anti-money laundering program.', category:'pardon' },
-      { id:'p074', line:'pardon', date:'2025-11-07', title:'Glen Casada', summary:'Conspiracy to defraud the United States; honest services wire fraud (four counts); use of a fictitious name...', details:'Date: November 7, 2025. Type: pardon. Offense: Conspiracy to defraud the United States; honest services wire fraud (four counts); use of a fictitious name to carry out a fraud; conspiracy to commit money laundering; money laundering (eight counts).', category:'pardon' },
-      { id:'p075', line:'pardon', date:'2025-11-07', title:'Cade Cothren', summary:'Conspiracy to defraud the United States; honest services wire fraud (six counts); use of fictitious name to...', details:'Date: November 7, 2025. Type: pardon. Offense: Conspiracy to defraud the United States; honest services wire fraud (six counts); use of fictitious name to carry out unlawful business; conspiracy to commit money laundering; money laundering (seven counts).', category:'pardon' },
-      { id:'p076', line:'pardon', date:'2025-11-07', title:'Robert Henry Harshbarger, Jr.', summary:'Introducing misbranded drugs into Interstate commerce; health care fraud', details:'Date: November 7, 2025. Type: pardon. Offense: Introducing misbranded drugs into Interstate commerce; health care fraud.', category:'pardon' },
-      { id:'p077', line:'pardon', date:'2025-11-07', title:'Troy Lake', summary:'Conspiracy to violate the Clean Air Act', details:'Date: November 7, 2025. Type: pardon. Offense: Conspiracy to violate the Clean Air Act.', category:'pardon' },
-      { id:'p078', line:'pardon', date:'2025-11-07', title:'Michael McMahon', summary:'Acting as an agent of a foreign government without prior notification to the Attorney General; conspiracy t...', details:'Date: November 7, 2025. Type: pardon. Offense: Acting as an agent of a foreign government without prior notification to the Attorney General; conspiracy to engage in interstate stalking; stalking.', category:'pardon' },
-      { id:'p079', line:'pardon', date:'2025-11-07', title:'Darryl Strawberry, Sr.', summary:'Income tax evasion', details:'Date: November 7, 2025. Type: pardon. Offense: Income tax evasion.', category:'pardon' },
-      { id:'p080', line:'pardon', date:'2025-11-07', title:'Michelino Sunseri', summary:'Leaving the Garnet Canyon Trail to use the shortcut of the Old Climber\'s Trail in violation of the Superin...', details:'Date: November 7, 2025. Type: pardon. Offense: Leaving the Garnet Canyon Trail to use the shortcut of the Old Climber\'s Trail in violation of the Superintendent\'s 2024 Compendium.', category:'pardon' },
-      { id:'p081', line:'pardon', date:'2025-11-12', title:'Joseph Lewis', summary:'Conspiracy to commit securities fraud; securities fraud (two counts)', details:'Date: November 12, 2025. Type: pardon. Offense: Conspiracy to commit securities fraud; securities fraud (two counts).', category:'pardon' },
-      { id:'p082', line:'pardon', date:'2025-11-14', title:'Suzanne Kaye', summary:'Interstate Communications - Threats', details:'Date: November 14, 2025. Type: pardon. Offense: Interstate Communications - Threats.', category:'pardon' },
-      { id:'p083', line:'pardon', date:'2025-11-14', title:'Joseph Schwartz', summary:'Willful failure to pay over employment taxes; failure to file the Annual 5500 Report', details:'Date: November 14, 2025. Type: pardon. Offense: Willful failure to pay over employment taxes; failure to file the Annual 5500 Report.', category:'pardon' },
-      { id:'p084', line:'pardon', date:'2025-11-14', title:'Daniel Edwin Wilson', summary:'Possession of a firearm by a prohibited person; possession of an unregistered firearm', details:'Date: November 14, 2025. Type: pardon. Offense: Possession of a firearm by a prohibited person; possession of an unregistered firearm.', category:'pardon' },
-      { id:'p085', line:'pardon', date:'2025-11-26', title:'David Gentile [Commutation]', summary:'Conspiracy to commit securities fraud; conspiracy to commit wire fraud; securities fraud; wire fraud (two c...', details:'Date: November 26, 2025. Type: commutation. Offense: Conspiracy to commit securities fraud; conspiracy to commit wire fraud; securities fraud; wire fraud (two counts).', category:'commutation' },
-      { id:'p086', line:'pardon', date:'2025-12-01', title:'Juan Orlando Hernandez', summary:'Conspiracy to import cocaine into the United States; possessing machine guns and destructive devices in fur...', details:'Date: December 1, 2025. Type: pardon. Offense: Conspiracy to import cocaine into the United States; possessing machine guns and destructive devices in furtherance of the cocaine importation conspiracy; conspiracy to use and carry machine guns and destructive devices.', category:'pardon' },
-      { id:'p087', line:'pardon', date:'2025-12-02', title:'Enrique Roberto Cuellar', summary:'Conspiracy (two counts); bribery (two counts); honest services wire fraud; honest services wire fraud consp...', details:'Date: December 2, 2025. Type: pardon. Offense: Conspiracy (two counts); bribery (two counts); honest services wire fraud; honest services wire fraud conspiracy; money laundering conspiracy; money laundering (five counts).', category:'pardon' },
-      { id:'p088', line:'pardon', date:'2025-12-02', title:'Imelda Rios Cuellar', summary:'Conspiracy (two counts); bribery (two counts); honest services wire fraud; honest services wire fraud consp...', details:'Date: December 2, 2025. Type: pardon. Offense: Conspiracy (two counts); bribery (two counts); honest services wire fraud; honest services wire fraud conspiracy; money laundering conspiracy; money laundering (five counts).', category:'pardon' },
-      { id:'p089', line:'pardon', date:'2025-12-02', title:'Timothy Joseph Leiweke', summary:'Conspiracy to restrain trade', details:'Date: December 2, 2025. Type: pardon. Offense: Conspiracy to restrain trade.', category:'pardon' },
-      { id:'p090', line:'pardon', date:'2025-12-05', title:'Tina Peters', summary:'“For those offenses she has or may have committed or taken part in related to election integrity and securi...', details:'Date: December 5, 2025. Type: pardon. Offense: “For those offenses she has or may have committed or taken part in related to election integrity and security during the period from January 1, 2020 through December 31, 2021”.', category:'pardon' },
-      { id:'p091', line:'pardon', date:'2026-01-15', title:'Jimmy Ray Barnett [Commutation]', summary:'Conspiracy and aiding and abetting; possession with intent to distribute 50 grams or more of methamphetamin...', details:'Date: January 15, 2026. Type: commutation. Offense: Conspiracy and aiding and abetting; possession with intent to distribute 50 grams or more of methamphetamine; possession with intent to distribute 50 grams or more of amphetamine; possession with intent to distribute methamphetamine; convicted felon in possession of firearms.', category:'commutation' },
-      { id:'p092', line:'pardon', date:'2026-01-15', title:'Zechariah Benjamin [Commutation]', summary:'Distribute and aid and abet the distribution of 5 grams or more of cocaine base after having been convicted...', details:'Date: January 15, 2026. Type: commutation. Offense: Distribute and aid and abet the distribution of 5 grams or more of cocaine base after having been convicted of two felony drug offenses; distribute 5 grams or more of cocaine base after having been convicted of two felony drug offenses; conspiracy to distribute and possess with intent to distribute 50 grams or more of cocaine base after two prior felony drug offenses.', category:'commutation' },
-      { id:'p093', line:'pardon', date:'2026-01-15', title:'Angela Wannette Cupit [Commutation]', summary:'Conspiracy to possess with intent to distribute a controlled substance', details:'Date: January 15, 2026. Type: commutation. Offense: Conspiracy to possess with intent to distribute a controlled substance.', category:'commutation' },
-      { id:'p094', line:'pardon', date:'2026-01-15', title:'Jacob Deutsch [Commutation]', summary:'Conspiracy to commit mail fraud and wire fraud', details:'Date: January 15, 2026. Type: commutation. Offense: Conspiracy to commit mail fraud and wire fraud.', category:'commutation' },
-      { id:'p095', line:'pardon', date:'2026-01-15', title:'Juan Mercado, III [Commutation]', summary:'1. Conspiracy to possess, with intent to distribute, 2160.02 kilograms of marijuana2. Supervised release vi...', details:'Date: January 15, 2026. Type: commutation. Offense: 1. Conspiracy to possess, with intent to distribute, 2160.02 kilograms of marijuana2. Supervised release violation (conspiracy to possess with intent to distribute five kilograms or more of cocaine).', category:'commutation' },
-      { id:'p096', line:'pardon', date:'2026-01-15', title:'Angela Reynolds [Commutation]', summary:'Conspiracy to possess with intent to distribute a controlled substance', details:'Date: January 15, 2026. Type: commutation. Offense: Conspiracy to possess with intent to distribute a controlled substance.', category:'commutation' },
-      { id:'p097', line:'pardon', date:'2026-01-15', title:'Andre Donnell Routt [Commutation]', summary:'Did knowingly and intentionally conspire, combine, confederate and agree together, with each other and with...', details:'Date: January 15, 2026. Type: commutation. Offense: Did knowingly and intentionally conspire, combine, confederate and agree together, with each other and with other persons to knowingly and intentionally distribute and possess with intent to distribute five kilograms or more of cocaine.', category:'commutation' },
-      { id:'p098', line:'pardon', date:'2026-01-15', title:'James Phillip Womack [Commutation]', summary:'Distribution of more than five grams of actual methamphetamine', details:'Date: January 15, 2026. Type: commutation. Offense: Distribution of more than five grams of actual methamphetamine.', category:'commutation' },
-      { id:'p099', line:'pardon', date:'2026-01-15', title:'Adriana Isabel Camberos', summary:'Conspiracy to commit wire and mail fraud; wire fraud and aiding and abetting (seven counts)', details:'Date: January 15, 2026. Type: pardon. Offense: Conspiracy to commit wire and mail fraud; wire fraud and aiding and abetting (seven counts).', category:'pardon' },
-      { id:'p100', line:'pardon', date:'2026-01-15', title:'Andres Enrique Camberos', summary:'Conspiracy to commit wire and mail fraud; wire fraud and aiding and abetting (seven counts)', details:'Date: January 15, 2026. Type: pardon. Offense: Conspiracy to commit wire and mail fraud; wire fraud and aiding and abetting (seven counts).', category:'pardon' },
-      { id:'p101', line:'pardon', date:'2026-01-15', title:'Danny Preston Conrad', summary:'Embezzling by postal employee', details:'Date: January 15, 2026. Type: pardon. Offense: Embezzling by postal employee.', category:'pardon' },
-      { id:'p102', line:'pardon', date:'2026-01-15', title:'Arie Eric De Jong, III', summary:'Conspiracy', details:'Date: January 15, 2026. Type: pardon. Offense: Conspiracy.', category:'pardon' },
-      { id:'p103', line:'pardon', date:'2026-01-15', title:'Russell John Flint, Jr.', summary:'Aiding and abetting the making of false Selective Service Registration Certificates', details:'Date: January 15, 2026. Type: pardon. Offense: Aiding and abetting the making of false Selective Service Registration Certificates.', category:'pardon' },
-      { id:'p104', line:'pardon', date:'2026-01-15', title:'Julio M. Herrera Velutini', summary:'Conspiracy (two counts); federal program bribery (two counts); honest services wire fraud (two counts)', details:'Date: January 15, 2026. Type: pardon. Offense: Conspiracy (two counts); federal program bribery (two counts); honest services wire fraud (two counts).', category:'pardon' },
-      { id:'p105', line:'pardon', date:'2026-01-15', title:'Kenneth Caprist Kelly', summary:'Armed bank robbery; assault during armed bank robbery; use of firearm during a crime of violence', details:'Date: January 15, 2026. Type: pardon. Offense: Armed bank robbery; assault during armed bank robbery; use of firearm during a crime of violence.', category:'pardon' },
-      { id:'p106', line:'pardon', date:'2026-01-15', title:'James Michael Klos', summary:'Possession of an unregistered firearm', details:'Date: January 15, 2026. Type: pardon. Offense: Possession of an unregistered firearm.', category:'pardon' },
-      { id:'p107', line:'pardon', date:'2026-01-15', title:'David Levy', summary:'Conspiracy to commit securities fraud; securities fraud', details:'Date: January 15, 2026. Type: pardon. Offense: Conspiracy to commit securities fraud; securities fraud.', category:'pardon' },
-      { id:'p108', line:'pardon', date:'2026-01-15', title:'Hollie Ann Nadel', summary:'Conspiracy to commit money laundering and bank fraud', details:'Date: January 15, 2026. Type: pardon. Offense: Conspiracy to commit money laundering and bank fraud.', category:'pardon' },
-      { id:'p109', line:'pardon', date:'2026-01-15', title:'Mark T. Rossini', summary:'Conspiracy; federal program bribery; honest services wire fraud', details:'Date: January 15, 2026. Type: pardon. Offense: Conspiracy; federal program bribery; honest services wire fraud.', category:'pardon' },
-      { id:'p110', line:'pardon', date:'2026-01-15', title:'Wanda Vazquez Garced', summary:'Conspiracy; federal program bribery; honest services wire fraud', details:'Date: January 15, 2026. Type: pardon. Offense: Conspiracy; federal program bribery; honest services wire fraud.', category:'pardon' },
-      { id:'p111', line:'pardon', date:'2026-01-16', title:'Terren Scott Peizer', summary:'Securities fraud; insider trading (two counts)', details:'Date: January 16, 2026. Type: pardon. Offense: Securities fraud; insider trading (two counts).', category:'pardon' },
-      { id:'p112', line:'pardon', date:'2026-01-20', title:'Julio M. Herrera Velutini', summary:'Contribution by a foreign national', details:'Date: January 20, 2026. Type: pardon. Offense: Contribution by a foreign national.', category:'pardon' },
-      { id:'p113', line:'pardon', date:'2026-01-20', title:'Mark T. Rossini', summary:'Contribution by a foreign national', details:'Date: January 20, 2026. Type: pardon. Offense: Contribution by a foreign national.', category:'pardon' },
-      { id:'p114', line:'pardon', date:'2026-01-20', title:'Wanda Vazquez Garced', summary:'Contribution by a foreign national', details:'Date: January 20, 2026. Type: pardon. Offense: Contribution by a foreign national.', category:'pardon' },
-      { id:'p115', line:'pardon', date:'2026-02-12', title:'Travis Henry', summary:'Conspiracy to possess with intent to distribute cocaine', details:'Date: February 12, 2026. Type: pardon. Offense: Conspiracy to possess with intent to distribute cocaine.', category:'pardon' },
-      { id:'p116', line:'pardon', date:'2026-02-12', title:'Timothy S. Smith', summary:'Conspiring to defraud the Internal Revenue Service', details:'Date: February 12, 2026. Type: pardon. Offense: Conspiring to defraud the Internal Revenue Service.', category:'pardon' },
-      { id:'p117', line:'pardon', date:'2026-02-12', title:'Nathaniel Newton, Jr.', summary:'Conspiracy to possess with intent to distribute marijuana', details:'Date: February 12, 2026. Type: pardon. Offense: Conspiracy to possess with intent to distribute marijuana.', category:'pardon' },
-      { id:'p118', line:'pardon', date:'2026-02-12', title:'Joseph Klecko', summary:'Perjury', details:'Date: February 12, 2026. Type: pardon. Offense: Perjury.', category:'pardon' },
-      { id:'p119', line:'pardon', date:'2026-02-12', title:'Jamal Lewis', summary:'Use of telephone to facilitate an attempt to possess with intent to distribute cocaine', details:'Date: February 12, 2026. Type: pardon. Offense: Use of telephone to facilitate an attempt to possess with intent to distribute cocaine.', category:'pardon' },
-      { id:'p120', line:'pardon', date:'2026-02-12', title:'Elite Diesel Service, Inc.', summary:'Conspiracy to violate the Clean Air Act', details:'Date: February 12, 2026. Type: pardon. Offense: Conspiracy to violate the Clean Air Act.', category:'pardon' },
-      { id:'p121', line:'pardon', date:'2026-02-12', title:'Dr. Billy A. Cannon', summary:'Conspiracy', details:'Date: February 12, 2026. Type: pardon. Offense: Conspiracy.', category:'pardon' },
-      { id:'p122', line:'pardon', date:'2026-06-04', title:'Stephen E. Buyer', summary:'Securities fraud (four counts)', details:'Date: June 4, 2026. Type: pardon. Offense: Securities fraud (four counts).', category:'pardon' },
+      {
+        id: 'p122',
+        line: 'pardon',
+        date: '2026-06-04',
+        title: 'Stephen E. Buyer',
+        summary: 'Securities fraud (four counts)',
+        details: 'Date: June 4, 2026. Type: pardon. Offense: Securities fraud (four counts).',
+        category: 'pardon'
+      }
     ];
 
     // ── CONFIG ──────────────────────────────────────────────────
@@ -812,33 +1949,114 @@
 
     let highlightedCategory = null;
 
+    function getCrimeDegree(details, summary) {
+      const text = (details + ' ' + summary).toLowerCase();
+      // Class A Felony — Life / Death (18 USC § 3559(a)(1))
+      if (text.includes('murder') || text.includes('manslaughter')) return 'Class A Felony (Life)';
+      if (text.includes('continuing criminal enterprise')) return 'Class A Felony (Life)';
+      // Class B Felony — 25+ years (18 USC § 3559(a)(2))
+      if (text.includes('armed') && text.includes('robbery')) return 'Class B Felony (25 yrs)';
+      if (text.includes('bank fraud')) return 'Class B Felony (30 yrs)';
+      // Class C Felony — 10-25 years (18 USC § 3559(a)(3))
+      if (text.includes('securities fraud') || text.includes('insider trading')) return 'Class C Felony (20 yrs)';
+      if (text.includes('wire fraud') || text.includes('mail fraud')) return 'Class C Felony (20 yrs)';
+      if (text.includes('money laundering')) return 'Class C Felony (20 yrs)';
+      if (text.includes('tampering') && text.includes('witness')) return 'Class C Felony (20 yrs)';
+      if (text.includes('bribe') || text.includes('extortion') || text.includes('honest services')) return 'Class C Felony (15 yrs)';
+      if (text.includes('firearm') || text.includes('weapon') || text.includes('felon in possession')) return 'Class C Felony (15 yrs)';
+      if (text.includes('cocaine') || text.includes('methamphetamine') || text.includes('heroin') || text.includes('narcotic')) return 'Class C Felony (20 yrs)';
+      if (text.includes('distribute') && (text.includes('controlled') || text.includes('marijuana') || text.includes('possess'))) return 'Class C Felony (20 yrs)';
+      // Class D Felony — 5-10 years (18 USC § 3559(a)(4))
+      if (text.includes('health care fraud')) return 'Class D Felony (10 yrs)';
+      if (text.includes('marijuana') || (text.includes('controlled substance') && text.includes('possess'))) return 'Class D Felony (10 yrs)';
+      if (text.includes('obstruction of justice') || text.includes('tampering with documents') || text.includes('tampering with proceedings')) return 'Class D Felony (10 yrs)';
+      if (text.includes('theft of government') || text.includes('theft of property') || text.includes('second degree theft') || text.includes('shoplifting')) return 'Class D Felony (10 yrs)';
+      if (text.includes('computer hack')) return 'Class D Felony (10 yrs)';
+      if (text.includes('interstate communications') && text.includes('threat')) return 'Class D Felony (5 yrs)';
+      // Class E Felony — 1-5 years (18 USC § 3559(a)(5))
+      if (text.includes('perjury')) return 'Class E Felony (5 yrs)';
+      if (text.includes('stalking')) return 'Class E Felony (5 yrs)';
+      if (text.includes('foreign agent') || text.includes('fara')) return 'Class E Felony (5 yrs)';
+      if (text.includes('bank secrecy')) return 'Class E Felony (5 yrs)';
+      if (text.includes('identity theft')) return 'Class E Felony (2 yrs)';
+      if (text.includes('conspiracy against rights')) return 'Misdemeanor (1 yr)';
+      if (text.includes('conspiracy') && text.includes('defraud the united states')) return 'Class E Felony (5 yrs)';
+      if (text.includes('conspiracy') && text.includes('internal revenue')) return 'Class E Felony (5 yrs)';
+      if (text.includes('conspiracy') && !text.includes('rights')) return 'Class E Felony (5 yrs)';
+      if (text.includes('false statement') || text.includes('false labor') || text.includes('false and fraudulent tax')) return 'Class E Felony (5 yrs)';
+      if (text.includes('aiding') && text.includes('false') && text.includes('tax')) return 'Class E Felony (5 yrs)';
+      if (text.includes('tax evasion') || text.includes('internal revenue') || text.includes('defraud the irs') || text.includes('defraud the internal revenue')) return 'Class E Felony (5 yrs)';
+      if (text.includes('failure to pay') && (text.includes('tax') || text.includes('employment'))) return 'Class E Felony (5 yrs)';
+      if (text.includes('failure to file') && text.includes('return')) return 'Class E Felony (5 yrs)';
+      if (text.includes('election') || text.includes('capitol') || text.includes('january')) return 'Class E Felony (5 yrs)';
+      if (text.includes('permitting a convicted felon') && text.includes('insurance')) return 'Class E Felony (5 yrs)';
+      if (text.includes('false tax')) return 'Class E Felony (5 yrs)';
+      // Misdemeanors
+      if (text.includes('face act') || text.includes('freedom of access') || text.includes('clinic access') || text.includes('clinic obstruction')) return 'Misdemeanor (1 yr)';
+      if (text.includes('clean air')) return 'Misdemeanor (2 yrs)';
+      if (text.includes('national park') || text.includes('trail') || text.includes('superintendent')) return 'Infraction (Fine)';
+      // Military
+      if (text.includes('violation of lawful orders') || text.includes('army')) return 'UCMJ Offense';
+      return 'Federal Offense';
+    }
+
     function renderLegend() {
       const pardons = EVENTS.filter(e => e.line === 'pardon');
-      const cats = {};
+      const catMap = {}; // cat → { entries: [{name, desc, degree}], count }
       pardons.forEach(e => {
         const cat = categorizePardon(e.details);
         e._category = cat;
-        cats[cat] = (cats[cat] || 0) + 1;
+        if (!catMap[cat]) catMap[cat] = { entries: [], count: 0 };
+        catMap[cat].entries.push({
+          name: e.title,
+          desc: e.summary,
+          degree: getCrimeDegree(e.details, e.summary)
+        });
+        catMap[cat].count++;
       });
-      const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+
+      const sorted = Object.entries(catMap).sort((a, b) => b[1].count - a[1].count);
       const list = document.getElementById('legend-list');
-      list.innerHTML = sorted.map(([cat, count]) =>
-        '<div class="legend-category' + (cat === highlightedCategory ? ' active' : '') + '" data-cat="' + cat + '">' +
-          '<span>' + cat + '</span><span class="legend-count">' + count + '</span>' +
+      list.innerHTML = sorted.map(([cat, data]) =>
+        '<div class="legend-category" data-cat="' + cat + '">' +
+          '<div class="legend-header">' +
+            '<span>' + cat + '</span><span class="legend-count">' + data.count + '</span>' +
+          '</div>' +
+          '<div class="legend-sublist">' +
+            data.entries.map(e =>
+              '<div data-name="' + e.name.replace(/"/g, '&quot;') + '">' +
+                '<span class="sublist-name">' + e.name + ' &mdash; ' + e.degree + '</span>' +
+                '<span class="sublist-desc">' + e.desc + '</span>' +
+              '</div>'
+            ).join('') +
+          '</div>' +
         '</div>'
       ).join('');
       document.getElementById('legend-total').textContent = pardons.length;
 
-      list.querySelectorAll('.legend-category').forEach(el => {
-        el.addEventListener('click', function() {
-          const cat = this.getAttribute('data-cat');
-          if (highlightedCategory === cat) {
-            highlightedCategory = null;
-          } else {
-            highlightedCategory = cat;
+      // Toggle dropdown on click
+      list.querySelectorAll('.legend-header').forEach(header => {
+        header.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const parent = this.parentElement;
+          const wasOpen = parent.classList.contains('open');
+          list.querySelectorAll('.legend-category.open').forEach(el => el.classList.remove('open'));
+          if (!wasOpen) parent.classList.add('open');
+        });
+      });
+
+      // Clicking a name scrolls to that marker
+      list.querySelectorAll('.legend-sublist div[data-name]').forEach(div => {
+        div.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const name = this.getAttribute('data-name');
+          const marker = Array.from(document.querySelectorAll('.marker-label')).find(
+            l => l.textContent === name
+          );
+          if (marker) {
+            marker.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+            marker.click();
           }
-          renderLegend();
-          updateLabelHighlights();
         });
       });
     }
@@ -1085,7 +2303,7 @@
       cardCategory.textContent = evt.line.toUpperCase();
       cardCategory.className = 'card-category ' + evt.line;
       cardTitle.textContent = evt.title;
-      cardBody.innerHTML = evt.details;
+      cardBody.innerHTML = evt.details + getUSCLinks(evt.details);
 
       detailCard.classList.add('expanded');
       currentOpenId = evt.id;
@@ -1104,6 +2322,115 @@
     function formatDate(dateStr) {
       const d = new Date(dateStr + 'T00:00:00');
       return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    function getUSCLinks(details) {
+      const lower = details.toLowerCase();
+      const links = [];
+      const seen = new Set();
+
+      const add = (label, url) => {
+        if (!seen.has(label)) { seen.add(label); links.push({ label, url }); }
+      };
+
+      if (lower.includes('face act') || lower.includes('freedom of access'))
+        add('18 USC § 248', 'https://www.law.cornell.edu/uscode/text/18/248');
+
+      if (lower.includes('conspiracy against rights'))
+        add('18 USC § 241', 'https://www.law.cornell.edu/uscode/text/18/241');
+
+      if (lower.includes('controlled substance') || lower.includes('distribute') && (lower.includes('cocaine') || lower.includes('meth') || lower.includes('marijuana') || lower.includes('drug')))
+        add('21 USC § 841', 'https://www.law.cornell.edu/uscode/text/21/841');
+
+      if (lower.includes('continuing criminal enterprise'))
+        add('21 USC § 848', 'https://www.law.cornell.edu/uscode/text/21/848');
+
+      if (lower.includes('drug') || lower.includes('narcotic'))
+        add('21 USC § 841', 'https://www.law.cornell.edu/uscode/text/21/841');
+
+      if (lower.includes('conspiracy') && (lower.includes('distribute') || lower.includes('possess')))
+        add('21 USC § 846', 'https://www.law.cornell.edu/uscode/text/21/846');
+
+      if (lower.includes('bank secrecy'))
+        add('31 USC § 5311', 'https://www.law.cornell.edu/uscode/text/31/5311');
+
+      if (lower.includes('money laundering'))
+        add('18 USC § 1956', 'https://www.law.cornell.edu/uscode/text/18/1956');
+
+      if (lower.includes('wire fraud') || lower.includes('honest services wire fraud'))
+        add('18 USC § 1343', 'https://www.law.cornell.edu/uscode/text/18/1343');
+
+      if (lower.includes('mail fraud') || lower.includes('honest services mail fraud'))
+        add('18 USC § 1341', 'https://www.law.cornell.edu/uscode/text/18/1341');
+
+      if (lower.includes('securities fraud'))
+        add('15 USC § 78j', 'https://www.law.cornell.edu/uscode/text/15/78j');
+
+      if (lower.includes('insider trading'))
+        add('15 USC § 78j(b)', 'https://www.law.cornell.edu/uscode/text/15/78j');
+
+      if (lower.includes('bribe') || lower.includes('bribery'))
+        add('18 USC § 201', 'https://www.law.cornell.edu/uscode/text/18/201');
+
+      if (lower.includes('extortion'))
+        add('18 USC § 1951', 'https://www.law.cornell.edu/uscode/text/18/1951');
+
+      if (lower.includes('firearm') || lower.includes('felon in possession'))
+        add('18 USC § 922(g)', 'https://www.law.cornell.edu/uscode/text/18/922');
+
+      if (lower.includes('perjury'))
+        add('18 USC § 1621', 'https://www.law.cornell.edu/uscode/text/18/1621');
+
+      if (lower.includes('obstruction of justice'))
+        add('18 USC § 1503', 'https://www.law.cornell.edu/uscode/text/18/1503');
+
+      if (lower.includes('tampering') && lower.includes('witness'))
+        add('18 USC § 1512', 'https://www.law.cornell.edu/uscode/text/18/1512');
+
+      if (lower.includes('tax evasion'))
+        add('26 USC § 7201', 'https://www.law.cornell.edu/uscode/text/26/7201');
+
+      if (lower.includes('foreign agent') || lower.includes('fara'))
+        add('22 USC § 611', 'https://www.law.cornell.edu/uscode/text/22/611');
+
+      if (lower.includes('clean air'))
+        add('42 USC § 7413', 'https://www.law.cornell.edu/uscode/text/42/7413');
+
+      if (lower.includes('false statement') && (lower.includes('tax') || lower.includes('irs')))
+        add('26 USC § 7206', 'https://www.law.cornell.edu/uscode/text/26/7206');
+
+      if (lower.includes('false statement') || lower.includes('false tax'))
+        add('18 USC § 1001', 'https://www.law.cornell.edu/uscode/text/18/1001');
+
+      if (lower.includes('bank fraud'))
+        add('18 USC § 1344', 'https://www.law.cornell.edu/uscode/text/18/1344');
+
+      if (lower.includes('identity theft') || lower.includes('aggravated identity'))
+        add('18 USC § 1028A', 'https://www.law.cornell.edu/uscode/text/18/1028A');
+
+      if (lower.includes('theft of government property') || lower.includes('embezzl'))
+        add('18 USC § 641', 'https://www.law.cornell.edu/uscode/text/18/641');
+
+      if (lower.includes('stalking'))
+        add('18 USC § 2261A', 'https://www.law.cornell.edu/uscode/text/18/2261A');
+
+      if (lower.includes('murder'))
+        add('18 USC § 1111', 'https://www.law.cornell.edu/uscode/text/18/1111');
+
+      if (lower.includes('health care fraud'))
+        add('18 USC § 1347', 'https://www.law.cornell.edu/uscode/text/18/1347');
+
+      if (lower.includes('conspiracy') && !links.some(l => l.label.includes('846')))
+        add('18 USC § 371', 'https://www.law.cornell.edu/uscode/text/18/371');
+
+      if (lower.includes('computer hack'))
+        add('18 USC § 1030', 'https://www.law.cornell.edu/uscode/text/18/1030');
+
+      if (links.length === 0) return '';
+
+      return '<div class="uscode-links">' +
+        links.map(l => '<a href="' + l.url + '" target="_blank" rel="noopener">' + l.label + '</a>').join(' &middot; ') +
+        '</div>';
     }
 
     // ── EVENT BINDING ───────────────────────────────────────────
