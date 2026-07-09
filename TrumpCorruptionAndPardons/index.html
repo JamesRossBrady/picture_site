@@ -351,7 +351,8 @@
     }
     #legend h3 { font-size: 12px; color: #fff; margin: 0 0 8px 0; }
     #legend .legend-category { border-bottom: 1px solid #1a1a1a; }
-    #legend .legend-header { display: flex; justify-content: space-between; padding: 3px 0; cursor: pointer; transition: background 0.15s; }
+    #legend .legend-header { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; cursor: pointer; transition: background 0.15s; }
+    #legend .legend-swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
     #legend .legend-header:hover { background: #1a1a1a; }
     #legend .legend-count { color: #888; }
     #legend .legend-total { margin-top: 6px; padding-top: 4px; border-top: 1px solid #444; font-weight: 600; color: #fff; }
@@ -362,6 +363,15 @@
     #legend .legend-sublist div[data-name]:hover { color: #fff; }
     #legend .legend-sublist .sublist-name { display: block; color: #ccc; font-weight: 500; }
     #legend .legend-sublist .sublist-desc { display: block; color: #666; font-size: 9px; line-height: 1.3; margin-top: 1px; }
+    #corruption-list .corr-item { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #1a1a1a; font-size: 10px; cursor: pointer; }
+    #corruption-list .corr-item:hover { color: #fff; }
+    #corruption-list .corr-amount { color: #e67e22; font-family: monospace; font-size: 10px; white-space: nowrap; margin-left: 6px; }
+    #corruption-list .corr-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #corruption-list .corr-swatches { display: flex; gap: 2px; flex-shrink: 0; margin: 0 4px; }
+    #corruption-list .law-dot { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }
+    #corruption-legend { margin-top: 6px; padding-top: 6px; border-top: 1px solid #333; }
+    #corruption-legend .law-item { display: flex; align-items: center; padding: 1px 0; font-size: 9px; color: #999; }
+    #corruption-legend .law-swatch { width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; flex-shrink: 0; }
 
     .marker-label.highlighted {
       font-size: 13px !important;
@@ -377,6 +387,24 @@
       #legend { width: 140px; font-size: 10px; padding: 10px 8px; }
       #timeline-container { margin-right: 140px; }
     }
+
+    #chart-tooltip {
+      position: fixed;
+      pointer-events: none;
+      z-index: 200;
+      background: #1a1a2e;
+      color: #f39c12;
+      font-size: 11px;
+      font-family: monospace;
+      padding: 4px 8px;
+      border: 1px solid #f39c12;
+      border-radius: 4px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.05s;
+    }
+
+    #chart-tooltip.visible { opacity: 1; }
 
     .scroll-hint {
       position: absolute;
@@ -432,10 +460,17 @@
         </div>
       </div>
       <div class="scroll-hint">scroll &#8594;</div>
+      <div id="chart-tooltip"></div>
     </div>
 
     <div id="legend">
-      <h3>Pardons by Offense</h3>
+      <h3>Corruption</h3>
+      <p style="font-size: 10px; color: #666; margin: -4px 0 6px 0;">organized by dollar amount</p>
+      <div id="corruption-list"></div>
+      <div id="corruption-legend"></div>
+
+      <h3 style="margin-top: 20px;">Pardons by Offense</h3>
+      <p style="font-size: 10px; color: #666; margin: -4px 0 6px 0;">organized by time</p>
       <div id="legend-list"></div>
       <div class="legend-category legend-total">
         <span>Total</span>
@@ -455,7 +490,7 @@
         date: '2025-01-17',
         title: '$TRUMP Meme Coin Launch',
         summary: 'Trump launches $TRUMP meme coin days before inauguration, generating $635M in disclosed income.',
-        details: 'The $TRUMP meme coin was launched on the Solana blockchain just three days before Trump took office. Trump\'s 2025 financial disclosure revealed $635 million in income from CIC Digital LLC, the entity behind the coin. Ethics watchdogs condemned the launch as an unprecedented conflict of interest, with a sitting president personally profiting from a speculative crypto asset that foreign actors could purchase to curry favor.',
+        details: 'The $TRUMP meme coin was launched on the Solana blockchain just three days before Trump took office. Trump\'s 2025 financial disclosure revealed $635 million in income from CIC Digital LLC, the entity behind the coin. Ethics watchdogs condemned the launch as an unprecedented conflict of interest, with a sitting president personally profiting from a speculative crypto asset that foreign actors could purchase to curry favor.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'Crypto'
       },
       {
@@ -464,7 +499,7 @@
         date: '2025-01-20',
         title: 'Inauguration & Emoluments Concerns',
         summary: 'Trump sworn in for second term amid immediate concerns about foreign payments and business conflicts.',
-        details: 'Trump assumed office already facing Emoluments Clause concerns. His family business empire had expanded dramatically since his first term, now including crypto ventures, Truth Social (DJT stock), and numerous licensing deals. Watchdog groups warned that the scale of potential foreign influence had multiplied compared to 2017.',
+        details: 'Trump assumed office already facing Emoluments Clause concerns. His family business empire had expanded dramatically since his first term, now including crypto ventures, Truth Social (DJT stock), and numerous licensing deals. Watchdog groups warned that the scale of potential foreign influence had multiplied compared to 2017.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'Ethics'
       },
       {
@@ -725,7 +760,7 @@
         date: '2025-01-25',
         title: 'Firing of 17 Inspectors General',
         summary: 'Trump fires 17 IGs in a late-night purge without legally required notice to Congress.',
-        details: 'On his fifth day in office, Trump executed a mass firing of 17 inspectors general — the independent watchdogs embedded in federal agencies. The terminations were made without the 30-day notice to Congress required by law. Over 55% of presidentially appointed IG positions remained vacant months later, effectively dismantling independent oversight across the executive branch.',
+        details: 'On his fifth day in office, Trump executed a mass firing of 17 inspectors general — the independent watchdogs embedded in federal agencies. The terminations were made without the 30-day notice to Congress required by law. Over 55% of presidentially appointed IG positions remained vacant months later, effectively dismantling independent oversight across the executive branch.<br><br><a href="https://apnews.com/article/trump-inspectors-general-fired-congress-unlawful-4e8bc57e132c3f9a7f1c2a3754359993" target="_blank">News Coverage</a>',
         category: 'Oversight'
       },
       {
@@ -734,7 +769,7 @@
         date: '2025-02-01',
         title: 'World Liberty Financial Launch',
         summary: 'Trump crypto venture WLF co-founded with Witkoff family, raising billions from investors including foreign entities.',
-        details: 'World Liberty Financial, a crypto firm co-founded by Trump and the Witkoff family, became a primary vehicle for what ethics experts called "pay-to-play" influence. Trump\'s financial disclosure later showed $594 million in income from WLF. An investment firm linked to the UAE\'s ruling family would later deposit $2 billion into the platform.',
+        details: 'World Liberty Financial, a crypto firm co-founded by Trump and the Witkoff family, became a primary vehicle for what ethics experts called "pay-to-play" influence. Trump\'s financial disclosure later showed $594 million in income from WLF. An investment firm linked to the UAE\'s ruling family would later deposit $2 billion into the platform.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'Crypto'
       },
       {
@@ -743,7 +778,7 @@
         date: '2025-02-10',
         title: 'Gutting of Office of Government Ethics',
         summary: 'Trump fires OGE director David Huitema by email, three months into his five-year term.',
-        details: 'Trump fired the director of the Office of Government Ethics by email with no explanation. Huitema had been confirmed for a five-year term and had served only three months. The OGE is responsible for overseeing ethics compliance across the executive branch. His removal was seen as part of a broader pattern of dismantling ethics enforcement.',
+        details: 'Trump fired the director of the Office of Government Ethics by email with no explanation. Huitema had been confirmed for a five-year term and had served only three months. The OGE is responsible for overseeing ethics compliance across the executive branch. His removal was seen as part of a broader pattern of dismantling ethics enforcement.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'Oversight'
       },
       {
@@ -752,7 +787,7 @@
         date: '2025-02-10',
         title: 'Rod R. Blagojevich',
         summary: 'Wire fraud under color of official right (eight counts); conspiracy/attempted; attempt to commit extortion ...',
-        details: 'Date: February 10, 2025<br><br>Offense: Wire fraud under color of official right (eight counts); conspiracy/attempted; attempt to commit extortion under color of official right; conspiracy to solicit and solicitation of bribe (three counts); making false statements.<br><br><a href="https://www.justice.gov/pardon/media/1390911/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://apnews.com/article/trump-pardons-rod-blagojevich-ea52b9bd10ee8120934c434e5c75e406" target="_blank">News Coverage</a>',
+        details: 'Date: February 10, 2025<br><br>Offense: Wire fraud under color of official right (eight counts); conspiracy/attempted; attempt to commit extortion under color of official right; conspiracy to solicit and solicitation of bribe (three counts); making false statements.<br><br><a href="https://www.justice.gov/pardon/media/1390911/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       },
       {
@@ -761,7 +796,7 @@
         date: '2025-02-20',
         title: 'DOJ Public Integrity Unit Gutted',
         summary: '25 of 30 lawyers removed from the DOJ office that prosecutes public corruption cases.',
-        details: 'The Department of Justice\'s Public Integrity Section — the unit responsible for prosecuting corruption by public officials — was decimated. 25 of its 30 lawyers were reassigned or removed, and the section\'s authority to open new corruption cases was stripped. Former prosecutors called it the effective end of federal public corruption enforcement.',
+        details: 'The Department of Justice\'s Public Integrity Section — the unit responsible for prosecuting corruption by public officials — was decimated. 25 of its 30 lawyers were reassigned or removed, and the section\'s authority to open new corruption cases was stripped. Former prosecutors called it the effective end of federal public corruption enforcement.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'Oversight'
       },
       {
@@ -779,7 +814,7 @@
         date: '2025-03-10',
         title: 'SEC Drops Crypto Cases After Donations',
         summary: 'SEC dismisses cases against Robinhood, Coinbase, Ripple, and Kraken after each donated $1-5M to inaugural fund.',
-        details: 'The SEC dropped enforcement actions against multiple crypto firms that had collectively donated millions to Trump\'s inaugural committee. Robinhood, Coinbase, Ripple, and Kraken each contributed between $1 million and $5 million. Additionally, the DOJ disbanded its crypto crimes task force, effectively ending federal crypto fraud enforcement.',
+        details: 'The SEC dropped enforcement actions against multiple crypto firms that had collectively donated millions to Trump\'s inaugural committee. Robinhood, Coinbase, Ripple, and Kraken each contributed between $1 million and $5 million. Additionally, the DOJ disbanded its crypto crimes task force, effectively ending federal crypto fraud enforcement.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'Crypto'
       },
       {
@@ -797,7 +832,7 @@
         date: '2025-03-20',
         title: 'Thomas Edward Caldwell',
         summary: 'Tampering with documents or proceedings',
-        details: 'Date: March 20, 2025<br><br>Offense: Tampering with documents or proceedings.<br><br><a href="https://www.justice.gov/pardon/media/1394971/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://apnews.com/article/trump-pardon-oath-keepers-capitol-riot-thomas-caldwell-c14fecd857812c2002a2612f470f0821" target="_blank">News Coverage</a>',
+        details: 'Date: March 20, 2025<br><br>Offense: Tampering with documents or proceedings.<br><br><a href="https://www.justice.gov/pardon/media/1394971/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       },
       {
@@ -896,7 +931,7 @@
         date: '2025-04-01',
         title: 'IRS Taxpayer Data Leaked to ICE',
         summary: 'Trump administration illegally leaks tens of thousands of taxpayer records to ICE for immigration enforcement.',
-        details: 'The IRS, under Trump-appointed leadership, provided tens of thousands of confidential taxpayer records to Immigration and Customs Enforcement for deportation operations. This violated the same taxpayer privacy laws (26 USC §6103) that Trump was simultaneously suing the government over for the leak of his own tax returns. Legal experts called it a stunning act of hypocrisy.',
+        details: 'The IRS, under Trump-appointed leadership, provided tens of thousands of confidential taxpayer records to Immigration and Customs Enforcement for deportation operations. This violated the same taxpayer privacy laws (26 USC §6103) that Trump was simultaneously suing the government over for the leak of his own tax returns. Legal experts called it a stunning act of hypocrisy.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'IRS'
       },
       {
@@ -905,7 +940,7 @@
         date: '2025-04-07',
         title: 'Blanche Memo: DOJ Ends Crypto Enforcement',
         summary: 'Deputy AG Todd Blanche (Trump\'s former personal defense attorney) issues memo disbanding the crypto crimes unit.',
-        details: 'Deputy Attorney General Todd Blanche — Trump\'s former personal criminal defense attorney — issued an April 7, 2025 memo titled "Ending Regulation by Prosecution." The memo disbanded the National Cryptocurrency Enforcement Team (NCET), directed prosecutors to stop pursuing cases against crypto exchanges, mixers, and wallet providers, and declared the DOJ "is not a digital assets regulator." Blanche held $159,000–$485,000 in personal crypto assets (BTC, ETH, SOL, ADA) when he signed the memo, potentially violating his divestiture pledge. The memo directly benefited the crypto industry that had enriched the Trump family through World Liberty Financial and $TRUMP coin. Source: justice.gov/dag/media/1395781/dl.',
+        details: 'Deputy Attorney General Todd Blanche — Trump\'s former personal criminal defense attorney — issued an April 7, 2025 memo titled "Ending Regulation by Prosecution." The memo disbanded the National Cryptocurrency Enforcement Team (NCET), directed prosecutors to stop pursuing cases against crypto exchanges, mixers, and wallet providers, and declared the DOJ "is not a digital assets regulator." Blanche held $159,000–$485,000 in personal crypto assets (BTC, ETH, SOL, ADA) when he signed the memo, potentially violating his divestiture pledge. The memo directly benefited the crypto industry that had enriched the Trump family through World Liberty Financial and $TRUMP coin. Source: justice.gov/dag/media/1395781/dl.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'Oversight'
       },
       {
@@ -914,7 +949,7 @@
         date: '2025-04-15',
         title: 'IRS Direct File Program Killed',
         summary: 'Administration kills free tax-filing program, benefiting tax prep software companies.',
-        details: 'The IRS Direct File program, which allowed Americans to file taxes for free directly with the government, was terminated. The move was widely seen as a gift to tax preparation software giants like Intuit (TurboTax) and H&R Block, which have spent millions lobbying against free government filing options.',
+        details: 'The IRS Direct File program, which allowed Americans to file taxes for free directly with the government, was terminated. The move was widely seen as a gift to tax preparation software giants like Intuit (TurboTax) and H&R Block, which have spent millions lobbying against free government filing options.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'IRS'
       },
       {
@@ -923,7 +958,7 @@
         date: '2025-04-23',
         title: 'Michele Fiore',
         summary: 'Conspiracy to commit wire fraud; wire fraud (six counts)',
-        details: 'Date: April 23, 2025<br><br>Offense: Conspiracy to commit wire fraud; wire fraud (six counts).<br><br><a href="https://www.justice.gov/pardon/media/1397926/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://apnews.com/article/trump-pardon-michele-fiore-paul-walczak-b67860ed938ed53fc17563e16f05c8b4" target="_blank">News Coverage</a>',
+        details: 'Date: April 23, 2025<br><br>Offense: Conspiracy to commit wire fraud; wire fraud (six counts).<br><br><a href="https://www.justice.gov/pardon/media/1397926/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       },
       {
@@ -932,7 +967,7 @@
         date: '2025-04-23',
         title: 'Paul Walczak',
         summary: 'Willful failure to pay trust fund taxes; failure to file return/information',
-        details: 'Date: April 23, 2025<br><br>Offense: Willful failure to pay trust fund taxes; failure to file return/information.<br><br><a href="https://www.justice.gov/pardon/media/1397931/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://apnews.com/article/trump-pardon-michele-fiore-paul-walczak-b67860ed938ed53fc17563e16f05c8b4" target="_blank">News Coverage</a>',
+        details: 'Date: April 23, 2025<br><br>Offense: Willful failure to pay trust fund taxes; failure to file return/information.<br><br><a href="https://www.justice.gov/pardon/media/1397931/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       },
       {
@@ -941,7 +976,7 @@
         date: '2025-04-30',
         title: 'USDA Reverses Salmonella Rule for Trump Donor',
         summary: 'Pilgrim\'s Pride donated $5M to Trump inauguration — USDA reverses a salmonella safety rule they wanted eliminated.',
-        details: 'Pilgrim\'s Pride, a major poultry producer, donated $5 million to Trump\'s inauguration fund — more than Amazon, Meta, or Exxon. The USDA subsequently reversed a salmonella safety regulation that Pilgrim\'s Pride had specifically requested be eliminated. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        details: 'Pilgrim\'s Pride, a major poultry producer, donated $5 million to Trump\'s inauguration fund — more than Amazon, Meta, or Exxon. The USDA subsequently reversed a salmonella safety regulation that Pilgrim\'s Pride had specifically requested be eliminated. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'Pay-to-Play'
       },
       {
@@ -950,7 +985,7 @@
         date: '2025-05-01',
         title: 'Qatar Boeing 747 Gift & Defense Deal',
         summary: 'Trump accepts $400M luxury jet from Qatar, then quietly grants a U.S. defense guarantee.',
-        details: 'Trump accepted a luxury Boeing 747 jet valued at approximately $400 million as a gift from the Qatari government. Shortly afterward, his administration quietly granted Qatar a U.S. defense guarantee. Constitutional scholars noted this appeared to be a clear violation of the Foreign Emoluments Clause, which prohibits federal officials from accepting gifts from foreign states without congressional consent.',
+        details: 'Trump accepted a luxury Boeing 747 jet valued at approximately $400 million as a gift from the Qatari government. Shortly afterward, his administration quietly granted Qatar a U.S. defense guarantee. Constitutional scholars noted this appeared to be a clear violation of the Foreign Emoluments Clause, which prohibits federal officials from accepting gifts from foreign states without congressional consent.<br><br><a href="https://www.politifact.com/article/2025/may/13/Trump-Qatar-plane-unconstitutional-gift/" target="_blank">News Coverage</a>',
         category: 'Foreign'
       },
       {
@@ -959,7 +994,7 @@
         date: '2025-05-15',
         title: 'UAE $2B Deposit & AI Chips Deal',
         summary: 'UAE-linked firm deposits $2B in World Liberty Financial; two weeks later UAE gets advanced AI chips access.',
-        details: 'An investment firm linked to the United Arab Emirates\' ruling family deposited $2 billion into Trump\'s World Liberty Financial crypto platform. Two weeks later, the Trump administration granted the UAE access to hundreds of thousands of advanced AI computer chips, overriding national security concerns that the technology could be shared with China.',
+        details: 'An investment firm linked to the United Arab Emirates\' ruling family deposited $2 billion into Trump\'s World Liberty Financial crypto platform. Two weeks later, the Trump administration granted the UAE access to hundreds of thousands of advanced AI computer chips, overriding national security concerns that the technology could be shared with China.<br><br><a href="https://abcnews.go.com/Politics/white-house-faces-questions-uae-royals-investment-trump/story?id=129774262" target="_blank">News Coverage</a>',
         category: 'Foreign'
       },
       {
@@ -1211,7 +1246,7 @@
         date: '2025-06-01',
         title: 'Vulcan Elements Pentagon Loan',
         summary: 'Startup linked to Trump Jr.\'s VC firm receives $600M+ Pentagon loan; valuation grows tenfold.',
-        details: 'Vulcan Elements, a mining startup linked to Donald Trump Jr.\'s venture capital firm 1789 Capital, received a loan of over $600 million from the Department of Defense. The company\'s valuation increased tenfold after the deal was announced. Critics pointed to the clear conflict of interest given Trump Jr.\'s role at 1789 Capital.',
+        details: 'Vulcan Elements, a mining startup linked to Donald Trump Jr.\'s venture capital firm 1789 Capital, received a loan of over $600 million from the Department of Defense. The company\'s valuation increased tenfold after the deal was announced. Critics pointed to the clear conflict of interest given Trump Jr.\'s role at 1789 Capital.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'Family'
       },
       {
@@ -1220,7 +1255,7 @@
         date: '2025-06-10',
         title: 'Unusual Machines Drone Deal',
         summary: 'Drone company where Trump Jr. is shareholder sees stock surge 65% on Pentagon talks.',
-        details: 'Unusual Machines, a drone manufacturing company in which Donald Trump Jr. is both a shareholder and advisory board member, saw its stock price surge 65% following news that it was in contract negotiations with the Pentagon. The deal raised concerns about Trump family members personally profiting from defense contracts.',
+        details: 'Unusual Machines, a drone manufacturing company in which Donald Trump Jr. is both a shareholder and advisory board member, saw its stock price surge 65% following news that it was in contract negotiations with the Pentagon. The deal raised concerns about Trump family members personally profiting from defense contracts.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'Family'
       },
       {
@@ -1229,7 +1264,7 @@
         date: '2025-06-20',
         title: '$1.776 Billion "Slush Fund" Settlement',
         summary: 'Trump\'s DOJ negotiates taxpayer-funded settlement creating $1.776B fund for Trump allies.',
-        details: 'In one of the most heavily criticized scandals of the term, Trump sued the IRS for $10 billion over the leak of his tax returns. His own DOJ then negotiated a settlement creating a $1.776 billion "Anti-Weaponization Fund" — taxpayer money to be distributed to Trump allies, including potentially January 6 rioters. An addendum granted Trump, his family, and business associates permanent immunity from IRS audits and prosecution.',
+        details: 'In one of the most heavily criticized scandals of the term, Trump sued the IRS for $10 billion over the leak of his tax returns. His own DOJ then negotiated a settlement creating a $1.776 billion "Anti-Weaponization Fund" — taxpayer money to be distributed to Trump allies, including potentially January 6 rioters. An addendum granted Trump, his family, and business associates permanent immunity from IRS audits and prosecution.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'Legal'
       },
       {
@@ -1238,7 +1273,7 @@
         date: '2025-06-24',
         title: 'Stephen Miller\'s Palantir Stock & ICE No-Bid Contract',
         summary: 'Stephen Miller owned up to $250K in Palantir stock; ICE awarded Palantir a $30M no-bid surveillance contract.',
-        details: 'White House advisor Stephen Miller held up to $250,000 in Palantir stock while overseeing ICE, which awarded Palantir a $30 million no-bid contract for surveillance technology. The financial conflict raises serious ethics concerns given Miller\'s role in immigration policy. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        details: 'White House advisor Stephen Miller held up to $250,000 in Palantir stock while overseeing ICE, which awarded Palantir a $30 million no-bid contract for surveillance technology. The financial conflict raises serious ethics concerns given Miller\'s role in immigration policy. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage (Murphy Senate Speech)</a>',
         category: 'Conflict of Interest'
       },
       {
@@ -1247,7 +1282,7 @@
         date: '2025-07-01',
         title: 'Treasury Top Lawyer Resigns',
         summary: 'Treasury Department\'s top lawyer resigns in protest over the $1.776B slush fund deal.',
-        details: 'The Treasury Department\'s most senior career lawyer resigned in protest over the $1.776 billion settlement arrangement, calling it legally indefensible. The resignation underscored the extraordinary nature of the deal, which career government lawyers reportedly refused to sign off on.',
+        details: 'The Treasury Department\'s most senior career lawyer resigned in protest over the $1.776 billion settlement arrangement, calling it legally indefensible. The resignation underscored the extraordinary nature of the deal, which career government lawyers reportedly refused to sign off on.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'Legal'
       },
       {
@@ -1256,7 +1291,7 @@
         date: '2025-07-20',
         title: '35 Federal Judges Denounce Slush Fund',
         summary: '35 former federal judges file motion calling the $1.776B settlement "a fraud on the court."',
-        details: 'Thirty-five former federal judges — an unprecedented coalition — filed an amicus motion describing the $1.776 billion settlement as "a fraud on the court" and "an unprecedentedly fraudulent scheme." A sitting federal judge subsequently opened an inquiry into whether the DOJ and Trump\'s lawyers had committed fraud on the court.',
+        details: 'Thirty-five former federal judges — an unprecedented coalition — filed an amicus motion describing the $1.776 billion settlement as "a fraud on the court" and "an unprecedentedly fraudulent scheme." A sitting federal judge subsequently opened an inquiry into whether the DOJ and Trump\'s lawyers had committed fraud on the court.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'Legal'
       },
       {
@@ -1265,7 +1300,7 @@
         date: '2025-09-15',
         title: 'Trump Family Tax Fraud Amnesty',
         summary: 'Senator Whitehouse renews probe into slush fund addendum granting Trump family permanent IRS immunity.',
-        details: 'Senator Sheldon Whitehouse launched a renewed investigation into the addendum to the slush fund settlement that granted Trump, his family members, and business associates permanent immunity from IRS audits and prosecution for any prior tax offenses. The "forever binding" provision was described by tax law experts as having no legal precedent.',
+        details: 'Senator Sheldon Whitehouse launched a renewed investigation into the addendum to the slush fund settlement that granted Trump, his family members, and business associates permanent immunity from IRS audits and prosecution for any prior tax offenses. The "forever binding" provision was described by tax law experts as having no legal precedent.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'Legal'
       },
       {
@@ -1274,7 +1309,7 @@
         date: '2025-09-18',
         title: 'Trump Crypto Sold to Iran, Russia, North Korea Entities',
         summary: 'Trump made $57M selling crypto tokens to entities tied to regimes in North Korea, Iran, and Russia.',
-        details: 'President Trump\'s cryptocurrency ventures generated $57 million from token sales to entities linked to adversarial regimes in North Korea, Iran, and Russia — creating what critics described as a direct pipeline for foreign money flowing to a sitting president in violation of the Emoluments Clause. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        details: 'President Trump\'s cryptocurrency ventures generated $57 million from token sales to entities linked to adversarial regimes in North Korea, Iran, and Russia — creating what critics described as a direct pipeline for foreign money flowing to a sitting president in violation of the Emoluments Clause. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage (Murphy Senate Speech)</a>',
         category: 'Foreign'
       },
       {
@@ -1283,7 +1318,7 @@
         date: '2025-09-23',
         title: 'FBI Investigation Into Tom Homan Closed',
         summary: 'Border czar Tom Homan caught on video accepting $50K cash from undercover agents — investigation "made to go away."',
-        details: 'Tom Homan, Trump\'s border czar, was reportedly caught on video accepting $50,000 in cash from undercover agents in exchange for government contracts. The administration allegedly made the FBI investigation "go away." Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        details: 'Tom Homan, Trump\'s border czar, was reportedly caught on video accepting $50,000 in cash from undercover agents in exchange for government contracts. The administration allegedly made the FBI investigation "go away." Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage (Murphy Senate Speech)</a>',
         category: 'Abuse of Power'
       },
       {
@@ -1292,7 +1327,7 @@
         date: '2025-10-01',
         title: 'Powerus Drone Sales to Gulf States',
         summary: 'Company backed by Trump\'s sons sells drone interceptors to Persian Gulf countries.',
-        details: 'Powerus, a defense startup backed by Donald Trump Jr. and Eric Trump, began selling drone interceptor systems to Persian Gulf countries heavily dependent on U.S. military leadership under President Trump. Ethics experts noted that foreign governments could view purchases from Trump family-linked businesses as a means of securing favorable U.S. policy.',
+        details: 'Powerus, a defense startup backed by Donald Trump Jr. and Eric Trump, began selling drone interceptor systems to Persian Gulf countries heavily dependent on U.S. military leadership under President Trump. Ethics experts noted that foreign governments could view purchases from Trump family-linked businesses as a means of securing favorable U.S. policy.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'Family'
       },
       {
@@ -1310,7 +1345,7 @@
         date: '2025-10-15',
         title: 'White House Ballroom Donors Get $50B in Contracts',
         summary: 'Over half of donors to Trump\'s White House ballroom project received $50B+ in new or expanded federal contracts.',
-        details: 'An analysis revealed that more than half of publicly identified donors to Trump\'s White House ballroom renovation project received new or expanded federal contracts totaling over $50 billion, creating what critics called a direct pay-to-play pipeline. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        details: 'An analysis revealed that more than half of publicly identified donors to Trump\'s White House ballroom renovation project received new or expanded federal contracts totaling over $50 billion, creating what critics called a direct pay-to-play pipeline. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage (Murphy Senate Speech)</a>',
         category: 'Pay-to-Play'
       },
       {
@@ -1328,7 +1363,7 @@
         date: '2025-10-21',
         title: 'Changpeng Zhao',
         summary: 'Failure to maintain an effective anti-money laundering program',
-        details: 'Date: October 21, 2025<br><br>Offense: Failure to maintain an effective anti-money laundering program.<br><br><a href="https://www.justice.gov/pardon/media/1416576/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://apnews.com/article/trump-pardon-binance-changpeng-zhao-crypto-exchange-e1cb3fe516bc42b4c7ce5c107a280dc7" target="_blank">News Coverage</a>',
+        details: 'Date: October 21, 2025<br><br>Offense: Failure to maintain an effective anti-money laundering program.<br><br><a href="https://www.justice.gov/pardon/media/1416576/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       },
       {
@@ -1337,7 +1372,7 @@
         date: '2025-11-07',
         title: 'Glen Casada',
         summary: 'Conspiracy to defraud the United States; honest services wire fraud (four counts); use of a fictitious name...',
-        details: 'Date: November 7, 2025<br><br>Offense: Conspiracy to defraud the United States; honest services wire fraud (four counts); use of a fictitious name to carry out a fraud; conspiracy to commit money laundering; money laundering (eight counts).<br><br><a href="https://www.justice.gov/pardon/media/1417066/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://apnews.com/article/trump-pardons-strawberry-casada-2020-election-af03728f40655a23cfd5ee4688536600" target="_blank">News Coverage</a>',
+        details: 'Date: November 7, 2025<br><br>Offense: Conspiracy to defraud the United States; honest services wire fraud (four counts); use of a fictitious name to carry out a fraud; conspiracy to commit money laundering; money laundering (eight counts).<br><br><a href="https://www.justice.gov/pardon/media/1417066/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       },
       {
@@ -1346,7 +1381,7 @@
         date: '2025-11-07',
         title: 'Cade Cothren',
         summary: 'Conspiracy to defraud the United States; honest services wire fraud (six counts); use of fictitious name to...',
-        details: 'Date: November 7, 2025<br><br>Offense: Conspiracy to defraud the United States; honest services wire fraud (six counts); use of fictitious name to carry out unlawful business; conspiracy to commit money laundering; money laundering (seven counts).<br><br><a href="https://www.justice.gov/pardon/media/1417056/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://apnews.com/article/trump-pardons-strawberry-casada-2020-election-af03728f40655a23cfd5ee4688536600" target="_blank">News Coverage</a>',
+        details: 'Date: November 7, 2025<br><br>Offense: Conspiracy to defraud the United States; honest services wire fraud (six counts); use of fictitious name to carry out unlawful business; conspiracy to commit money laundering; money laundering (seven counts).<br><br><a href="https://www.justice.gov/pardon/media/1417056/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       },
       {
@@ -1355,7 +1390,7 @@
         date: '2025-11-07',
         title: 'Robert Henry Harshbarger, Jr.',
         summary: 'Introducing misbranded drugs into Interstate commerce; health care fraud',
-        details: 'Date: November 7, 2025<br><br>Offense: Introducing misbranded drugs into Interstate commerce; health care fraud.<br><br><a href="https://www.justice.gov/pardon/media/1417076/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://apnews.com/article/trump-pardons-strawberry-casada-2020-election-af03728f40655a23cfd5ee4688536600" target="_blank">News Coverage</a>',
+        details: 'Date: November 7, 2025<br><br>Offense: Introducing misbranded drugs into Interstate commerce; health care fraud.<br><br><a href="https://www.justice.gov/pardon/media/1417076/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       },
       {
@@ -1364,7 +1399,7 @@
         date: '2025-11-07',
         title: 'Troy Lake',
         summary: 'Conspiracy to violate the Clean Air Act',
-        details: 'Date: November 7, 2025<br><br>Offense: Conspiracy to violate the Clean Air Act.<br><br><a href="https://www.justice.gov/pardon/media/1417081/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://apnews.com/article/trump-pardons-strawberry-casada-2020-election-af03728f40655a23cfd5ee4688536600" target="_blank">News Coverage</a>',
+        details: 'Date: November 7, 2025<br><br>Offense: Conspiracy to violate the Clean Air Act.<br><br><a href="https://www.justice.gov/pardon/media/1417081/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       },
       {
@@ -1373,7 +1408,7 @@
         date: '2025-11-07',
         title: 'Michael McMahon',
         summary: 'Acting as an agent of a foreign government without prior notification to the Attorney General; conspiracy t...',
-        details: 'Date: November 7, 2025<br><br>Offense: Acting as an agent of a foreign government without prior notification to the Attorney General; conspiracy to engage in interstate stalking; stalking.<br><br><a href="https://www.justice.gov/pardon/media/1417071/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://apnews.com/article/trump-pardons-strawberry-casada-2020-election-af03728f40655a23cfd5ee4688536600" target="_blank">News Coverage</a>',
+        details: 'Date: November 7, 2025<br><br>Offense: Acting as an agent of a foreign government without prior notification to the Attorney General; conspiracy to engage in interstate stalking; stalking.<br><br><a href="https://www.justice.gov/pardon/media/1417071/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       },
       {
@@ -1382,7 +1417,7 @@
         date: '2025-11-07',
         title: 'Darryl Strawberry, Sr.',
         summary: 'Income tax evasion',
-        details: 'Date: November 7, 2025<br><br>Offense: Income tax evasion.<br><br><a href="https://www.justice.gov/pardon/media/1417061/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://apnews.com/article/trump-pardons-strawberry-casada-2020-election-af03728f40655a23cfd5ee4688536600" target="_blank">News Coverage</a>',
+        details: 'Date: November 7, 2025<br><br>Offense: Income tax evasion.<br><br><a href="https://www.justice.gov/pardon/media/1417061/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       },
       {
@@ -1391,7 +1426,7 @@
         date: '2025-11-07',
         title: 'Michelino Sunseri',
         summary: 'Leaving the Garnet Canyon Trail to use the shortcut of the Old Climber\'s Trail in violation of the Superin...',
-        details: 'Date: November 7, 2025<br><br>Offense: Leaving the Garnet Canyon Trail to use the shortcut of the Old Climber\'s Trail in violation of the Superintendent\'s 2024 Compendium.<br><br><a href="https://www.justice.gov/pardon/media/1417111/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://apnews.com/article/trump-pardons-strawberry-casada-2020-election-af03728f40655a23cfd5ee4688536600" target="_blank">News Coverage</a>',
+        details: 'Date: November 7, 2025<br><br>Offense: Leaving the Garnet Canyon Trail to use the shortcut of the Old Climber\'s Trail in violation of the Superintendent\'s 2024 Compendium.<br><br><a href="https://www.justice.gov/pardon/media/1417111/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       },
       {
@@ -1400,7 +1435,7 @@
         date: '2025-11-07',
         title: 'Coast Guard Bases Ordered to Sell Trump-Branded Products',
         summary: 'Trump ordered U.S. Coast Guard base markets to stock his personally branded wine and cider.',
-        details: 'The Trump administration ordered U.S. Coast Guard base commissaries and exchanges to stock Trump-branded wine and cider, using government retail outlets to directly boost the president\'s personal business revenue. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        details: 'The Trump administration ordered U.S. Coast Guard base commissaries and exchanges to stock Trump-branded wine and cider, using government retail outlets to directly boost the president\'s personal business revenue. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage (Murphy Senate Speech)</a>',
         category: 'Self-Dealing'
       },
       {
@@ -1418,7 +1453,7 @@
         date: '2025-11-14',
         title: 'Suzanne Kaye',
         summary: 'Interstate Communications - Threats',
-        details: 'Date: November 14, 2025<br><br>Offense: Interstate Communications - Threats.<br><br><a href="https://www.justice.gov/pardon/media/1418306/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://apnews.com/article/trump-pardon-daniel-edwin-wilson-firearms-capitol-riot-fdd10aaab22a8996a097704bea37b6ae" target="_blank">News Coverage</a>',
+        details: 'Date: November 14, 2025<br><br>Offense: Interstate Communications - Threats.<br><br><a href="https://www.justice.gov/pardon/media/1418306/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       },
       {
@@ -1427,7 +1462,7 @@
         date: '2025-11-14',
         title: 'Joseph Schwartz',
         summary: 'Willful failure to pay over employment taxes; failure to file the Annual 5500 Report',
-        details: 'Date: November 14, 2025<br><br>Offense: Willful failure to pay over employment taxes; failure to file the Annual 5500 Report.<br><br><a href="https://www.justice.gov/pardon/media/1418296/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://apnews.com/article/trump-pardon-daniel-edwin-wilson-firearms-capitol-riot-fdd10aaab22a8996a097704bea37b6ae" target="_blank">News Coverage</a>',
+        details: 'Date: November 14, 2025<br><br>Offense: Willful failure to pay over employment taxes; failure to file the Annual 5500 Report.<br><br><a href="https://www.justice.gov/pardon/media/1418296/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       },
       {
@@ -1436,7 +1471,7 @@
         date: '2025-11-14',
         title: 'Daniel Edwin Wilson',
         summary: 'Possession of a firearm by a prohibited person; possession of an unregistered firearm',
-        details: 'Date: November 14, 2025<br><br>Offense: Possession of a firearm by a prohibited person; possession of an unregistered firearm.<br><br><a href="https://www.justice.gov/pardon/media/1418291/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://apnews.com/article/trump-pardon-daniel-edwin-wilson-firearms-capitol-riot-fdd10aaab22a8996a097704bea37b6ae" target="_blank">News Coverage</a>',
+        details: 'Date: November 14, 2025<br><br>Offense: Possession of a firearm by a prohibited person; possession of an unregistered firearm.<br><br><a href="https://www.justice.gov/pardon/media/1418291/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       },
       {
@@ -1454,7 +1489,7 @@
         date: '2025-12-01',
         title: 'Juan Orlando Hernandez',
         summary: 'Conspiracy to import cocaine into the United States; possessing machine guns and destructive devices in fur...',
-        details: 'Date: December 1, 2025<br><br>Offense: Conspiracy to import cocaine into the United States; possessing machine guns and destructive devices in furtherance of the cocaine importation conspiracy; conspiracy to use and carry machine guns and destructive devices.<br><br><a href="https://www.justice.gov/pardon/media/1419806/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://apnews.com/article/trump-pardon-honduras-president-juan-orlando-hernandez-b831c2da84afd20e25730967b46a0e0b" target="_blank">News Coverage</a>',
+        details: 'Date: December 1, 2025<br><br>Offense: Conspiracy to import cocaine into the United States; possessing machine guns and destructive devices in furtherance of the cocaine importation conspiracy; conspiracy to use and carry machine guns and destructive devices.<br><br><a href="https://www.justice.gov/pardon/media/1419806/dl?inline" target="_blank">Pardon Warrant (DOJ)</a><br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       },
       {
@@ -1490,7 +1525,7 @@
         date: '2025-12-02',
         title: 'Nursing Home Staffing Rule Revoked After Donor Lunch',
         summary: 'Nursing home executives paid for a private lunch with Trump, then a staffing rule tied to mortality rates was rescinded.',
-        details: 'Nursing home industry executives paid for a private lunch with Trump and asked him to revoke a Biden-era staffing minimum rule. Research linked the staffing rule to lower patient mortality rates. Trump immediately ordered it rescinded after the lunch. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        details: 'Nursing home industry executives paid for a private lunch with Trump and asked him to revoke a Biden-era staffing minimum rule. Research linked the staffing rule to lower patient mortality rates. Trump immediately ordered it rescinded after the lunch. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage (Murphy Senate Speech)</a>',
         category: 'Pay-to-Play'
       },
       {
@@ -1499,7 +1534,7 @@
         date: '2025-12-05',
         title: 'Tina Peters',
         summary: '“For those offenses she has or may have committed or taken part in related to election integrity and securi...',
-        details: 'Date: December 5, 2025<br><br>Offense: “For those offenses she has or may have committed or taken part in related to election integrity and security during the period from January 1, 2020 through December 31, 2021”.<br><br><a href="https://apnews.com/article/trump-pardon-tina-peters-election-colorado-31f5a08ee35f6c174a2e9ff2ef3a1ff2" target="_blank">News Coverage</a>',
+        details: 'Date: December 5, 2025<br><br>Offense: “For those offenses she has or may have committed or taken part in related to election integrity and security during the period from January 1, 2020 through December 31, 2021”.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       },
       {
@@ -1724,7 +1759,7 @@
         date: '2026-02-03',
         title: 'Fraud Crackdown Targets Political Foes',
         summary: 'Trump administration fraud enforcement disproportionately targets Democratic-leaning states.',
-        details: 'A New York Times investigation revealed that the Trump administration\'s fraud enforcement efforts were disproportionately targeting states and organizations perceived as political opponents. Minnesota\'s SNAP and Medicaid programs faced intense scrutiny while similar issues in Republican-leaning states received little attention, suggesting politicized enforcement.',
+        details: 'A New York Times investigation revealed that the Trump administration\'s fraud enforcement efforts were disproportionately targeting states and organizations perceived as political opponents. Minnesota\'s SNAP and Medicaid programs faced intense scrutiny while similar issues in Republican-leaning states received little attention, suggesting politicized enforcement.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'Abuse of Power'
       },
       {
@@ -1733,7 +1768,7 @@
         date: '2026-02-10',
         title: 'Trump Blocks Detroit-Canada Bridge After Donor Meeting',
         summary: 'Bridge owner donated $1M for a meeting with Commerce Secretary Lutnick; within hours Trump blocked a competing bridge.',
-        details: 'The owner of an existing international bridge donated $1 million for a meeting with Commerce Secretary Howard Lutnick. Within hours of that meeting, Trump announced he would block the opening of a competing bridge connecting Detroit to Canada that was ready to open. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        details: 'The owner of an existing international bridge donated $1 million for a meeting with Commerce Secretary Howard Lutnick. Within hours of that meeting, Trump announced he would block the opening of a competing bridge connecting Detroit to Canada that was ready to open. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage (Murphy Senate Speech)</a>',
         category: 'Pay-to-Play'
       },
       {
@@ -1805,7 +1840,7 @@
         date: '2026-03-19',
         title: 'Corey Lewandowski\'s DHS Contractor Extortion Scheme',
         summary: 'Trump advisor Lewandowski demanded direct payments from DHS contractors for "protection" — those who refused lost contracts.',
-        details: 'Corey Lewandowski, a special advisor at the Department of Homeland Security, allegedly demanded direct payments from DHS contractors in exchange for "protection." Companies that refused to pay saw their DHS contracts dry up. The scheme was confirmed by a DHS employee. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        details: 'Corey Lewandowski, a special advisor at the Department of Homeland Security, allegedly demanded direct payments from DHS contractors in exchange for "protection." Companies that refused to pay saw their DHS contracts dry up. The scheme was confirmed by a DHS employee. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage (Murphy Senate Speech)</a>',
         category: 'Abuse of Power'
       },
       {
@@ -1814,7 +1849,7 @@
         date: '2026-04-05',
         title: 'DOJ Reverses Handgun Mail Ban, Benefiting Don Jr.\'s Company',
         summary: 'A 100-year-old ban on shipping handguns by mail was declared unconstitutional, clearing the way for Don Jr.\'s gun mail-order venture.',
-        details: 'Trump\'s DOJ suddenly declared unconstitutional a century-old ban on shipping handguns through the U.S. mail system. The ruling cleared the regulatory path for a company Donald Trump Jr. had invested in — which specialized in mail-order gun sales. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        details: 'Trump\'s DOJ suddenly declared unconstitutional a century-old ban on shipping handguns through the U.S. mail system. The ruling cleared the regulatory path for a company Donald Trump Jr. had invested in — which specialized in mail-order gun sales. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage (Murphy Senate Speech)</a>',
         category: 'Family'
       },
       {
@@ -1823,7 +1858,7 @@
         date: '2026-04-08',
         title: 'War Profiteering via Insider Trading on Prediction Markets',
         summary: '~$950M in bets placed hours before Trump announced an Iran ceasefire; oil dropped 15%, netting massive profits.',
-        details: 'Hours before Trump announced an Iran ceasefire, investors — likely with inside White House knowledge — placed approximately $950 million in bets on prediction markets that oil prices would fall. Oil dropped 15% after the announcement, generating massive profits for those with advance knowledge. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        details: 'Hours before Trump announced an Iran ceasefire, investors — likely with inside White House knowledge — placed approximately $950 million in bets on prediction markets that oil prices would fall. Oil dropped 15% after the announcement, generating massive profits for those with advance knowledge. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage (Murphy Senate Speech)</a>',
         category: 'Insider Trading'
       },
       {
@@ -1832,7 +1867,7 @@
         date: '2026-04-10',
         title: 'Trump Promises Blanket Pardons for "Everyone Near White House"',
         summary: 'Trump publicly declares "I will pardon everyone within 200 feet of the White House" — signaling total impunity.',
-        details: 'Trump explicitly stated: "I will pardon everyone within 200 feet of the White House" — an open declaration that those around him would face no legal consequences regardless of their actions. The statement was characterized as a green light for unchecked corruption within the administration. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        details: 'Trump explicitly stated: "I will pardon everyone within 200 feet of the White House" — an open declaration that those around him would face no legal consequences regardless of their actions. The statement was characterized as a green light for unchecked corruption within the administration. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage (Murphy Senate Speech)</a>',
         category: 'Abuse of Power'
       },
       {
@@ -1841,7 +1876,7 @@
         date: '2026-04-22',
         title: 'No-Bid $17M Contract for White House Fountains',
         summary: 'Trump gave a friend a no-bid $17M fountain contract — 5x the cost of a competitive bid (~$3M).',
-        details: 'Trump awarded a no-bid contract worth $17 million to a personal friend for refurbishing fountains near the White House. The National Park Service had planned to competitively bid the project at approximately one-fifth the cost (~$3 million). Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        details: 'Trump awarded a no-bid contract worth $17 million to a personal friend for refurbishing fountains near the White House. The National Park Service had planned to competitively bid the project at approximately one-fifth the cost (~$3 million). Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage (Murphy Senate Speech)</a>',
         category: 'Self-Dealing'
       },
       {
@@ -1850,7 +1885,7 @@
         date: '2026-05-01',
         title: 'Big Tobacco Buys Reversal of FDA Flavored Vape Ban',
         summary: 'Tobacco lobbyists made a $5M donation, secured a Trump lunch, and got FDA flavored vape regulations reversed.',
-        details: 'Tobacco industry lobbyists made a $5 million donation, secured a private lunch with Trump, and subsequently got FDA regulations blocking flavored vape products — which were marketed to children — reversed by the administration. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.',
+        details: 'Tobacco industry lobbyists made a $5 million donation, secured a private lunch with Trump, and subsequently got FDA regulations blocking flavored vape products — which were marketed to children — reversed by the administration. Source: Sen. Chris Murphy Senate floor speech, June 23, 2026.<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage (Murphy Senate Speech)</a>',
         category: 'Pay-to-Play'
       },
       {
@@ -1859,7 +1894,7 @@
         date: '2026-05-21',
         title: 'NYT: "Somewhere the Country Had Never Been"',
         summary: 'Major NYT op-ed declares Trump corruption has taken the country to unprecedented territory.',
-        details: 'The New York Times published a landmark op-ed analyzing the cumulative scale of Trump second-term corruption, concluding that the combination of crypto profiteering, foreign payments, oversight dismantling, and the slush fund scheme represented a level of self-dealing "the country had never been before." The piece noted $2.25 billion in realized profits and up to $9.72 billion including unrealized gains.',
+        details: 'The New York Times published a landmark op-ed analyzing the cumulative scale of Trump second-term corruption, concluding that the combination of crypto profiteering, foreign payments, oversight dismantling, and the slush fund scheme represented a level of self-dealing "the country had never been before." The piece noted $2.25 billion in realized profits and up to $9.72 billion including unrealized gains.<br><br><a href="https://www.nytimes.com/2026/05/21/opinion/corruption-trump-slush-fund.html" target="_blank">News Coverage</a>',
         category: 'Analysis'
       },
       {
@@ -1868,7 +1903,7 @@
         date: '2026-06-04',
         title: 'Stephen E. Buyer',
         summary: 'Securities fraud (four counts)',
-        details: 'Date: June 4, 2026<br><br>Offense: Securities fraud (four counts).<br><br><a href="https://apnews.com/article/trump-pardon-stephen-buyer-insider-trading-61c67cf2937e8ff57663c3d7645b9f3e" target="_blank">News Coverage</a>',
+        details: 'Date: June 4, 2026<br><br>Offense: Securities fraud (four counts).<br><br><a href="https://www.murphy.senate.gov/newsroom/press-releases/murphy-details-unprecedented-corruption-of-trump-white-house-over-the-last-500-days" target="_blank">News Coverage</a>',
         category: 'pardon'
       }
     ];
@@ -1878,15 +1913,61 @@
     const CONFIG = {
       startDate: new Date('2025-01-01'),
       endDate: new Date('2026-07-05'),
-      corruptionLineY: 130,
-      pardonsLineY: 1200,
-      rulerY: 1360,
+      totalLineY: 220,
+      corruptionLineY: 240,
+      pardonsLineY: 1310,
+      rulerY: 1470,
       markerBaseHeight: 28,
       markerStaggerStep: 30,
       clutterThreshold: 260,
       leftPadding: 60,
       rightPadding: 40
     };
+
+    // Dollar amounts (in millions) for corruption events
+    const CORRUPTION_DOLLARS = {
+      'c01': 635,    // $TRUMP coin disclosed income
+      'c04': 594,    // World Liberty Financial
+      'c07': 5,      // Crypto donations to inaugural fund (min)
+      'c10': 400,    // Qatar Boeing 747
+      'c11': 2500,   // UAE $2B deposit + $500M stake
+      'c12': 600,    // Vulcan Elements Pentagon loan
+      'c14': 1776,   // $1.776B slush fund
+      'c22': 5,      // Pilgrim's Pride donation
+      'c23': 30,     // Palantir ICE contract
+      'c24': 57,     // Crypto sold to adversaries
+      'c25': 0.05,   // Tom Homan $50K cash
+      'c26': 50000,  // Ballroom donors $50B contracts
+      'c29': 1,      // Detroit bridge donation
+      'c32': 950,    // Prediction market bets
+      'c34': 17,     // Fountain contract
+      'c35': 5,      // Big Tobacco donation
+    };
+
+    // Category colors evenly spaced around the color wheel
+    const CATEGORY_HUES = {
+      'FACE Act / Clinic': 0,
+      'Drug Offenses': 21,
+      'Bribery/Corruption': 42,
+      'Other': 64,
+      'Securities Fraud': 85,
+      'Money Laundering': 106,
+      'Fraud': 127,
+      'Theft/Robbery': 148,
+      'Obstruction': 169,
+      'Firearms/Weapons': 191,
+      'Tax Offenses': 212,
+      'Murder/Manslaughter': 233,
+      'Environmental': 254,
+      'Stalking/Threats': 275,
+      'Conspiracy': 296,
+      'Jan 6 / Election': 318,
+      'Perjury': 339,
+    };
+    function catColor(cat) {
+      const h = CATEGORY_HUES[cat] || 0;
+      return 'hsl(' + h + ', 65%, 55%)';
+    }
 
     // ── STATE ───────────────────────────────────────────────────
 
@@ -1915,11 +1996,13 @@
     function init() {
       computeLayout();
       renderLines();
+      renderTotalLine();
       renderRuler();
       computePositions();
       computeStaggering();
       renderMarkers();
       renderLegend();
+      renderCorruptionList();
       bindEvents();
       updateScrollHint();
     }
@@ -2020,7 +2103,8 @@
       list.innerHTML = sorted.map(([cat, data]) =>
         '<div class="legend-category" data-cat="' + cat + '">' +
           '<div class="legend-header">' +
-            '<span>' + cat + '</span><span class="legend-count">' + data.count + '</span>' +
+            '<span><span class="legend-swatch" style="background:' + catColor(cat) + '"></span>' + cat + '</span>' +
+            '<span class="legend-count">' + data.count + '</span>' +
           '</div>' +
           '<div class="legend-sublist">' +
             data.entries.map(e =>
@@ -2045,7 +2129,7 @@
         });
       });
 
-      // Clicking a name scrolls to that marker
+      // Clicking a name navigates and opens the card
       list.querySelectorAll('.legend-sublist div[data-name]').forEach(div => {
         div.addEventListener('click', function(e) {
           e.stopPropagation();
@@ -2054,8 +2138,8 @@
             l => l.textContent === name
           );
           if (marker) {
-            marker.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-            marker.click();
+            const eventId = marker.closest('.marker').getAttribute('data-event-id');
+            navigateAndOpen(eventId);
           }
         });
       });
@@ -2072,11 +2156,114 @@
       });
     }
 
+    // Law index mappings for corruption events (keyword → law index)
+    const CORRUPTION_LAWS = [
+      'Art. I, §9, Cl. 8 (Foreign Emoluments Clause)',
+      'Art. II, §2, Cl. 1 (Pardon Power)',
+      '18 USC § 201 (Bribery of Public Officials)',
+      '18 USC § 208 (Conflicts of Interest)',
+      '18 USC § 371 (Conspiracy to Defraud the US)',
+      '18 USC § 1348 (Securities/Commodities Fraud)',
+      '18 USC § 1505 (Obstruction of Proceedings)',
+      '18 USC § 1510 (Obstruction of Investigations)',
+      '18 USC § 1715 (Firearms - Nonmailable)',
+      '18 USC § 1951 (Hobbs Act - Extortion)',
+      '26 USC § 6103 (Tax Return Confidentiality)',
+      '26 USC § 7121 (Closing Agreements)',
+      '26 USC § 7213 (Unauthorized Tax Disclosure)',
+      '26 USC § 7803 (IRS Authority)',
+      '31 USC § 1301 (Appropriations - Purpose Statute)',
+      '41 USC § 3304 (Competition Requirements)',
+      '42 USC § 1395i-3 (Nursing Home Requirements)',
+      '5 USC § 3 note (Inspector General Act)',
+      '5 USC App. § 101 (STOCK Act)',
+      '5 USC App. § 401 (Ethics in Government Act)',
+      '5 CFR § 2635.101 (Ethics Standards)',
+      '5 CFR § 2635.702 (Public Office for Private Gain)',
+      '28 CFR § 0.39 (Public Integrity Section)',
+    ];
+
+    const LAW_COLORS = {};
+    CORRUPTION_LAWS.forEach((law, i) => {
+      LAW_COLORS[law] = 'hsl(' + (i * 360 / CORRUPTION_LAWS.length).toFixed(0) + ', 60%, 55%)';
+    });
+
+    function getCorruptionLawIndices(details, title) {
+      const text = (details + ' ' + title).toLowerCase();
+      const found = [];
+      if (text.includes('qatar') || text.includes('emoluments') || text.includes('foreign gift') || text.includes('boeing 747') || (text.includes('foreign') && text.includes('deposit')) || (text.includes('crypto') && (text.includes('iran') || text.includes('north korea') || text.includes('russia')))) found.push(0);
+      if (text.includes('blanket pardon') || text.includes('pardon everyone')) found.push(1);
+      if (text.includes('bribe') || text.includes('salmonella') || text.includes('ballroom') || text.includes('bridge') && text.includes('detroit') || text.includes('fda') || text.includes('tobacco') || text.includes('vape') || text.includes('nursing home') && text.includes('staffing') || text.includes('coast guard') && text.includes('wine')) found.push(2);
+      if (text.includes('palantir') || text.includes('stephen miller') && text.includes('stock') || text.includes('vulcan') || text.includes('drone') && (text.includes('jr') || text.includes('trump'))) found.push(3);
+      if (text.includes('slush fund') || text.includes('$1.776')) found.push(4);
+      if (text.includes('prediction market') || text.includes('insider trading') || text.includes('oil') && text.includes('bet')) found.push(5);
+      if (text.includes('fbi') && text.includes('home') || text.includes('homan')) found.push(6);
+      if (text.includes('investigation') && (text.includes('made to go away') || text.includes('closed'))) found.push(7);
+      if (text.includes('handgun') || text.includes('gun mail')) found.push(8);
+      if (text.includes('lewandowski') || text.includes('extortion') && text.includes('dhs')) found.push(9);
+      if (text.includes('irs') && (text.includes('leaked to ice') || text.includes('taxpayer data'))) found.push(10);
+      if (text.includes('tax fraud amnesty') || text.includes('tax immunity')) found.push(11);
+      if (text.includes('leak') && text.includes('taxpayer')) found.push(12);
+      if (text.includes('direct file') || text.includes('tax prep')) found.push(13);
+      if (text.includes('slush fund') || text.includes('$1.776')) found.push(14);
+      if (text.includes('no-bid') || text.includes('fountain') || text.includes('$17m') || text.includes('palantir') || text.includes('no-bid contract')) found.push(15);
+      if (text.includes('nursing home') && text.includes('staffing')) found.push(16);
+      if (text.includes('inspector general') || text.includes('ig ') || text.includes('igs')) found.push(17);
+      if (text.includes('sti') || text.includes('stock act') || text.includes('prediction market')) found.push(18);
+      if (text.includes('government ethics') || text.includes('oge') || text.includes('ethics director')) found.push(19);
+      if (text.includes('blanche') || text.includes('crypto enforcement') || text.includes('fraud crackdown') && text.includes('political')) found.push(20);
+      if (text.includes('meme coin') || text.includes('$trump') || text.includes('sec drop') || (text.includes('crypto cases') && text.includes('dismiss')) || text.includes('qatar') || text.includes('emoluments')) found.push(21);
+      if (text.includes('public integrity') && text.includes('gutted')) found.push(22);
+      return [...new Set(found)];
+    }
+
+    function renderCorruptionList() {
+      const corruptionEvents = EVENTS
+        .filter(e => e.line === 'corruption' && CORRUPTION_DOLLARS[e.id])
+        .map(e => ({ title: e.title, amount: CORRUPTION_DOLLARS[e.id], date: e.date, id: e.id, details: e.details }))
+        .sort((a, b) => b.amount - a.amount);
+
+      const list = document.getElementById('corruption-list');
+      list.innerHTML = corruptionEvents.map(e => {
+        const amtStr = e.amount >= 1000 ? '$' + (e.amount/1000).toFixed(1) + 'B'
+          : e.amount >= 1 ? '$' + Math.round(e.amount) + 'M'
+          : '$' + (e.amount*1000).toFixed(0) + 'K';
+        const lawIndices = getCorruptionLawIndices(e.details, e.title);
+        const swatches = lawIndices.map(i => {
+          const c = LAW_COLORS[CORRUPTION_LAWS[i]];
+          return '<span class="law-dot" style="background:' + c + '" title="' + CORRUPTION_LAWS[i].replace(/"/g, '&quot;') + '"></span>';
+        }).join('');
+        return '<div class="corr-item" data-id="' + e.id + '">' +
+          '<span class="corr-name">' + e.title + '</span>' +
+          '<span class="corr-swatches">' + swatches + '</span>' +
+          '<span class="corr-amount">' + amtStr + '</span>' +
+        '</div>';
+      }).join('');
+
+      // Click to navigate and open corruption card
+      list.querySelectorAll('.corr-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          navigateAndOpen(id);
+        });
+      });
+
+      // Legal offenses legend
+      const legendDiv = document.getElementById('corruption-legend');
+      legendDiv.innerHTML = CORRUPTION_LAWS.map((law, i) => {
+        const color = LAW_COLORS[law];
+        return '<div class="law-item">' +
+          '<span class="law-swatch" style="background:' + color + '"></span>' +
+          law +
+        '</div>';
+      }).join('');
+    }
+
     function computeLayout() {
       const totalDays = (CONFIG.endDate - CONFIG.startDate) / (1000 * 60 * 60 * 24);
       const minWidth = Math.max(window.innerWidth, 1800);
       pixelsPerDay = Math.max(15, Math.ceil(totalDays / window.innerWidth * 18));
-      timelineWidth = Math.max(minWidth, totalDays * pixelsPerDay + CONFIG.leftPadding + CONFIG.rightPadding);
+      timelineWidth = Math.max(minWidth, totalDays * pixelsPerDay + CONFIG.leftPadding + CONFIG.rightPadding + 200);
       content.style.width = timelineWidth + 'px';
     }
 
@@ -2100,6 +2287,205 @@
       pl.style.top = CONFIG.pardonsLineY + 'px';
       pl.innerHTML = '<span class="line-label">PARDONS: ' + pardonCount + '</span>';
       linesLayer.appendChild(pl);
+    }
+
+    // ── RENDER TOTAL CORRUPTION COUNTER LINE ────────────────────
+
+    function renderTotalLine() {
+      const corruptionEvents = EVENTS
+        .filter(e => e.line === 'corruption' && CORRUPTION_DOLLARS[e.id])
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      if (corruptionEvents.length === 0) return;
+
+      // Compute running totals
+      const steps = [];
+      let runningTotal = 0;
+      steps.push({ x: CONFIG.leftPadding, total: 0 });
+
+      corruptionEvents.forEach(e => {
+        runningTotal += CORRUPTION_DOLLARS[e.id];
+        steps.push({ x: dateToX(e.date), total: runningTotal, title: e.title, amount: CORRUPTION_DOLLARS[e.id] });
+      });
+
+      steps.push({ x: dateToX('2026-07-05'), total: runningTotal });
+
+      const svgH = 200;
+      const padBottom = 20;
+      const padTop = 30;
+      const chartH = svgH - padTop - padBottom;
+      const maxDollars = runningTotal;
+      const svgTop = CONFIG.corruptionLineY - svgH - 5;
+
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('style', 'position:absolute;top:' + svgTop + 'px;left:0;z-index:5;overflow:visible;pointer-events:none;');
+      svg.style.width = timelineWidth + 'px';
+      svg.style.height = svgH + 'px';
+
+      // Baseline at $0
+      const baselineY = svgH - padBottom;
+      const bl = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      bl.setAttribute('x1', CONFIG.leftPadding);
+      bl.setAttribute('y1', baselineY);
+      bl.setAttribute('x2', steps[steps.length - 1].x + 100);
+      bl.setAttribute('y2', baselineY);
+      bl.setAttribute('stroke', '#555');
+      bl.setAttribute('stroke-width', '1');
+      bl.setAttribute('stroke-dasharray', '4,4');
+      svg.appendChild(bl);
+
+      // $0 label
+      const zl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      zl.setAttribute('x', CONFIG.leftPadding - 4);
+      zl.setAttribute('y', baselineY + 3);
+      zl.setAttribute('fill', '#666');
+      zl.setAttribute('font-size', '8');
+      zl.setAttribute('font-family', 'monospace');
+      zl.setAttribute('text-anchor', 'end');
+      zl.textContent = '$0';
+      svg.appendChild(zl);
+
+      // Dashed horizontal grid lines at dollar thresholds
+      const gridSteps = [10000, 20000, 30000, 40000, 50000]; // $10B, $20B, etc. in millions
+      gridSteps.forEach(gs => {
+        if (gs > maxDollars) return;
+        const gy = baselineY - ((gs / maxDollars) * chartH);
+        const gl = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        gl.setAttribute('x1', CONFIG.leftPadding);
+        gl.setAttribute('y1', gy);
+        gl.setAttribute('x2', steps[steps.length - 1].x + 100);
+        gl.setAttribute('y2', gy);
+        gl.setAttribute('stroke', '#444');
+        gl.setAttribute('stroke-width', '0.5');
+        gl.setAttribute('stroke-dasharray', '3,5');
+        svg.appendChild(gl);
+
+        // Invisible wider hover line with instant tooltip
+        const hoverLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        hoverLine.setAttribute('x1', CONFIG.leftPadding);
+        hoverLine.setAttribute('y1', gy);
+        hoverLine.setAttribute('x2', steps[steps.length - 1].x + 100);
+        hoverLine.setAttribute('y2', gy);
+        hoverLine.setAttribute('stroke', 'transparent');
+        hoverLine.setAttribute('stroke-width', '12');
+        hoverLine.setAttribute('pointer-events', 'stroke');
+        hoverLine.setAttribute('cursor', 'help');
+        const tip = document.getElementById('chart-tooltip');
+        hoverLine.addEventListener('mouseenter', (e) => {
+          tip.textContent = '$' + (gs/1000) + 'B in Corruption';
+          tip.classList.add('visible');
+        });
+        hoverLine.addEventListener('mousemove', (e) => {
+          tip.style.left = (e.clientX + 12) + 'px';
+          tip.style.top = (e.clientY - 28) + 'px';
+        });
+        hoverLine.addEventListener('mouseleave', () => tip.classList.remove('visible'));
+        svg.appendChild(hoverLine);
+
+        const glText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        glText.setAttribute('x', CONFIG.leftPadding - 4);
+        glText.setAttribute('y', gy + 3);
+        glText.setAttribute('fill', '#555');
+        glText.setAttribute('font-size', '8');
+        glText.setAttribute('font-family', 'monospace');
+        glText.setAttribute('text-anchor', 'end');
+        glText.textContent = '$' + (gs/1000) + 'B';
+        svg.appendChild(glText);
+      });
+
+      // Build stepped path — line goes UP as total grows
+      let pathD = '';
+      let prevX = steps[0].x;
+      let prevY = baselineY; // bottom
+
+      for (let i = 1; i < steps.length; i++) {
+        const step = steps[i];
+        const y = baselineY - ((step.total / maxDollars) * chartH);
+        pathD += ' M' + prevX + ',' + prevY;
+        pathD += ' L' + step.x + ',' + prevY;  // horizontal
+        pathD += ' L' + step.x + ',' + y;       // vertical step up
+        prevX = step.x;
+        prevY = y;
+      }
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', pathD);
+      path.setAttribute('stroke', '#f39c12');
+      path.setAttribute('stroke-width', '1');
+      path.setAttribute('fill', 'none');
+      svg.appendChild(path);
+
+      // Invisible wider hover path for the total line
+      const hoverPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      hoverPath.setAttribute('d', pathD);
+      hoverPath.setAttribute('stroke', 'transparent');
+      hoverPath.setAttribute('stroke-width', '10');
+      hoverPath.setAttribute('fill', 'none');
+      hoverPath.setAttribute('pointer-events', 'stroke');
+      hoverPath.setAttribute('cursor', 'help');
+      const tip2 = document.getElementById('chart-tooltip');
+      hoverPath.addEventListener('mouseenter', () => {
+        tip2.textContent = 'Cumulative Corruption Total';
+        tip2.classList.add('visible');
+      });
+      hoverPath.addEventListener('mousemove', (e) => {
+        tip2.style.left = (e.clientX + 12) + 'px';
+        tip2.style.top = (e.clientY - 28) + 'px';
+      });
+      hoverPath.addEventListener('mouseleave', () => tip2.classList.remove('visible'));
+      svg.appendChild(hoverPath);
+
+      // Dollar labels at each step
+      steps.forEach((step, i) => {
+        if (i === 0 || step.total === 0) return;
+        const y = baselineY - ((step.total / maxDollars) * chartH);
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', step.x + 4);
+        text.setAttribute('y', y - 5);
+        text.setAttribute('fill', '#e67e22');
+        text.setAttribute('font-size', '8');
+        text.setAttribute('font-family', 'monospace');
+        const amt = step.amount;
+        text.textContent = '+$' + (amt >= 1000 ? (amt/1000).toFixed(1)+'B' : amt >= 1 ? Math.round(amt)+'M' : (amt*1000).toFixed(0)+'K');
+        svg.appendChild(text);
+
+        // Invisible hover rect for step label
+        const hr = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        hr.setAttribute('x', step.x);
+        hr.setAttribute('y', y - 12);
+        hr.setAttribute('width', '60');
+        hr.setAttribute('height', '14');
+        hr.setAttribute('fill', 'transparent');
+        hr.setAttribute('pointer-events', 'all');
+        hr.setAttribute('cursor', 'help');
+        const tip3 = document.getElementById('chart-tooltip');
+        const stepText = step.title + ' (+$' + (amt >= 1000 ? (amt/1000).toFixed(1)+'B' : amt >= 1 ? Math.round(amt)+'M' : (amt*1000).toFixed(0)+'K') + ')';
+        hr.addEventListener('mouseenter', () => {
+          tip3.textContent = stepText;
+          tip3.classList.add('visible');
+        });
+        hr.addEventListener('mousemove', (e) => {
+          tip3.style.left = (e.clientX + 12) + 'px';
+          tip3.style.top = (e.clientY - 28) + 'px';
+        });
+        hr.addEventListener('mouseleave', () => tip3.classList.remove('visible'));
+        svg.appendChild(hr);
+      });
+
+      // Total on the right
+      const totalLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      const endY = (svgH - 4) - ((runningTotal / maxDollars) * chartH);
+      totalLabel.setAttribute('x', steps[steps.length - 1].x + 8);
+      totalLabel.setAttribute('y', endY);
+      totalLabel.setAttribute('fill', '#f39c12');
+      totalLabel.setAttribute('font-size', '10');
+      totalLabel.setAttribute('font-weight', 'bold');
+      totalLabel.setAttribute('font-family', 'monospace');
+      const totalStr = runningTotal >= 1000 ? '$' + (runningTotal/1000).toFixed(1) + 'B' : '$' + Math.round(runningTotal) + 'M';
+      totalLabel.textContent = totalStr;
+      svg.appendChild(totalLabel);
+
+      linesLayer.appendChild(svg);
     }
 
     // ── RENDER RULER ────────────────────────────────────────────
@@ -2253,9 +2639,29 @@
         label.textContent = evt.title;
         if (isCorruption) {
           label.style.top = evt.markerHeight + 'px';
+          // Split background into colored segments for each law broken
+          const lawIdx = getCorruptionLawIndices(evt.details, evt.title);
+          if (lawIdx.length > 0) {
+            const segments = lawIdx.map((li, i) => {
+              const pct = (i / lawIdx.length * 100).toFixed(1);
+              const nextPct = ((i + 1) / lawIdx.length * 100).toFixed(1);
+              const c = LAW_COLORS[CORRUPTION_LAWS[li]];
+              return c + ' ' + pct + '%, ' + c + ' ' + nextPct + '%';
+            });
+            label.style.background = 'linear-gradient(to right, ' + segments.join(', ') + ')';
+            label.style.borderColor = '#555';
+            label.style.color = '#fff';
+            label.style.textShadow = '0 0 4px #000, 0 0 4px #000';
+          }
         } else {
           label.style.bottom = evt.markerHeight + 'px';
-          label.setAttribute('data-cat', evt._category || categorizePardon(evt.details));
+          const cat = evt._category || categorizePardon(evt.details);
+          label.setAttribute('data-cat', cat);
+          const c = catColor(cat);
+          label.style.background = c.replace('55%)', '12%)');
+          label.style.borderColor = c.replace('55%)', '40%)');
+          label.style.color = c;
+          stem.style.background = c;
         }
         label.style.transform = 'translateX(-50%)';
 
@@ -2273,37 +2679,59 @@
     function openCard(evt, markerEl) {
       const containerRect = container.getBoundingClientRect();
       const scrollLeft = container.scrollLeft;
-      const viewWidth = containerRect.width;
-      const cardWidth = detailCard.offsetWidth || 340;
-
+      const scrollTop = container.scrollTop;
+      const viewW = containerRect.width;
+      const viewH = containerRect.height;
+      const CARD_W = 340;
       const LABEL_W = 120;
       const LABEL_H = 16;
+
       const isCorruption = evt.line === 'corruption';
       const lineY = isCorruption ? CONFIG.corruptionLineY : CONFIG.pardonsLineY;
 
-      // Anchor card at bottom-right corner of the clicked label
+      // All in content coordinates
       const labelRight = evt.x + LABEL_W / 2;
       const labelBottom = isCorruption
         ? lineY + evt.markerHeight + LABEL_H
         : lineY - evt.markerHeight;
 
-      let cardX = labelRight - scrollLeft + 8;
+      // Place card to the right of label
+      let cardX = labelRight + 8;
       let cardY = labelBottom;
 
-      // Clamp to viewport
-      if (cardX + cardWidth > scrollLeft + viewWidth - 10) {
-        cardX = labelRight - scrollLeft - cardWidth - 8;
+      // Check if card fits to the right — if not, place to the left
+      if (cardX + CARD_W - scrollLeft > viewW - 10) {
+        cardX = evt.x - LABEL_W / 2 - CARD_W - 8;
       }
-      cardX = Math.max(scrollLeft + 10, cardX);
+      // Check if card is left of viewport
+      if (cardX - scrollLeft < 10) {
+        cardX = scrollLeft + 10;
+      }
 
       detailCard.style.left = cardX + 'px';
       detailCard.style.top = cardY + 'px';
 
+      // Populate content so we can measure real height
       cardDate.textContent = formatDate(evt.date);
       cardCategory.textContent = evt.line.toUpperCase();
       cardCategory.className = 'card-category ' + evt.line;
       cardTitle.textContent = evt.title;
-      cardBody.innerHTML = evt.details + getUSCLinks(evt.details);
+      if (evt.line === 'pardon') {
+        cardBody.innerHTML = evt.details + getUSCLinks(evt.details);
+      } else {
+        cardBody.innerHTML = evt.details + getCorruptionLawLinks(evt.details, evt.title);
+      }
+
+      // Now measure actual card height and adjust scroll
+      const actualCardH = detailCard.offsetHeight;
+      const cardBottom = cardY + actualCardH;
+
+      if (cardBottom - scrollTop > viewH - 10) {
+        container.scrollTop = cardBottom - viewH + 20;
+      }
+      if (cardY - scrollTop < 10) {
+        container.scrollTop = Math.max(0, cardY - 20);
+      }
 
       detailCard.classList.add('expanded');
       currentOpenId = evt.id;
@@ -2317,6 +2745,159 @@
       detailCard.classList.remove('expanded');
       currentOpenId = null;
       document.querySelectorAll('.marker.active').forEach(m => m.classList.remove('active'));
+    }
+
+    function navigateAndOpen(eventId) {
+      const evt = renderedEvents.find(e => e.id === eventId);
+      if (!evt) return;
+      const marker = document.querySelector('.marker[data-event-id="' + eventId + '"]');
+      if (!marker) return;
+
+      const isCorruption = evt.line === 'corruption';
+      const lineY = isCorruption ? CONFIG.corruptionLineY : CONFIG.pardonsLineY;
+      const labelBottom = isCorruption
+        ? lineY + evt.markerHeight + 16
+        : lineY - evt.markerHeight;
+      const labelCenterX = evt.x;
+
+      // Scroll to center the label in the viewport (no card offset yet)
+      const viewW = container.clientWidth;
+      const viewH = container.clientHeight;
+      container.scrollTo({
+        left: Math.max(0, labelCenterX - viewW / 2),
+        top: Math.max(0, labelBottom - viewH * 0.4),
+        behavior: 'smooth'
+      });
+
+      // Open card after scroll completes, then micro-adjust if needed
+      setTimeout(() => {
+        openCard(evt, marker);
+      }, 400);
+    }
+
+    function getCorruptionLawLinks(details, title) {
+      const text = (details + ' ' + title).toLowerCase();
+      const links = [];
+      const seen = new Set();
+      const add = (label, url) => {
+        if (!seen.has(label)) { seen.add(label); links.push({ label, url }); }
+      };
+
+      // Emoluments Clause violations
+      if (text.includes('qatar') || text.includes('emoluments') || text.includes('foreign gift') || text.includes('boeing 747'))
+        add('Art. I, §9, Cl. 8 (Foreign Emoluments Clause)', 'https://constitution.congress.gov/browse/essay/artI-S9-C8-1/ALDE_00000035/');
+      if (text.includes('uae') || text.includes('saudi') || text.includes('foreign') && text.includes('deposit'))
+        add('Art. I, §9, Cl. 8 (Foreign Emoluments Clause)', 'https://constitution.congress.gov/browse/essay/artI-S9-C8-1/ALDE_00000035/');
+
+      // Crypto-related
+      if (text.includes('crypto') && (text.includes('sold to') || text.includes('iran') || text.includes('north korea') || text.includes('russia')))
+        add('Art. I, §9, Cl. 8 (Foreign Emoluments Clause)', 'https://constitution.congress.gov/browse/essay/artI-S9-C8-1/ALDE_00000035/');
+      if (text.includes('meme coin') || text.includes('$trump'))
+        add('5 CFR § 2635.702 (Use of Public Office for Private Gain)', 'https://www.law.cornell.edu/cfr/text/5/2635.702');
+      if (text.includes('sec drop') || text.includes('crypto cases') && text.includes('dismiss'))
+        add('5 CFR § 2635.702 (Use of Public Office for Private Gain)', 'https://www.law.cornell.edu/cfr/text/5/2635.702');
+
+      // Inspector General / Oversight
+      if (text.includes('inspector general') || text.includes('ig ') || text.includes('igs'))
+        add('5 USC § 3 note (Inspector General Act of 1978)', 'https://www.law.cornell.edu/uscode/text/5a/compactact-95-452');
+      if (text.includes('government ethics') || text.includes('oge') || text.includes('ethics director'))
+        add('5 USC App. § 401 (Ethics in Government Act)', 'https://www.law.cornell.edu/uscode/text/5a/compactedition-iv');
+      if (text.includes('public integrity') && text.includes('gutted'))
+        add('28 CFR § 0.39 (Public Integrity Section)', 'https://www.law.cornell.edu/cfr/text/28/0.39');
+
+      // IRS / Tax
+      if (text.includes('irs') && text.includes('leaked to ice'))
+        add('26 USC § 6103 (Confidentiality of Tax Returns)', 'https://www.law.cornell.edu/uscode/text/26/6103');
+      if (text.includes('direct file') || text.includes('tax prep'))
+        add('26 USC § 7803 (Taxpayer Advocate / IRS Authority)', 'https://www.law.cornell.edu/uscode/text/26/7803');
+      if (text.includes('tax fraud amnesty') || text.includes('tax immunity'))
+        add('26 USC § 7121 (Closing Agreements)', 'https://www.law.cornell.edu/uscode/text/26/7121');
+
+      // Fraud / Bribery / Self-Dealing
+      if (text.includes('bribe') || text.includes('quid pro quo') || text.includes('pay-to-play') || text.includes('pay to play'))
+        add('18 USC § 201 (Bribery of Public Officials)', 'https://www.law.cornell.edu/uscode/text/18/201');
+      if (text.includes('slush fund') || text.includes('$1.776'))
+        add('31 USC § 1301 (Appropriations - Purpose Statute)', 'https://www.law.cornell.edu/uscode/text/31/1301');
+      if (text.includes('slush fund') || text.includes('settlement') || text.includes('fraud on the court'))
+        add('18 USC § 371 (Conspiracy to Defraud the US)', 'https://www.law.cornell.edu/uscode/text/18/371');
+      if (text.includes('leak') && text.includes('taxpayer'))
+        add('26 USC § 7213 (Unauthorized Disclosure of Tax Info)', 'https://www.law.cornell.edu/uscode/text/26/7213');
+
+      // Contracts / Procurement
+      if (text.includes('pentagon loan') || text.includes('defense contract') || text.includes('vulcan'))
+        add('18 USC § 208 (Conflicts of Interest - Financial)', 'https://www.law.cornell.edu/uscode/text/18/208');
+      if (text.includes('drone') && (text.includes('jr') || text.includes('trump') || text.includes('stock')))
+        add('18 USC § 208 (Conflicts of Interest - Financial)', 'https://www.law.cornell.edu/uscode/text/18/208');
+      if (text.includes('no-bid') || text.includes('fountain') || text.includes('$17m'))
+        add('41 USC § 3304 (Competition Requirements)', 'https://www.law.cornell.edu/uscode/text/41/3304');
+      if (text.includes('ballroom') || text.includes('$50b') || text.includes('donors get'))
+        add('18 USC § 201 (Bribery of Public Officials)', 'https://www.law.cornell.edu/uscode/text/18/201');
+      if (text.includes('coast guard') && text.includes('wine'))
+        add('18 USC § 208 (Conflicts of Interest - Financial)', 'https://www.law.cornell.edu/uscode/text/18/208');
+
+      // Miller / Palantir
+      if (text.includes('palantir') || text.includes('stephen miller') && text.includes('stock'))
+        add('18 USC § 208 (Conflicts of Interest - Financial)', 'https://www.law.cornell.edu/uscode/text/18/208');
+      if (text.includes('no-bid contract') || text.includes('$30m'))
+        add('41 USC § 3304 (Competition Requirements)', 'https://www.law.cornell.edu/uscode/text/41/3304');
+
+      // Blanche memo / Crypto enforcement
+      if (text.includes('blanche') || text.includes('crypto enforcement'))
+        add('5 CFR § 2635.101 (Ethics Standards)', 'https://www.law.cornell.edu/cfr/text/5/2635.101');
+
+      // FBI / Obstruction
+      if (text.includes('fbi') && text.includes('home') || text.includes('homan'))
+        add('18 USC § 1505 (Obstruction of Proceedings)', 'https://www.law.cornell.edu/uscode/text/18/1505');
+      if (text.includes('investigation') && text.includes('made to go away'))
+        add('18 USC § 1510 (Obstruction of Criminal Investigations)', 'https://www.law.cornell.edu/uscode/text/18/1510');
+
+      // Lewandowski / Extortion
+      if (text.includes('lewandowski') || text.includes('extortion') && text.includes('dhs'))
+        add('18 USC § 1951 (Hobbs Act - Extortion)', 'https://www.law.cornell.edu/uscode/text/18/1951');
+
+      // Bridge / Detroit-Canada
+      if (text.includes('bridge') && text.includes('detroit'))
+        add('18 USC § 201 (Bribery of Public Officials)', 'https://www.law.cornell.edu/uscode/text/18/201');
+
+      // Gun mail
+      if (text.includes('handgun') || text.includes('gun mail'))
+        add('18 USC § 1715 (Firearms - Nonmailable)', 'https://www.law.cornell.edu/uscode/text/18/1715');
+
+      // Prediction markets / Insider trading
+      if (text.includes('prediction market') || text.includes('insider trading') || text.includes('oil') && text.includes('bet'))
+        add('18 USC § 1348 (Securities/Commodities Fraud)', 'https://www.law.cornell.edu/uscode/text/18/1348');
+      if (text.includes('sti') || text.includes('stock act'))
+        add('5 USC App. § 101 (STOCK Act)', 'https://www.law.cornell.edu/uscode/text/5a/compactedition-i');
+
+      // Pardons / Abuse of power
+      if (text.includes('blanket pardon') || text.includes('pardon everyone'))
+        add('Art. II, §2, Cl. 1 (Pardon Power)', 'https://constitution.congress.gov/browse/essay/artII-S2-C1-1/ALDE_000_13359/');
+      if (text.includes('fraud crackdown') && text.includes('political'))
+        add('5 CFR § 2635.101 (Ethics - Impartiality)', 'https://www.law.cornell.edu/cfr/text/5/2635.101');
+
+      // FDA / Tobacco
+      if (text.includes('fda') || text.includes('tobacco') || text.includes('vape'))
+        add('18 USC § 201 (Bribery of Public Officials)', 'https://www.law.cornell.edu/uscode/text/18/201');
+
+      // Nursing home
+      if (text.includes('nursing home') && text.includes('staffing'))
+        add('42 USC § 1395i-3 (Nursing Home Requirements)', 'https://www.law.cornell.edu/uscode/text/42/1395i-3');
+
+      // USDA / Salmonella
+      if (text.includes('salmonella') || text.includes('usda reverses'))
+        add('18 USC § 201 (Bribery of Public Officials)', 'https://www.law.cornell.edu/uscode/text/18/201');
+
+      // NYT op-ed (reaction, not a crime)
+      if (text.includes('somewhere the country') || text.includes('nyt op-ed'))
+        return '';
+
+      if (links.length === 0) {
+        add('5 CFR § 2635.101 (Basic Ethics Obligations)', 'https://www.law.cornell.edu/cfr/text/5/2635.101');
+      }
+
+      return '<div class="uscode-links">' +
+        links.map(l => '<a href="' + l.url + '" target="_blank" rel="noopener">' + l.label + '</a>').join(' &middot; ') +
+        '</div>';
     }
 
     function formatDate(dateStr) {
@@ -2472,6 +3053,52 @@
           closeCard();
         }
       });
+
+      // Drag-to-pan
+      let isDragging = false;
+      let dragStartX, dragStartY, scrollStartX, scrollStartY;
+
+      container.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.marker') || e.target.closest('.card') || e.target.closest('#legend')) return;
+        isDragging = true;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        scrollStartX = container.scrollLeft;
+        scrollStartY = container.scrollTop;
+        container.classList.add('dragging');
+        e.preventDefault();
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        container.scrollLeft = scrollStartX + (dragStartX - e.clientX);
+        container.scrollTop = scrollStartY + (dragStartY - e.clientY);
+      });
+
+      window.addEventListener('mouseup', () => {
+        isDragging = false;
+        container.classList.remove('dragging');
+      });
+
+      // Touch support for drag-to-pan
+      container.addEventListener('touchstart', (e) => {
+        if (e.target.closest('.marker') || e.target.closest('.card') || e.target.closest('#legend')) return;
+        if (e.touches.length === 1) {
+          isDragging = true;
+          dragStartX = e.touches[0].clientX;
+          dragStartY = e.touches[0].clientY;
+          scrollStartX = container.scrollLeft;
+          scrollStartY = container.scrollTop;
+        }
+      }, { passive: false });
+
+      container.addEventListener('touchmove', (e) => {
+        if (!isDragging || e.touches.length !== 1) return;
+        container.scrollLeft = scrollStartX + (dragStartX - e.touches[0].clientX);
+        container.scrollTop = scrollStartY + (dragStartY - e.touches[0].clientY);
+      }, { passive: false });
+
+      container.addEventListener('touchend', () => { isDragging = false; });
 
       // Scroll hint fade
       container.addEventListener('scroll', updateScrollHint);
