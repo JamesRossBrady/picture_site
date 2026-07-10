@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animal Graphic</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0d0d0d; overflow: hidden; height: 100vh; display: flex; flex-direction: column; font-family: sans-serif; }
+
+    #controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: #111;
+      border-bottom: 1px solid #333;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    #controls .sliders {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .animal-ctrl {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 14px;
+      background: #1a1a1a;
+      border-radius: 8px;
+    }
+
+    .animal-ctrl.lethality { border: 1px solid #e74c3c; }
+    .animal-ctrl.sociability { border: 1px solid #2ecc71; }
+    .animal-ctrl.cuteness { border: 1px solid #3498db; }
+
+    .animal-ctrl.lethality label { color: #e74c3c; }
+    .animal-ctrl.sociability label { color: #2ecc71; }
+    .animal-ctrl.cuteness label { color: #3498db; }
+
+    .animal-ctrl.lethality input[type=range] { accent-color: #e74c3c; }
+    .animal-ctrl.sociability input[type=range] { accent-color: #2ecc71; }
+    .animal-ctrl.cuteness input[type=range] { accent-color: #3498db; }
+
+    .animal-ctrl.lethality .weight-val { color: #e74c3c; }
+    .animal-ctrl.sociability .weight-val { color: #2ecc71; }
+    .animal-ctrl.cuteness .weight-val { color: #3498db; }
+
+    .animal-ctrl .weight-val {
+      font-size: 16px;
+      font-weight: bold;
+      font-family: monospace;
+      width: 20px;
+      text-align: center;
+    }
+
+    #view {
+      flex: 1;
+      position: relative;
+    }
+
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <span style="color:#888;font-size:12px;">select your personal animal characteristic weight preference:</span>
+    <div class="sliders">
+      <div class="animal-ctrl lethality">
+        <label>Lethality</label>
+        <input type="range" id="w-lethality" min="1" max="5" value="1" step="1">
+        <span class="weight-val" id="v-lethality">1</span>
+      </div>
+      <div class="animal-ctrl sociability">
+        <label>Sociability</label>
+        <input type="range" id="w-sociability" min="1" max="5" value="1" step="1">
+        <span class="weight-val" id="v-sociability">1</span>
+      </div>
+      <div class="animal-ctrl cuteness">
+        <label>Cuteness</label>
+        <input type="range" id="w-cuteness" min="1" max="5" value="1" step="1">
+        <span class="weight-val" id="v-cuteness">1</span>
+      </div>
+    </div>
+  </div>
+  <div id="view"></div>
+
+  <script type="importmap">
+    { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+
+    const viewDiv = document.getElementById('view');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0d0d0d);
+
+    const camera = new THREE.PerspectiveCamera(45, viewDiv.clientWidth / viewDiv.clientHeight, 0.1, 300);
+    camera.position.set(55, 30, 45);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(viewDiv.clientWidth, viewDiv.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    viewDiv.appendChild(renderer.domElement);
+
+    // Lighting
+    scene.add(new THREE.AmbientLight(0x606060, 2));
+    const dir = new THREE.DirectionalLight(0xffffff, 3);
+    dir.position.set(20, 30, 20);
+    scene.add(dir);
+
+    // ── AXES (extend to 50 for max weight * rating) ──
+    const AXIS_LEN = 50;
+
+    function makeAxis(color, from, to) {
+      const mat = new THREE.LineBasicMaterial({ color });
+      const pts = [new THREE.Vector3(...from), new THREE.Vector3(...to)];
+      return new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), mat);
+    }
+
+    scene.add(makeAxis(0xe74c3c, [-AXIS_LEN,0,0], [AXIS_LEN,0,0]));
+    scene.add(makeAxis(0x2ecc71, [0,-AXIS_LEN,0], [0,AXIS_LEN,0]));
+    scene.add(makeAxis(0x3498db, [0,0,-AXIS_LEN], [0,0,AXIS_LEN]));
+
+    function makeLabel(text, position, color, scale) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512; canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = color;
+      ctx.font = 'bold 44px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, 256, 64);
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.minFilter = THREE.LinearFilter;
+      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
+      sprite.position.set(...position);
+      const s = scale || 8;
+      sprite.scale.set(s, s * 0.25, 1);
+      return sprite;
+    }
+
+    // Tick marks at multiples of 10
+    for (let i = -AXIS_LEN; i <= AXIS_LEN; i += 10) {
+      if (i === 0) continue;
+      scene.add(makeLabel(String(i), [i, -1.5, 0], '#e74c3c', 4));
+      scene.add(makeLabel(String(i), [-1.5, i, 0], '#2ecc71', 4));
+      scene.add(makeLabel(String(i), [0, -1.5, i], '#3498db', 4));
+    }
+
+    // Origin
+    const origin = new THREE.Mesh(
+      new THREE.SphereGeometry(0.3, 12, 12),
+      new THREE.MeshBasicMaterial({ color: 0xffffff })
+    );
+    scene.add(origin);
+
+    // Axis names
+    scene.add(makeLabel('LETHALITY', [AXIS_LEN + 5, 0, 0], '#e74c3c', 8));
+    scene.add(makeLabel('SOCIABILITY', [0, AXIS_LEN + 5, 0], '#2ecc71', 8));
+    scene.add(makeLabel('CUTENESS', [0, 0, AXIS_LEN + 5], '#3498db', 8));
+
+    // ── ANIMAL SPRITES ──
+    function drawAnimalOutline(name) {
+      const c = document.createElement('canvas');
+      c.width = 512; c.height = 512;
+      const ctx = c.getContext('2d');
+      const cx = 256, cy = 256;
+      ctx.strokeStyle = '#ffffff';
+      ctx.fillStyle = '#ffffff';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      const eye = (ex, ey, r) => { ctx.beginPath(); ctx.arc(ex, ey, r || 4, 0, Math.PI * 2); ctx.fill(); };
+      const leg4 = (a, b, c2, d) => { [a, b, c2, d].forEach(([lx, ly]) => { ctx.strokeRect(lx - 8, ly, 15, 55); }); };
+      const ell = (ex, ey, rx, ry, rot) => { ctx.beginPath(); ctx.ellipse(ex, ey, rx, ry, rot || 0, 0, Math.PI * 2); ctx.stroke(); };
+
+      if (name === 'Zebra') {
+        ell(cx, cy + 20, 100, 55); ctx.beginPath(); ctx.moveTo(cx + 70, cy); ctx.quadraticCurveTo(cx + 140, cy - 40, cx + 130, cy - 110); ctx.quadraticCurveTo(cx + 100, cy - 40, cx + 60, cy - 10); ctx.stroke();
+        ell(cx + 120, cy - 120, 28, 38, 0.2); ctx.beginPath(); ctx.moveTo(cx + 105, cy - 150); ctx.lineTo(cx + 95, cy - 178); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 130, cy - 152); ctx.lineTo(cx + 140, cy - 180); ctx.stroke();
+        leg4([cx - 50, cy + 60], [cx + 20, cy + 60], [cx - 55, cy + 55], [cx + 30, cy + 55]);
+        ctx.lineWidth = 2; for (let sx = cx - 60; sx < cx + 60; sx += 22) { ctx.beginPath(); ctx.moveTo(sx, cy - 20); ctx.quadraticCurveTo(sx, cy + 10, sx, cy + 52); ctx.stroke(); }
+        ctx.lineWidth = 3; eye(cx + 130, cy - 125, 4);
+        ctx.beginPath(); ctx.moveTo(cx - 90, cy + 10); ctx.quadraticCurveTo(cx - 135, cy - 20, cx - 125, cy + 50); ctx.stroke();
+      } else if (name === 'Lion') {
+        ctx.lineWidth = 2; for (let a = 0; a < Math.PI * 2; a += 0.2) { ctx.beginPath(); ctx.moveTo(cx - 10 + Math.cos(a) * 65, cy - 20 + Math.sin(a) * 65); ctx.lineTo(cx - 10 + Math.cos(a) * 95, cy - 20 + Math.sin(a) * 95); ctx.stroke(); }
+        ctx.lineWidth = 3; ell(cx - 10, cy + 50, 70, 50);
+        leg4([cx - 40, cy + 85], [cx + 20, cy + 85], [cx - 50, cy + 80], [cx + 30, cy + 80]);
+        ctx.beginPath(); ctx.arc(cx - 10, cy - 40, 35, 0, Math.PI * 2); ctx.stroke();
+        eye(cx + 18, cy - 28, 5); eye(cx - 20, cy - 45, 4); eye(cx + 5, cy - 42, 4);
+        ctx.beginPath(); ctx.moveTo(cx - 70, cy + 20); ctx.quadraticCurveTo(cx - 105, cy - 10, cx - 100, cy + 40); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx - 100, cy + 40, 8, 0, Math.PI * 2); ctx.fill();
+      } else if (name === 'Dog') {
+        ell(cx - 10, cy + 20, 75, 45); ctx.beginPath(); ctx.arc(cx + 70, cy - 30, 38, 0, Math.PI * 2); ctx.stroke();
+        ell(cx + 110, cy - 20, 16, 14, 0.2); eye(cx + 125, cy - 22, 5); eye(cx + 58, cy - 38, 4); eye(cx + 82, cy - 42, 4);
+        ell(cx + 42, cy - 78, 12, 24, -0.3); ell(cx + 82, cy - 80, 12, 24, 0.3);
+        leg4([cx - 35, cy + 50], [cx + 15, cy + 50], [cx - 45, cy + 48], [cx + 25, cy + 48]);
+        ctx.beginPath(); ctx.moveTo(cx - 75, cy + 5); ctx.quadraticCurveTo(cx - 105, cy - 45, cx - 90, cy - 60); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx + 115, cy - 8, 12, 0.1, Math.PI * 0.7); ctx.stroke();
+      } else if (name === 'Cat') {
+        ell(cx, cy + 20, 55, 40); ctx.beginPath(); ctx.arc(cx + 50, cy - 30, 32, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 35, cy - 60); ctx.lineTo(cx + 25, cy - 85); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 55, cy - 62); ctx.lineTo(cx + 65, cy - 88); ctx.stroke();
+        leg4([cx - 30, cy + 50], [cx + 10, cy + 50], [cx - 25, cy + 48], [cx + 20, cy + 48]);
+        eye(cx + 55, cy - 36, 4); ctx.beginPath(); ctx.moveTo(cx - 10, cy + 30); ctx.quadraticCurveTo(cx - 40, cy - 10, cx - 30, cy - 20); ctx.stroke();
+      } else if (name === 'Elephant') {
+        ell(cx, cy + 30, 100, 65); ctx.beginPath(); ctx.arc(cx + 80, cy - 50, 45, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 120, cy - 60); ctx.quadraticCurveTo(cx + 140, cy - 20, cx + 125, cy + 40); ctx.quadraticCurveTo(cx + 115, cy + 20, cx + 100, cy - 40); ctx.stroke();
+        ell(cx - 60, cy - 65, 30, 38, -0.3);
+        leg4([cx - 50, cy + 80], [cx + 15, cy + 80], [cx - 55, cy + 75], [cx + 40, cy + 75]);
+        eye(cx + 95, cy - 55, 4); ctx.beginPath(); ctx.moveTo(cx - 40, cy + 15); ctx.quadraticCurveTo(cx - 70, cy, cx - 60, cy + 30); ctx.stroke();
+      } else if (name === 'Shark') {
+        ctx.beginPath(); ctx.moveTo(cx + 110, cy); ctx.quadraticCurveTo(cx + 40, cy - 70, cx - 90, cy - 10); ctx.quadraticCurveTo(cx - 30, cy + 40, cx + 110, cy);
+        ctx.moveTo(cx - 90, cy - 10); ctx.lineTo(cx - 120, cy + 20); ctx.lineTo(cx - 90, cy + 15); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 30, cy - 55); ctx.lineTo(cx + 20, cy - 95); ctx.lineTo(cx + 50, cy - 50); ctx.stroke();
+        eye(cx + 70, cy - 15, 5);
+      } else if (name === 'Dolphin') {
+        ctx.beginPath(); ctx.moveTo(cx + 100, cy + 20); ctx.quadraticCurveTo(cx + 60, cy - 50, cx - 30, cy - 60); ctx.quadraticCurveTo(cx - 80, cy - 20, cx - 90, cy + 10);
+        ctx.quadraticCurveTo(cx - 40, cy + 30, cx + 50, cy + 20); ctx.quadraticCurveTo(cx + 90, cy + 10, cx + 110, cy - 10); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 30, cy - 50); ctx.lineTo(cx + 35, cy - 95); ctx.lineTo(cx + 55, cy - 45); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 110, cy - 20); ctx.quadraticCurveTo(cx + 130, cy - 40, cx + 120, cy - 15); ctx.stroke();
+        eye(cx + 70, cy - 20, 4);
+      } else if (name === 'Rabbit') {
+        ctx.beginPath(); ctx.arc(cx, cy + 30, 55, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx + 40, cy - 30, 30, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 25, cy - 58); ctx.lineTo(cx + 20, cy - 110); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 45, cy - 58); ctx.lineTo(cx + 50, cy - 110); ctx.stroke();
+        leg4([cx - 25, cy + 75], [cx + 10, cy + 75], [cx - 20, cy + 72], [cx + 20, cy + 72]);
+        eye(cx + 50, cy - 32, 4); ctx.beginPath(); ctx.arc(cx + 55, cy - 40, 6, 0, Math.PI); ctx.stroke();
+      } else if (name === 'Eagle') {
+        ctx.beginPath(); ctx.arc(cx, cy + 10, 30, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx - 10, cy + 35); ctx.lineTo(cx - 15, cy + 75); ctx.lineTo(cx - 5, cy + 35); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 10, cy + 35); ctx.lineTo(cx + 15, cy + 75); ctx.lineTo(cx + 5, cy + 35); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx - 15, cy - 10); ctx.quadraticCurveTo(cx - 120, cy - 110, cx - 110, cy - 60); ctx.quadraticCurveTo(cx - 30, cy - 20, cx - 15, cy - 10); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 15, cy - 10); ctx.quadraticCurveTo(cx + 120, cy - 110, cx + 110, cy - 60); ctx.quadraticCurveTo(cx + 30, cy - 20, cx + 15, cy - 10); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 20, cy - 15); ctx.lineTo(cx + 30, cy - 5); ctx.stroke();
+        eye(cx + 15, cy + 5, 3); eye(cx - 15, cy + 5, 3);
+      } else if (name === 'Wolf') {
+        ell(cx, cy + 20, 80, 45); ctx.beginPath(); ctx.arc(cx + 70, cy - 25, 30, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 60, cy - 55); ctx.lineTo(cx + 55, cy - 80); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 80, cy - 50); ctx.lineTo(cx + 85, cy - 75); ctx.stroke();
+        leg4([cx - 40, cy + 50], [cx + 15, cy + 50], [cx - 50, cy + 48], [cx + 25, cy + 48]);
+        eye(cx + 80, cy - 30, 4);
+        ctx.beginPath(); ctx.moveTo(cx - 70, cy + 15); ctx.quadraticCurveTo(cx - 100, cy - 30, cx - 95, cy + 25); ctx.quadraticCurveTo(cx - 90, cy - 10, cx - 80, cy + 10); ctx.stroke();
+      } else if (name === 'Panda') {
+        ctx.beginPath(); ctx.arc(cx, cy + 30, 70, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx + 40, cy - 30, 38, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx - 30, cy - 70, 18, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx + 30, cy - 70, 18, 0, Math.PI * 2); ctx.stroke();
+        eye(cx + 35, cy - 45, 10); eye(cx + 60, cy - 38, 10);
+        ctx.beginPath(); ctx.arc(cx + 55, cy - 25, 6, 0, Math.PI * 2); ctx.fill();
+        leg4([cx - 30, cy + 85], [cx + 10, cy + 85], [cx - 25, cy + 82], [cx + 20, cy + 82]);
+      } else if (name === 'Snake') {
+        ctx.beginPath(); ctx.moveTo(cx + 100, cy + 60); ctx.quadraticCurveTo(cx + 50, cy + 100, cx - 20, cy + 60);
+        ctx.quadraticCurveTo(cx - 60, cy, cx - 20, cy - 40); ctx.quadraticCurveTo(cx + 40, cy - 80, cx + 60, cy - 20);
+        ctx.quadraticCurveTo(cx + 80, cy + 30, cx + 30, cy + 10); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 20, cy + 10); ctx.lineTo(cx + 15, cy - 5); ctx.lineTo(cx + 40, cy - 5); ctx.stroke();
+        eye(cx + 35, cy + 5, 3); eye(cx + 25, cy + 5, 3);
+      } else if (name === 'Cow') {
+        ell(cx, cy + 30, 85, 55); ctx.beginPath(); ctx.arc(cx + 70, cy - 50, 35, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 55, cy - 70); ctx.lineTo(cx + 50, cy - 95); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 80, cy - 68); ctx.lineTo(cx + 90, cy - 90); ctx.stroke();
+        leg4([cx - 45, cy + 72], [cx + 15, cy + 72], [cx - 50, cy + 68], [cx + 25, cy + 68]);
+        eye(cx + 75, cy - 55, 5); ctx.beginPath(); ctx.arc(cx + 55, cy - 40, 10, 0, Math.PI); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx - 40, cy - 30); ctx.lineTo(cx - 25, cy - 55); ctx.stroke();
+      } else if (name === 'Octopus') {
+        ctx.beginPath(); ctx.arc(cx, cy - 10, 45, 0, Math.PI * 2); ctx.stroke();
+        eye(cx - 15, cy - 20, 5); eye(cx + 15, cy - 20, 5);
+        for (let t = 0; t < 8; t++) {
+          const a = -Math.PI / 2 + (t - 3.5) * 0.35;
+          ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * 40, cy + 30);
+          ctx.quadraticCurveTo(cx + Math.cos(a) * 80, cy + 100, cx + Math.cos(a) * 120 + Math.sin(a) * 20, cy + 110 + Math.cos(a) * 15);
+          ctx.stroke();
+        }
+      } else if (name === 'Chimpanzee') {
+        ell(cx, cy + 30, 55, 40); ctx.beginPath(); ctx.arc(cx + 30, cy - 30, 35, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx - 60, cy - 80, 18, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx + 60, cy - 80, 18, 0, Math.PI * 2); ctx.stroke();
+        leg4([cx - 20, cy + 65], [cx + 15, cy + 65], [cx - 30, cy + 60], [cx + 25, cy + 60]);
+        ctx.beginPath(); ctx.moveTo(cx - 30, cy); ctx.lineTo(cx - 50, cy - 50); ctx.lineTo(cx - 60, cy - 80); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 30, cy); ctx.lineTo(cx + 50, cy - 50); ctx.lineTo(cx + 60, cy - 80); ctx.stroke();
+        eye(cx + 35, cy - 35, 4); eye(cx + 15, cy - 35, 4);
+        ctx.beginPath(); ctx.arc(cx + 50, cy - 15, 12, 0, Math.PI); ctx.stroke();
+      } else if (name === 'Penguin') {
+        ctx.beginPath(); ctx.moveTo(cx, cy + 100); ctx.quadraticCurveTo(cx - 55, cy + 40, cx - 35, cy - 50);
+        ctx.quadraticCurveTo(cx - 20, cy - 100, cx, cy - 110); ctx.quadraticCurveTo(cx + 20, cy - 100, cx + 35, cy - 50);
+        ctx.quadraticCurveTo(cx + 55, cy + 40, cx, cy + 100); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx - 30, cy + 30); ctx.lineTo(cx - 60, cy + 60); ctx.lineTo(cx - 25, cy + 45); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 30, cy + 30); ctx.lineTo(cx + 60, cy + 60); ctx.lineTo(cx + 25, cy + 45); ctx.stroke();
+        eye(cx - 12, cy - 50, 4); eye(cx + 12, cy - 50, 4);
+        ctx.beginPath(); ctx.moveTo(cx - 8, cy - 20); ctx.lineTo(cx + 8, cy - 20); ctx.lineTo(cx, cy); ctx.stroke();
+      } else if (name === 'Crocodile') {
+        ctx.beginPath(); ctx.moveTo(cx + 130, cy + 10); ctx.lineTo(cx + 30, cy + 10); ctx.quadraticCurveTo(cx - 30, cy, cx - 40, cy + 30);
+        ctx.quadraticCurveTo(cx - 10, cy + 55, cx + 30, cy + 50); ctx.quadraticCurveTo(cx + 100, cy + 20, cx + 130, cy + 10); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 130, cy + 10); ctx.lineTo(cx + 160, cy - 5); ctx.lineTo(cx + 130, cy + 20); ctx.stroke();
+        leg4([cx - 10, cy + 65], [cx + 25, cy + 65], [cx - 30, cy + 70], [cx + 40, cy + 70]);
+        eye(cx + 90, cy + 5, 5); ctx.lineWidth = 1.5;
+        for (let sc = cx - 20; sc < cx + 100; sc += 12) { ctx.beginPath(); ctx.moveTo(sc, cy + 15); ctx.lineTo(sc + 4, cy + 40); ctx.stroke(); }
+        ctx.lineWidth = 3;
+      } else if (name === 'Horse') {
+        ell(cx, cy + 20, 100, 55); ctx.beginPath(); ctx.moveTo(cx + 70, cy); ctx.quadraticCurveTo(cx + 140, cy - 40, cx + 130, cy - 110); ctx.quadraticCurveTo(cx + 100, cy - 40, cx + 60, cy - 10); ctx.stroke();
+        ell(cx + 120, cy - 120, 28, 38, 0.2); ctx.beginPath(); ctx.moveTo(cx + 105, cy - 150); ctx.lineTo(cx + 95, cy - 178); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 130, cy - 152); ctx.lineTo(cx + 140, cy - 180); ctx.stroke();
+        leg4([cx - 50, cy + 60], [cx + 20, cy + 60], [cx - 55, cy + 55], [cx + 30, cy + 55]);
+        eye(cx + 130, cy - 125, 4);
+        ctx.beginPath(); ctx.moveTo(cx - 90, cy + 10); ctx.quadraticCurveTo(cx - 130, cy - 30, cx - 115, cy + 30); ctx.stroke();
+      } else if (name === 'Spider') {
+        ctx.beginPath(); ctx.arc(cx, cy, 22, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx, cy - 18, 16, 0, Math.PI * 2); ctx.stroke();
+        eye(cx - 6, cy - 22, 3); eye(cx + 6, cy - 22, 3);
+        for (let l = 0; l < 8; l++) {
+          const a = (l / 8) * Math.PI * 2;
+          ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * 20, cy + Math.sin(a) * 20);
+          ctx.quadraticCurveTo(cx + Math.cos(a) * 60, cy + Math.sin(a) * 80, cx + Math.cos(a) * 100, cy + Math.sin(a) * 90);
+          ctx.lineWidth = 2; ctx.stroke(); ctx.lineWidth = 3;
+        }
+      } else if (name === 'Koala') {
+        ctx.beginPath(); ctx.arc(cx, cy + 20, 55, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx + 30, cy - 40, 35, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx - 40, cy - 70, 20, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx + 15, cy - 75, 20, 0, Math.PI * 2); ctx.stroke();
+        eye(cx + 25, cy - 46, 4); eye(cx + 45, cy - 46, 4);
+        ctx.beginPath(); ctx.arc(cx + 45, cy - 35, 12, 0, Math.PI * 2); ctx.stroke();
+        leg4([cx - 20, cy + 68], [cx + 15, cy + 68], [cx - 30, cy + 65], [cx + 25, cy + 65]);
+      } else {
+        // Generic animal outline for remaining species
+        ctx.beginPath(); ctx.ellipse(cx, cy + 10, 60, 40, 0, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx + 40, cy - 25, 28, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 25, cy - 50); ctx.lineTo(cx + 20, cy - 70); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 45, cy - 50); ctx.lineTo(cx + 50, cy - 70); ctx.stroke();
+        leg4([cx - 30, cy + 40], [cx + 5, cy + 40], [cx - 25, cy + 38], [cx + 15, cy + 38]);
+        eye(cx + 48, cy - 30, 4);
+        ctx.beginPath(); ctx.moveTo(cx - 50, cy + 5); ctx.quadraticCurveTo(cx - 70, cy - 10, cx - 65, cy + 15); ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(c);
+      tex.minFilter = THREE.LinearFilter;
+      tex.premultiplyAlpha = true;
+      return tex;
+    }
+
+    function nameLabelSprite(name) {
+      const lc = document.createElement('canvas');
+      lc.width = 256; lc.height = 48;
+      const lctx = lc.getContext('2d');
+      lctx.fillStyle = '#ffffff';
+      lctx.font = 'bold 20px sans-serif';
+      lctx.textAlign = 'center';
+      lctx.textBaseline = 'middle';
+      lctx.fillText(name, 128, 24);
+      const ltex = new THREE.CanvasTexture(lc);
+      ltex.minFilter = THREE.LinearFilter;
+      const ls = new THREE.Sprite(new THREE.SpriteMaterial({ map: ltex, transparent: true, depthTest: false }));
+      ls.position.y = -1.0;
+      ls.scale.set(2, 0.4, 1);
+      return ls;
+    }
+
+    // ── ANIMALS ── (lethality=X, sociability=Y, cuteness=Z, scale -10 to +10)
+const animals = [
+      { name: "Aardvark", lethality: -2, sociability: 3, cuteness: 3 },
+      { name: "Adder", lethality: 5, sociability: -9, cuteness: -6 },
+      { name: "Albatross", lethality: -1, sociability: 3, cuteness: 3 },
+      { name: "Anaconda", lethality: 9, sociability: -9, cuteness: -5 },
+      { name: "Angelfish", lethality: -6, sociability: 2, cuteness: 7 },
+      { name: "Anteater", lethality: 2, sociability: -4, cuteness: 3 },
+      { name: "Aphid", lethality: -9, sociability: 8, cuteness: -7 },
+      { name: "Asp", lethality: 7, sociability: -9, cuteness: -7 },
+      { name: "Avocet", lethality: -3, sociability: 5, cuteness: 6 },
+      { name: "Badger", lethality: 5, sociability: -4, cuteness: 4 },
+      { name: "Barnacle", lethality: -9, sociability: -9, cuteness: -6 },
+      { name: "Bass", lethality: -5, sociability: 3, cuteness: 0 },
+      { name: "Beaver", lethality: 0, sociability: 7, cuteness: 6 },
+      { name: "Bee", lethality: 2, sociability: 9, cuteness: 3 },
+      { name: "Bison", lethality: 6, sociability: 5, cuteness: 2 },
+      { name: "Blackbird", lethality: -3, sociability: 4, cuteness: 4 },
+      { name: "Bobcat", lethality: 5, sociability: -4, cuteness: 5 },
+      { name: "Buffalo", lethality: 6, sociability: 5, cuteness: 1 },
+      { name: "Bullfrog", lethality: -3, sociability: 0, cuteness: 4 },
+      { name: "Butterfly", lethality: -9, sociability: 1, cuteness: 9 },
+      { name: "Caiman", lethality: 7, sociability: -6, cuteness: -3 },
+      { name: "Canary", lethality: -6, sociability: 2, cuteness: 6 },
+      { name: "Caribou", lethality: 2, sociability: 7, cuteness: 5 },
+      { name: "Cassowary", lethality: 8, sociability: -7, cuteness: 2 },
+      { name: "Caterpillar", lethality: -8, sociability: 3, cuteness: 8 },
+      { name: "Chameleon", lethality: -2, sociability: -6, cuteness: 5 },
+      { name: "Chickadee", lethality: -6, sociability: 5, cuteness: 8 },
+      { name: "Chinchilla", lethality: -6, sociability: 3, cuteness: 9 },
+      { name: "Cicada", lethality: -9, sociability: 7, cuteness: -2 },
+      { name: "Clownfish", lethality: -6, sociability: -1, cuteness: 6 },
+      { name: "Cod", lethality: -6, sociability: 5, cuteness: 1 },
+      { name: "Coral", lethality: -10, sociability: -5, cuteness: 5 },
+      { name: "Cougar", lethality: 8, sociability: -6, cuteness: 4 },
+      { name: "Crab", lethality: 1, sociability: -6, cuteness: 2 },
+      { name: "Cricket", lethality: -7, sociability: 5, cuteness: 3 },
+      { name: "Cuckoo", lethality: 1, sociability: 1, cuteness: 4 },
+      { name: "Deer", lethality: 1, sociability: 4, cuteness: 8 },
+      { name: "Dodo", lethality: -8, sociability: 2, cuteness: 6 },
+      { name: "Donkey", lethality: -1, sociability: 4, cuteness: 4 },
+      { name: "Dove", lethality: -7, sociability: 4, cuteness: 7 },
+      { name: "Duck", lethality: -3, sociability: 5, cuteness: 7 },
+      { name: "Eagle", lethality: 7, sociability: -4, cuteness: 3 },
+      { name: "Earwig", lethality: -2, sociability: 2, cuteness: -6 },
+      { name: "Egret", lethality: -2, sociability: 4, cuteness: 6 },
+      { name: "Elk", lethality: 3, sociability: 7, cuteness: 6 },
+      { name: "Ermine", lethality: 3, sociability: -5, cuteness: 6 },
+      { name: "Finch", lethality: -5, sociability: 5, cuteness: 7 },
+      { name: "Flamingo", lethality: -1, sociability: 7, cuteness: 5 },
+      { name: "Fly", lethality: -5, sociability: 2, cuteness: -7 },
+      { name: "Frog", lethality: -4, sociability: -2, cuteness: 5 },
+      { name: "Gecko", lethality: -4, sociability: -5, cuteness: 6 },
+      { name: "Giraffe", lethality: 2, sociability: 5, cuteness: 6 },
+      { name: "Gnu", lethality: 3, sociability: 6, cuteness: 2 },
+      { name: "Goldfinch", lethality: -5, sociability: 4, cuteness: 8 },
+      { name: "Gopher", lethality: 0, sociability: 2, cuteness: 6 },
+      { name: "Grasshopper", lethality: -6, sociability: 5, cuteness: 1 },
+      { name: "Grouse", lethality: -1, sociability: 3, cuteness: 3 },
+      { name: "Gull", lethality: 1, sociability: 6, cuteness: 2 },
+      { name: "Haddock", lethality: -5, sociability: 5, cuteness: 2 },
+      { name: "Hamster", lethality: -6, sociability: 1, cuteness: 8 },
+      { name: "Hawk", lethality: 6, sociability: -5, cuteness: 4 },
+      { name: "Heron", lethality: 1, sociability: 2, cuteness: 5 },
+      { name: "Honeybee", lethality: -5, sociability: 9, cuteness: 6 },
+      { name: "Horse", lethality: 3, sociability: 5, cuteness: 7 },
+      { name: "Hyena", lethality: 6, sociability: 7, cuteness: -3 },
+      { name: "Iguana", lethality: 0, sociability: -5, cuteness: 0 },
+      { name: "Jackal", lethality: 5, sociability: 6, cuteness: 2 },
+      { name: "Jellyfish", lethality: 5, sociability: -10, cuteness: -3 },
+      { name: "Kakapo", lethality: -6, sociability: -1, cuteness: 7 },
+      { name: "Kestrel", lethality: 4, sociability: -3, cuteness: 5 },
+      { name: "Kiwi", lethality: -5, sociability: -2, cuteness: 6 },
+      { name: "Koi", lethality: -7, sociability: 3, cuteness: 6 },
+      { name: "Krill", lethality: -10, sociability: 8, cuteness: -5 },
+      { name: "Lemming", lethality: -5, sociability: 5, cuteness: 7 },
+      { name: "Leopard", lethality: 8, sociability: -6, cuteness: 5 },
+      { name: "Lion", lethality: 9, sociability: 3, cuteness: 4 },
+      { name: "Llama", lethality: -1, sociability: 6, cuteness: 6 },
+      { name: "Locust", lethality: -3, sociability: 7, cuteness: -3 },
+      { name: "Louse", lethality: 0, sociability: 4, cuteness: -9 },
+      { name: "Macaw", lethality: 1, sociability: 6, cuteness: 7 },
+      { name: "Magpie", lethality: 1, sociability: 5, cuteness: 4 },
+      { name: "Manatee", lethality: -4, sociability: 2, cuteness: 8 },
+      { name: "Manta Ray", lethality: 1, sociability: -2, cuteness: 6 },
+      { name: "Marmot", lethality: -1, sociability: 6, cuteness: 7 },
+      { name: "Meerkat", lethality: 1, sociability: 9, cuteness: 8 },
+      { name: "Minnow", lethality: -8, sociability: 6, cuteness: 4 },
+      { name: "Mongoose", lethality: 4, sociability: 7, cuteness: 6 },
+      { name: "Monkey", lethality: 3, sociability: 8, cuteness: 6 },
+      { name: "Mosquito", lethality: 7, sociability: -3, cuteness: -9 },
+      { name: "Mule", lethality: 0, sociability: 4, cuteness: 4 },
+      { name: "Mussel", lethality: -9, sociability: -5, cuteness: -1 },
+      { name: "Nightingale", lethality: -5, sociability: 3, cuteness: 6 },
+      { name: "Ocelot", lethality: 6, sociability: -4, cuteness: 7 },
+      { name: "Okapi", lethality: 1, sociability: 2, cuteness: 6 },
+      { name: "Oryx", lethality: 3, sociability: 6, cuteness: 5 },
+      { name: "Ostrich", lethality: 3, sociability: 5, cuteness: 2 },
+      { name: "Owl", lethality: 4, sociability: -5, cuteness: 6 },
+      { name: "Pademelon", lethality: -2, sociability: 3, cuteness: 8 },
+      { name: "Pangolin", lethality: -3, sociability: -5, cuteness: 7 },
+      { name: "Parrot", lethality: 0, sociability: 6, cuteness: 6 },
+      { name: "Peacock", lethality: 0, sociability: 2, cuteness: 8 },
+      { name: "Penguin", lethality: -4, sociability: 8, cuteness: 8 },
+      { name: "Pigeon", lethality: -4, sociability: 6, cuteness: 3 },
+      { name: "Piranha", lethality: 7, sociability: 4, cuteness: -2 },
+      { name: "Polar Bear", lethality: 9, sociability: -5, cuteness: 3 },
+      { name: "Porpoise", lethality: 1, sociability: 8, cuteness: 7 },
+      { name: "Prairie Dog", lethality: -3, sociability: 9, cuteness: 7 },
+      { name: "Puma", lethality: 8, sociability: -6, cuteness: 4 },
+      { name: "Quokka", lethality: -5, sociability: 6, cuteness: 10 },
+      { name: "Raccoon", lethality: 1, sociability: 2, cuteness: 6 },
+      { name: "Rattlesnake", lethality: 8, sociability: -9, cuteness: -5 },
+      { name: "Red Panda", lethality: -2, sociability: -1, cuteness: 10 },
+      { name: "Rhea", lethality: 2, sociability: 4, cuteness: 3 },
+      { name: "Salamander", lethality: -3, sociability: -2, cuteness: 3 },
+      { name: "Sandpiper", lethality: -3, sociability: 4, cuteness: 5 },
+      { name: "Seahorse", lethality: -7, sociability: -2, cuteness: 5 },
+      { name: "Shark", lethality: 10, sociability: -8, cuteness: -5 },
+      { name: "Shrew", lethality: 1, sociability: -3, cuteness: 4 },
+      { name: "Sloth", lethality: -4, sociability: -3, cuteness: 7 },
+      { name: "Snail", lethality: -9, sociability: -1, cuteness: 2 },
+      { name: "Sparrow", lethality: -5, sociability: 5, cuteness: 6 },
+      { name: "Squirrel", lethality: -2, sociability: 3, cuteness: 8 },
+      { name: "Stingray", lethality: 5, sociability: -4, cuteness: 3 },
+      { name: "Sugar Glider", lethality: -3, sociability: 6, cuteness: 10 },
+      { name: "Swan", lethality: 1, sociability: 4, cuteness: 8 },
+      { name: "Swordfish", lethality: 5, sociability: -6, cuteness: 1 },
+      { name: "Tarantula", lethality: 4, sociability: -10, cuteness: -9 },
+      { name: "Termite", lethality: -4, sociability: 9, cuteness: -7 },
+      { name: "Tick", lethality: 2, sociability: 1, cuteness: -10 },
+      { name: "Tortoise", lethality: -5, sociability: -4, cuteness: 5 },
+      { name: "Trout", lethality: -4, sociability: 3, cuteness: 4 },
+      { name: "Turkey", lethality: -2, sociability: 2, cuteness: 0 },
+      { name: "Viper", lethality: 8, sociability: -9, cuteness: -7 },
+      { name: "Vulture", lethality: 5, sociability: 2, cuteness: -6 },
+      { name: "Warbler", lethality: -5, sociability: 4, cuteness: 6 },
+      { name: "Wasp", lethality: 3, sociability: 7, cuteness: -4 },
+      { name: "Whale", lethality: 1, sociability: 5, cuteness: 6 },
+      { name: "Wolverine", lethality: 7, sociability: -7, cuteness: 2 },
+      { name: "Woodpecker", lethality: 0, sociability: 2, cuteness: 5 },
+      { name: "Wren", lethality: -6, sociability: 4, cuteness: 7 },
+      { name: "Zebu", lethality: 2, sociability: 5, cuteness: 3 },
+      { name: "Anemone", lethality: -8, sociability: -5, cuteness: 6 },
+      { name: "Anhinga", lethality: 0, sociability: 2, cuteness: 2 },
+      { name: "Antlion", lethality: 3, sociability: -7, cuteness: -4 },
+      { name: "Archerfish", lethality: 0, sociability: 4, cuteness: 5 },
+      { name: "Babirusa", lethality: 4, sociability: 3, cuteness: 1 },
+      { name: "Banana Slug", lethality: -9, sociability: -2, cuteness: -2 },
+      { name: "Barbel", lethality: -2, sociability: 4, cuteness: 2 },
+      { name: "Basenji", lethality: 1, sociability: 6, cuteness: 6 },
+      { name: "Basking Shark", lethality: 3, sociability: -5, cuteness: -1 },
+      { name: "Bedlington Terrier", lethality: 1, sociability: 7, cuteness: 7 },
+      { name: "Betta Fish", lethality: 2, sociability: -7, cuteness: 6 },
+      { name: "Bighorn Sheep", lethality: 4, sociability: 6, cuteness: 5 },
+      { name: "Bison", lethality: 6, sociability: 5, cuteness: 2 },
+      { name: "Black Mamba", lethality: 9, sociability: -9, cuteness: -7 },
+      { name: "Blanket Octopus", lethality: 2, sociability: -6, cuteness: 4 },
+      { name: "Blowfish", lethality: 3, sociability: -4, cuteness: 6 },
+      { name: "Blue Tang", lethality: -4, sociability: 3, cuteness: 8 },
+      { name: "Boa Constrictor", lethality: 7, sociability: -8, cuteness: -3 },
+      { name: "Bonito", lethality: -2, sociability: 6, cuteness: 3 },
+      { name: "Box Jellyfish", lethality: 10, sociability: -10, cuteness: -6 },
+      { name: "Brown Bear", lethality: 8, sociability: -3, cuteness: 5 },
+      { name: "Bulldog", lethality: 2, sociability: 8, cuteness: 4 },
+      { name: "Bushbaby", lethality: -2, sociability: 4, cuteness: 9 },
+      { name: "Caccilian", lethality: -3, sociability: -5, cuteness: -2 },
+      { name: "Caecilian", lethality: -3, sociability: -5, cuteness: -2 },
+      { name: "Canvasback", lethality: -2, sociability: 4, cuteness: 4 },
+      { name: "Caracara", lethality: 3, sociability: 1, cuteness: 2 },
+      { name: "Caribou", lethality: 2, sociability: 7, cuteness: 5 },
+      { name: "Cashmere Goat", lethality: -1, sociability: 5, cuteness: 6 },
+      { name: "Catbird", lethality: -3, sociability: 3, cuteness: 5 },
+      { name: "Chihuahua", lethality: 1, sociability: 6, cuteness: 7 },
+      { name: "Chow Chow", lethality: 3, sociability: 4, cuteness: 6 },
+      { name: "Civit", lethality: 2, sociability: -3, cuteness: 3 },
+      { name: "Cockatoo", lethality: 0, sociability: 7, cuteness: 8 },
+      { name: "Coelacanth", lethality: 1, sociability: -3, cuteness: -2 },
+      { name: "Comb Jelly", lethality: -8, sociability: -7, cuteness: 5 },
+      { name: "Conure", lethality: -2, sociability: 7, cuteness: 8 },
+      { name: "Cormorant", lethality: 0, sociability: 5, cuteness: 2 },
+      { name: "Cotinga", lethality: -3, sociability: 2, cuteness: 7 },
+      { name: "Coypu", lethality: -1, sociability: 4, cuteness: 5 },
+      { name: "Crayfish", lethality: 1, sociability: -3, cuteness: 2 },
+      { name: "Crowned Crane", lethality: -1, sociability: 5, cuteness: 6 },
+      { name: "Cuttlefish", lethality: 2, sociability: -4, cuteness: 3 },
+      { name: "Dachshund", lethality: 0, sociability: 7, cuteness: 8 },
+      { name: "Damselfly", lethality: -6, sociability: 1, cuteness: 5 },
+      { name: "Darwin's Fox", lethality: 3, sociability: 0, cuteness: 7 },
+      { name: "Devil Ray", lethality: 2, sociability: -3, cuteness: 4 },
+      { name: "Discus Fish", lethality: -5, sociability: 5, cuteness: 7 },
+      { name: "Dodo", lethality: -8, sociability: 2, cuteness: 6 },
+      { name: "Dormouse", lethality: -6, sociability: 2, cuteness: 9 },
+      { name: "Dove", lethality: -7, sociability: 4, cuteness: 7 },
+      { name: "Dragonfly", lethality: -6, sociability: 1, cuteness: 6 },
+      { name: "Duckbill", lethality: -3, sociability: -1, cuteness: 5 },
+      { name: "Dunnock", lethality: -5, sociability: 3, cuteness: 5 },
+      { name: "Eagle Ray", lethality: 4, sociability: -3, cuteness: 4 },
+      { name: "Echidna", lethality: -1, sociability: -4, cuteness: 6 },
+      { name: "Eider", lethality: -2, sociability: 6, cuteness: 5 },
+      { name: "Elephant Seal", lethality: 7, sociability: 4, cuteness: 2 },
+      { name: "Elk", lethality: 3, sociability: 7, cuteness: 6 },
+      { name: "Emu", lethality: 2, sociability: 3, cuteness: 3 },
+      { name: "Fairy Wren", lethality: -6, sociability: 4, cuteness: 10 },
+      { name: "False Killer Whale", lethality: 7, sociability: 8, cuteness: 2 },
+      { name: "Fangtooth", lethality: 3, sociability: -8, cuteness: -8 },
+      { name: "Fieldfare", lethality: -2, sociability: 5, cuteness: 5 },
+      { name: "Fire Ant", lethality: 2, sociability: 9, cuteness: -6 },
+      { name: "Fisher", lethality: 5, sociability: -5, cuteness: 4 },
+      { name: "Flatworm", lethality: -8, sociability: -3, cuteness: -3 },
+      { name: "Flounder", lethality: -4, sociability: 2, cuteness: 2 },
+      { name: "Flying Fish", lethality: -5, sociability: 5, cuteness: 4 },
+      { name: "Flying Lizard", lethality: -1, sociability: -4, cuteness: 6 },
+      { name: "Fossa", lethality: 6, sociability: -5, cuteness: 4 },
+      { name: "Fritillary", lethality: -5, sociability: 2, cuteness: 7 },
+      { name: "Fruit Bat", lethality: 0, sociability: 9, cuteness: 3 },
+      { name: "Galapagos Tortoise", lethality: -4, sociability: -1, cuteness: 7 },
+      { name: "Garden Eel", lethality: -3, sociability: 4, cuteness: 6 },
+      { name: "Gaur", lethality: 6, sociability: 5, cuteness: 2 },
+      { name: "Gemsbok", lethality: 4, sociability: 6, cuteness: 4 },
+      { name: "Gentoo Penguin", lethality: -3, sociability: 7, cuteness: 9 },
+      { name: "Ghost Crab", lethality: 1, sociability: -4, cuteness: 3 },
+      { name: "Giant Otter", lethality: 4, sociability: 8, cuteness: 8 },
+      { name: "Giant Salamander", lethality: 1, sociability: -4, cuteness: 3 },
+      { name: "Giraffe Weevil", lethality: -6, sociability: 2, cuteness: 5 },
+      { name: "Glowworm", lethality: -8, sociability: 3, cuteness: 6 },
+      { name: "Golden Eagle", lethality: 7, sociability: -5, cuteness: 4 },
+      { name: "Goliath Beetle", lethality: 1, sociability: 1, cuteness: 3 },
+      { name: "Gopher Tortoise", lethality: -3, sociability: -2, cuteness: 6 },
+      { name: "Goshawk", lethality: 5, sociability: -4, cuteness: 3 },
+      { name: "Gray Whale", lethality: 0, sociability: 4, cuteness: 5 },
+      { name: "Great Dane", lethality: 2, sociability: 8, cuteness: 6 },
+      { name: "Green Anaconda", lethality: 9, sociability: -9, cuteness: -4 },
+      { name: "Green Turtle", lethality: -3, sociability: 1, cuteness: 8 },
+      { name: "Grenadier", lethality: -3, sociability: 5, cuteness: 2 },
+      { name: "Grison", lethality: 4, sociability: -3, cuteness: 5 },
+      { name: "Grouper", lethality: -1, sociability: 3, cuteness: 2 },
+      { name: "Grunt", lethality: -3, sociability: 5, cuteness: 1 },
+      { name: "Guillemot", lethality: -2, sociability: 6, cuteness: 5 },
+      { name: "Gulper Eel", lethality: 3, sociability: -8, cuteness: -7 },
+      { name: "Hagfish", lethality: 1, sociability: -4, cuteness: -8 },
+      { name: "Hake", lethality: -4, sociability: 4, cuteness: 1 },
+      { name: "Hammerkop", lethality: 0, sociability: 4, cuteness: 4 },
+      { name: "Harbor Seal", lethality: 1, sociability: 7, cuteness: 8 },
+      { name: "Harpy Eagle", lethality: 8, sociability: -5, cuteness: 2 },
+      { name: "Hartebeest", lethality: 3, sociability: 6, cuteness: 4 },
+      { name: "Hawksbill Turtle", lethality: -2, sociability: 1, cuteness: 6 },
+      { name: "Hellbender", lethality: 0, sociability: -3, cuteness: 2 },
+      { name: "Herring Gull", lethality: 2, sociability: 5, cuteness: 3 },
+      { name: "Honey Badger", lethality: 8, sociability: -6, cuteness: 4 },
+      { name: "Honeycreeper", lethality: -5, sociability: 4, cuteness: 7 },
+      { name: "Horned Lizard", lethality: 1, sociability: -4, cuteness: 5 },
+      { name: "Hornet", lethality: 3, sociability: 7, cuteness: -4 },
+      { name: "Horseshoe Crab", lethality: 0, sociability: -3, cuteness: 0 },
+      { name: "Human", lethality: 5, sociability: 7, cuteness: 4 },
+      { name: "Huntsman Spider", lethality: 2, sociability: -9, cuteness: -7 },
+      { name: "Hydra", lethality: -6, sociability: -8, cuteness: 1 },
+      { name: "Ibis", lethality: -2, sociability: 5, cuteness: 3 },
+      { name: "Ichneumon", lethality: 2, sociability: -4, cuteness: 2 },
+      { name: "Jackrabbit", lethality: -2, sociability: 2, cuteness: 7 },
+      { name: "Jaguarundi", lethality: 6, sociability: -4, cuteness: 5 },
+      { name: "Javan Rhino", lethality: 7, sociability: -4, cuteness: 3 },
+      { name: "John Dory", lethality: -2, sociability: 2, cuteness: 2 },
+      { name: "Kagu", lethality: -3, sociability: 1, cuteness: 5 },
+      { name: "Katydid", lethality: -5, sociability: 3, cuteness: 3 },
+      { name: "Killer Whale", lethality: 9, sociability: 7, cuteness: 1 },
+      { name: "King Penguin", lethality: -3, sociability: 8, cuteness: 8 },
+      { name: "Kiskadee", lethality: -2, sociability: 4, cuteness: 5 },
+      { name: "Kiwi", lethality: -5, sociability: -2, cuteness: 6 },
+      { name: "Knifefish", lethality: 2, sociability: -3, cuteness: 1 },
+      { name: "Kookaburra", lethality: 1, sociability: 5, cuteness: 6 },
+      { name: "Krait", lethality: 8, sociability: -9, cuteness: -6 },
+      { name: "Labrador", lethality: -1, sociability: 9, cuteness: 9 },
+      { name: "Lamprey", lethality: 4, sociability: -9, cuteness: -8 },
+      { name: "Langur", lethality: 2, sociability: 7, cuteness: 5 },
+      { name: "Lark", lethality: -5, sociability: 3, cuteness: 6 },
+      { name: "Leafcutter Ant", lethality: -3, sociability: 9, cuteness: -2 },
+      { name: "Leech", lethality: 2, sociability: -1, cuteness: -9 },
+      { name: "Lemur", lethality: -1, sociability: 6, cuteness: 7 },
+      { name: "Leopard Frog", lethality: -3, sociability: 0, cuteness: 6 },
+      { name: "Leopard Seal", lethality: 8, sociability: -6, cuteness: 4 },
+      { name: "Limpet", lethality: -9, sociability: -6, cuteness: -3 },
+      { name: "Lionfish", lethality: 5, sociability: -7, cuteness: 4 },
+      { name: "Lizardfish", lethality: 2, sociability: -5, cuteness: 1 },
+      { name: "Loach", lethality: -6, sociability: 3, cuteness: 4 },
+      { name: "Locust", lethality: -3, sociability: 7, cuteness: -3 },
+      { name: "Longfin", lethality: -3, sociability: 4, cuteness: 2 },
+      { name: "Loon", lethality: -2, sociability: 2, cuteness: 5 },
+      { name: "Loris", lethality: -3, sociability: -2, cuteness: 9 },
+      { name: "Luna Moth", lethality: -8, sociability: 0, cuteness: 9 },
+      { name: "Lynx", lethality: 6, sociability: -6, cuteness: 5 },
+      { name: "Macaw", lethality: 1, sociability: 6, cuteness: 7 },
+      { name: "Magpie", lethality: 1, sociability: 5, cuteness: 4 },
+      { name: "Malachite Kingfisher", lethality: 1, sociability: -2, cuteness: 8 },
+      { name: "Mammoth", lethality: 8, sociability: 6, cuteness: 2 },
+      { name: "Mandarin Fish", lethality: -3, sociability: -2, cuteness: 9 },
+      { name: "Mangabey", lethality: 3, sociability: 7, cuteness: 5 },
+      { name: "Marabou Stork", lethality: 2, sociability: 2, cuteness: -4 },
+      { name: "Marmot", lethality: -1, sociability: 6, cuteness: 7 },
+      { name: "Mayfly", lethality: -8, sociability: 5, cuteness: 2 },
+      { name: "Megamouth Shark", lethality: 3, sociability: -6, cuteness: -4 },
+      { name: "Midge", lethality: -7, sociability: 5, cuteness: -2 },
+      { name: "Mink", lethality: 4, sociability: -3, cuteness: 6 },
+      { name: "Mistle Thrush", lethality: -3, sociability: 2, cuteness: 5 },
+      { name: "Mockingbird", lethality: -3, sociability: 3, cuteness: 5 },
+      { name: "Monitor Lizard", lethality: 6, sociability: -5, cuteness: 0 },
+      { name: "Moray Eel", lethality: 5, sociability: -8, cuteness: -5 },
+      { name: "Moth", lethality: -7, sociability: 2, cuteness: 4 },
+      { name: "Mountain Goat", lethality: 4, sociability: 5, cuteness: 6 },
+      { name: "Mudskipper", lethality: 0, sociability: -2, cuteness: 5 },
+      { name: "Murre", lethality: -2, sociability: 7, cuteness: 5 },
+      { name: "Muskox", lethality: 5, sociability: 6, cuteness: 2 },
+      { name: "Mussel", lethality: -9, sociability: -5, cuteness: -1 },
+      { name: "Narwhal", lethality: 3, sociability: 6, cuteness: 5 },
+      { name: "Nautilus", lethality: -7, sociability: -3, cuteness: 6 },
+      { name: "Nettle", lethality: -3, sociability: -2, cuteness: -1 },
+      { name: "Nighthawk", lethality: 1, sociability: 2, cuteness: 3 },
+      { name: "Nilgai", lethality: 3, sociability: 5, cuteness: 5 },
+      { name: "Numbat", lethality: -3, sociability: -1, cuteness: 8 },
+      { name: "Nutcracker", lethality: 1, sociability: 3, cuteness: 4 },
+      { name: "Nutria", lethality: -1, sociability: 4, cuteness: 5 },
+      { name: "Octopus", lethality: 3, sociability: -7, cuteness: -2 },
+      { name: "Okapi", lethality: 1, sociability: 2, cuteness: 6 },
+      { name: "Orangutan", lethality: 4, sociability: 5, cuteness: 6 },
+      { name: "Oriole", lethality: -3, sociability: 4, cuteness: 7 },
+      { name: "Osprey", lethality: 5, sociability: -3, cuteness: 4 },
+      { name: "Owl Monkey", lethality: 1, sociability: 6, cuteness: 5 },
+      { name: "Oyster", lethality: -10, sociability: -7, cuteness: -2 },
+      { name: "Paca", lethality: -2, sociability: 2, cuteness: 6 },
+      { name: "Painted Bunting", lethality: -4, sociability: 3, cuteness: 9 },
+      { name: "Pangolin", lethality: -3, sociability: -5, cuteness: 7 },
+      { name: "Paradise Fish", lethality: 1, sociability: -5, cuteness: 7 },
+      { name: "Parr", lethality: -6, sociability: 5, cuteness: 4 },
+      { name: "Patas Monkey", lethality: 3, sociability: 7, cuteness: 5 },
+      { name: "Peccary", lethality: 4, sociability: 6, cuteness: 3 },
+      { name: "Pelican", lethality: 1, sociability: 5, cuteness: 4 },
+      { name: "Phalarope", lethality: -2, sociability: 4, cuteness: 5 },
+      { name: "Phoenix", lethality: 0, sociability: 5, cuteness: 5 },
+      { name: "Pika", lethality: -5, sociability: 2, cuteness: 9 },
+      { name: "Pilot Whale", lethality: 3, sociability: 8, cuteness: 4 },
+      { name: "Pine Siskin", lethality: -4, sociability: 4, cuteness: 6 },
+      { name: "Pipit", lethality: -4, sociability: 3, cuteness: 5 },
+      { name: "Plains Zebra", lethality: 5, sociability: 5, cuteness: 6 },
+      { name: "Plover", lethality: -3, sociability: 4, cuteness: 5 },
+      { name: "Polecat", lethality: 3, sociability: -3, cuteness: 5 },
+      { name: "Pond Skater", lethality: -7, sociability: 3, cuteness: 3 },
+      { name: "Porbeagle", lethality: 6, sociability: -4, cuteness: 2 },
+      { name: "Potoo", lethality: -2, sociability: 1, cuteness: 5 },
+      { name: "Prawn", lethality: -6, sociability: 3, cuteness: -1 },
+      { name: "Pronghorn", lethality: 2, sociability: 6, cuteness: 7 },
+      { name: "Pudu", lethality: -3, sociability: 2, cuteness: 10 },
+      { name: "Puffin", lethality: -2, sociability: 6, cuteness: 9 },
+      { name: "Puma", lethality: 8, sociability: -6, cuteness: 4 },
+      { name: "Purple Martin", lethality: -3, sociability: 6, cuteness: 7 },
+      { name: "Pygmy Marmoset", lethality: -2, sociability: 8, cuteness: 10 },
+      { name: "Python", lethality: 8, sociability: -8, cuteness: -3 },
+      { name: "Quahog", lethality: -9, sociability: -4, cuteness: 1 },
+      { name: "Quetzal", lethality: -3, sociability: 3, cuteness: 9 },
+      { name: "Rabbit", lethality: -6, sociability: 2, cuteness: 9 },
+      { name: "Racer Snake", lethality: 4, sociability: -5, cuteness: 2 },
+      { name: "Rail", lethality: -3, sociability: 4, cuteness: 5 },
+      { name: "Ratfish", lethality: 2, sociability: -4, cuteness: 1 },
+      { name: "Raven", lethality: 1, sociability: 6, cuteness: 2 },
+      { name: "Red Deer", lethality: 2, sociability: 6, cuteness: 7 },
+      { name: "Red Kangaroo", lethality: 4, sociability: 3, cuteness: 7 },
+      { name: "Red Squirrel", lethality: -2, sociability: 2, cuteness: 9 },
+      { name: "Redwing", lethality: -4, sociability: 5, cuteness: 6 },
+      { name: "Reef Shark", lethality: 7, sociability: -3, cuteness: 2 },
+      { name: "Rhesus Monkey", lethality: 4, sociability: 8, cuteness: 4 },
+      { name: "Ringtail", lethality: 2, sociability: 1, cuteness: 7 },
+      { name: "Roadrunner", lethality: 2, sociability: 0, cuteness: 5 },
+      { name: "Rock Hyrax", lethality: -1, sociability: 6, cuteness: 7 },
+      { name: "Rockfish", lethality: 2, sociability: -2, cuteness: 3 },
+      { name: "Roe Deer", lethality: 1, sociability: 3, cuteness: 9 },
+      { name: "Roseate Spoonbill", lethality: 0, sociability: 6, cuteness: 7 },
+      { name: "Royal Tern", lethality: 0, sociability: 5, cuteness: 4 },
+      { name: "Rudd", lethality: -4, sociability: 4, cuteness: 3 },
+      { name: "Sable", lethality: 4, sociability: -4, cuteness: 6 },
+      { name: "Saiga", lethality: 2, sociability: 5, cuteness: 4 },
+      { name: "Saki Monkey", lethality: 3, sociability: 7, cuteness: 5 },
+      { name: "Samoyed", lethality: 1, sociability: 8, cuteness: 9 },
+      { name: "Sand Lizard", lethality: 1, sociability: -4, cuteness: 5 },
+      { name: "Sandpiper", lethality: -3, sociability: 4, cuteness: 5 },
+      { name: "Sardine", lethality: -8, sociability: 8, cuteness: 1 },
+      { name: "Sawshark", lethality: 4, sociability: -5, cuteness: -1 },
+      { name: "Scarlet Ibis", lethality: -1, sociability: 5, cuteness: 7 },
+      { name: "Schipperke", lethality: 1, sociability: 6, cuteness: 6 },
+      { name: "Screamer", lethality: -1, sociability: 5, cuteness: 3 },
+      { name: "Sea Bunny", lethality: -8, sociability: -3, cuteness: 10 },
+      { name: "Sea Dragon", lethality: -5, sociability: -2, cuteness: 8 },
+      { name: "Sea Otter", lethality: -1, sociability: 8, cuteness: 10 },
+      { name: "Sea Slug", lethality: -8, sociability: -2, cuteness: 6 },
+      { name: "Sea Spider", lethality: -3, sociability: -6, cuteness: -1 },
+      { name: "Seadragon", lethality: -5, sociability: -2, cuteness: 8 },
+      { name: "Seal", lethality: 2, sociability: 7, cuteness: 8 },
+      { name: "Shag", lethality: 0, sociability: 5, cuteness: 4 },
+      { name: "Shepherd Dog", lethality: 4, sociability: 9, cuteness: 7 },
+      { name: "Shipworm", lethality: -5, sociability: -2, cuteness: -4 },
+      { name: "Shoveler", lethality: -2, sociability: 4, cuteness: 4 },
+      { name: "Shrike", lethality: 3, sociability: -4, cuteness: 2 },
+      { name: "Siamese Cat", lethality: 1, sociability: -2, cuteness: 8 },
+      { name: "Sifaka", lethality: 1, sociability: 7, cuteness: 7 },
+      { name: "Silverfish", lethality: -6, sociability: 1, cuteness: -3 },
+      { name: "Sitatunga", lethality: 2, sociability: 4, cuteness: 6 },
+      { name: "Skipper", lethality: -6, sociability: 2, cuteness: 4 },
+      { name: "Skunk", lethality: 2, sociability: -3, cuteness: 6 },
+      { name: "Slow Worm", lethality: -3, sociability: -2, cuteness: 5 },
+      { name: "Smelt", lethality: -6, sociability: 6, cuteness: 2 },
+      { name: "Snail", lethality: -9, sociability: -1, cuteness: 2 },
+      { name: "Snipe", lethality: -2, sociability: 3, cuteness: 4 },
+      { name: "Snow Leopard", lethality: 8, sociability: -5, cuteness: 8 },
+      { name: "Snowy Owl", lethality: 5, sociability: -5, cuteness: 8 },
+      { name: "Song Sparrow", lethality: -5, sociability: 4, cuteness: 6 },
+      { name: "Spadefish", lethality: -4, sociability: 4, cuteness: 5 },
+      { name: "Sparrow", lethality: -5, sociability: 5, cuteness: 6 },
+      { name: "Spearfish", lethality: 5, sociability: 0, cuteness: 3 },
+      { name: "Sphinx Moth", lethality: -6, sociability: 2, cuteness: 6 },
+      { name: "Spiny Lobster", lethality: 2, sociability: -5, cuteness: 2 },
+      { name: "Sponge", lethality: -10, sociability: -4, cuteness: 1 },
+      { name: "Spotted Dolphin", lethality: 3, sociability: 8, cuteness: 8 },
+      { name: "Springhare", lethality: -2, sociability: 3, cuteness: 8 },
+      { name: "Squid", lethality: 2, sociability: -6, cuteness: 0 },
+      { name: "Stag Beetle", lethality: 1, sociability: 0, cuteness: 4 },
+      { name: "Starling", lethality: -3, sociability: 7, cuteness: 4 },
+      { name: "Steller's Sea Cow", lethality: -3, sociability: 2, cuteness: 5 },
+      { name: "Stoat", lethality: 4, sociability: -4, cuteness: 7 },
+      { name: "Stonefly", lethality: -5, sociability: 2, cuteness: 2 },
+      { name: "Storm Petrel", lethality: -2, sociability: 5, cuteness: 4 },
+      { name: "Sugar Glider", lethality: -3, sociability: 6, cuteness: 10 },
+      { name: "Sunfish", lethality: -3, sociability: -1, cuteness: 5 },
+      { name: "Swallow", lethality: -4, sociability: 5, cuteness: 6 },
+      { name: "Swamphen", lethality: -2, sociability: 4, cuteness: 5 },
+      { name: "Swift", lethality: -5, sociability: 6, cuteness: 5 },
+      { name: "Tahr", lethality: 3, sociability: 5, cuteness: 5 },
+      { name: "Takin", lethality: 4, sociability: 5, cuteness: 4 },
+      { name: "Tamarin", lethality: 1, sociability: 8, cuteness: 9 },
+      { name: "Tapeworm", lethality: 0, sociability: -2, cuteness: -9 },
+      { name: "Tarantula Hawk", lethality: 4, sociability: -8, cuteness: -5 },
+      { name: "Tasmanian Devil", lethality: 6, sociability: -5, cuteness: 5 },
+      { name: "Tattler", lethality: -3, sociability: 3, cuteness: 4 },
+      { name: "Teal", lethality: -2, sociability: 5, cuteness: 6 },
+      { name: "Terrapin", lethality: -3, sociability: 0, cuteness: 6 },
+      { name: "Thorny Devil", lethality: 2, sociability: -8, cuteness: 5 },
+      { name: "Thrush", lethality: -4, sociability: 3, cuteness: 5 },
+      { name: "Tick", lethality: 2, sociability: 1, cuteness: -10 },
+      { name: "Tiger Beetle", lethality: 1, sociability: -1, cuteness: 3 },
+      { name: "Tilapia", lethality: -4, sociability: 5, cuteness: 4 },
+      { name: "Tit", lethality: -5, sociability: 5, cuteness: 7 },
+      { name: "Toadfish", lethality: 1, sociability: -3, cuteness: -1 },
+      { name: "Torpedo Ray", lethality: 5, sociability: -4, cuteness: 0 },
+      { name: "Toucan", lethality: 0, sociability: 5, cuteness: 7 },
+      { name: "Trapdoor Spider", lethality: 3, sociability: -9, cuteness: -5 },
+      { name: "Tree Shrew", lethality: 0, sociability: 2, cuteness: 6 },
+      { name: "Triggerfish", lethality: 3, sociability: -5, cuteness: 3 },
+      { name: "Trumpeter Swan", lethality: 0, sociability: 5, cuteness: 9 },
+      { name: "Tuatara", lethality: 0, sociability: -3, cuteness: 3 },
+      { name: "Turaco", lethality: -2, sociability: 4, cuteness: 7 },
+      { name: "Turtle Dove", lethality: -6, sociability: 5, cuteness: 8 },
+      { name: "Uakari", lethality: 2, sociability: 7, cuteness: 4 },
+      { name: "Unicornfish", lethality: -4, sociability: 3, cuteness: 5 },
+      { name: "Vampire Bat", lethality: 1, sociability: 8, cuteness: -4 },
+      { name: "Vaquita", lethality: -4, sociability: 3, cuteness: 8 },
+      { name: "Verdin", lethality: -5, sociability: 4, cuteness: 6 },
+      { name: "Vicuna", lethality: -1, sociability: 5, cuteness: 7 },
+      { name: "Viperfish", lethality: 5, sociability: -8, cuteness: -7 },
+      { name: "Vole", lethality: -5, sociability: 5, cuteness: 7 },
+      { name: "Wahoo", lethality: 4, sociability: 2, cuteness: 3 },
+      { name: "Wallaby", lethality: -1, sociability: 4, cuteness: 8 },
+      { name: "Walrus", lethality: 5, sociability: 7, cuteness: 4 },
+      { name: "Wapiti", lethality: 3, sociability: 7, cuteness: 6 },
+      { name: "Water Boatman", lethality: -6, sociability: 4, cuteness: 2 },
+      { name: "Water Deer", lethality: 1, sociability: 2, cuteness: 7 },
+      { name: "Water Flea", lethality: -9, sociability: 4, cuteness: -3 },
+      { name: "Waterbuck", lethality: 3, sociability: 6, cuteness: 6 },
+      { name: "Waxwing", lethality: -4, sociability: 6, cuteness: 7 },
+      { name: "Weaver Bird", lethality: -3, sociability: 8, cuteness: 6 },
+      { name: "Wels Catfish", lethality: 3, sociability: -2, cuteness: 0 },
+      { name: "Wheatear", lethality: -3, sociability: 3, cuteness: 5 },
+      { name: "Whippet", lethality: 0, sociability: 7, cuteness: 8 },
+      { name: "Whistling Duck", lethality: -2, sociability: 5, cuteness: 6 },
+      { name: "White-tailed Deer", lethality: 1, sociability: 5, cuteness: 8 },
+      { name: "Whitetip Reef Shark", lethality: 6, sociability: -3, cuteness: 3 },
+      { name: "Whooping Crane", lethality: 0, sociability: 5, cuteness: 6 },
+      { name: "Wild Boar", lethality: 7, sociability: 3, cuteness: 1 },
+      { name: "Willet", lethality: -2, sociability: 4, cuteness: 4 },
+      { name: "Winter Wren", lethality: -5, sociability: 3, cuteness: 7 },
+      { name: "Wobbegong", lethality: 3, sociability: -5, cuteness: 2 },
+      { name: "Wolf Spider", lethality: 3, sociability: -8, cuteness: -5 },
+      { name: "Wolverine", lethality: 7, sociability: -7, cuteness: 2 },
+      { name: "Wood Frog", lethality: -4, sociability: 1, cuteness: 6 },
+      { name: "Wood Warbler", lethality: -4, sociability: 4, cuteness: 6 },
+      { name: "Woodcock", lethality: -2, sociability: 2, cuteness: 5 },
+      { name: "Woolly Monkey", lethality: 2, sociability: 8, cuteness: 6 },
+      { name: "Wrasse", lethality: -3, sociability: 4, cuteness: 6 },
+      { name: "X-ray Tetra", lethality: -5, sociability: 4, cuteness: 7 },
+      { name: "Xerus", lethality: -1, sociability: 5, cuteness: 7 },
+      { name: "Yak", lethality: 4, sociability: 6, cuteness: 3 },
+      { name: "Yellowhammer", lethality: -4, sociability: 4, cuteness: 6 },
+      { name: "Yeti Crab", lethality: 0, sociability: -4, cuteness: 5 },
+      { name: "Zander", lethality: 4, sociability: 2, cuteness: 2 },
+      { name: "Zebra Shark", lethality: 3, sociability: -3, cuteness: 5 },
+      { name: "Zokor", lethality: -2, sociability: 2, cuteness: 3 }
+    ];
+
+    let wLethality = 1, wSociability = 1, wCuteness = 1;
+
+    animals.forEach(a => {
+      a.group = new THREE.Group();
+      const tex = drawAnimalOutline(a.name);
+      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
+      sprite.scale.set(1.3, 1.3, 1);
+      a.group.add(sprite);
+      a.group.add(nameLabelSprite(a.name));
+      scene.add(a.group);
+    });
+
+    function updatePositions() {
+      animals.forEach(a => {
+        a.group.position.set(
+          wLethality * a.lethality,
+          wSociability * a.sociability,
+          wCuteness * a.cuteness
+        );
+      });
+    }
+    updatePositions();
+
+    // ── CONTROLS ──
+    document.getElementById('w-lethality').addEventListener('input', function() {
+      wLethality = parseInt(this.value);
+      document.getElementById('v-lethality').textContent = this.value;
+      updatePositions();
+    });
+    document.getElementById('w-sociability').addEventListener('input', function() {
+      wSociability = parseInt(this.value);
+      document.getElementById('v-sociability').textContent = this.value;
+      updatePositions();
+    });
+    document.getElementById('w-cuteness').addEventListener('input', function() {
+      wCuteness = parseInt(this.value);
+      document.getElementById('v-cuteness').textContent = this.value;
+      updatePositions();
+    });
+
+    // ── CAMERA ORBIT ──
+    const target = new THREE.Vector3(0, 0, 0);
+    let radius = camera.position.distanceTo(target);
+    let theta = Math.atan2(camera.position.x, camera.position.z);
+    let phi = Math.asin(camera.position.y / radius);
+    let leftDown = false, rightDown = false, middleDown = false;
+    let prevX = 0, prevY = 0;
+
+    function updateCamera() {
+      camera.position.x = target.x + radius * Math.cos(phi) * Math.sin(theta);
+      camera.position.y = target.y + radius * Math.sin(phi);
+      camera.position.z = target.z + radius * Math.cos(phi) * Math.cos(theta);
+      camera.lookAt(target);
+    }
+
+    function isOrbiting() { return middleDown && (leftDown || rightDown); }
+    function isPanning() { return middleDown && !leftDown && !rightDown; }
+
+    renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
+    renderer.domElement.addEventListener('mousedown', e => {
+      if (e.button === 0) leftDown = true;
+      if (e.button === 1) { middleDown = true; e.preventDefault(); }
+      if (e.button === 2) rightDown = true;
+      prevX = e.clientX; prevY = e.clientY;
+    });
+    window.addEventListener('mousemove', e => {
+      if (isOrbiting()) {
+        theta -= (e.clientX - prevX) * 0.005;
+        phi += (e.clientY - prevY) * 0.005;
+        phi = Math.max(-Math.PI/2+0.05, Math.min(Math.PI/2-0.05, phi));
+        updateCamera();
+      } else if (isPanning()) {
+        const right = new THREE.Vector3();
+        camera.getWorldDirection(new THREE.Vector3());
+        right.crossVectors(camera.getWorldDirection(new THREE.Vector3()), camera.up).normalize();
+        const up = camera.up.clone().normalize();
+        target.addScaledVector(right, -(e.clientX - prevX) * 0.015);
+        target.addScaledVector(up, (e.clientY - prevY) * 0.015);
+        updateCamera();
+      }
+      prevX = e.clientX; prevY = e.clientY;
+    });
+    window.addEventListener('mouseup', e => {
+      if (e.button === 0) leftDown = false;
+      if (e.button === 1) middleDown = false;
+      if (e.button === 2) rightDown = false;
+    });
+    renderer.domElement.addEventListener('wheel', e => {
+      radius += e.deltaY * 0.03;
+      radius = Math.max(8, Math.min(150, radius));
+      updateCamera();
+    }, { passive: false });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = viewDiv.clientWidth / viewDiv.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(viewDiv.clientWidth, viewDiv.clientHeight);
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>
