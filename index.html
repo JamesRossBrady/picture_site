@@ -156,14 +156,554 @@
       </div>
       <div class="slide-title"><a href="AnimalGraphic/" target="_blank">Animal Graphic &#8599;</a></div>
     </div>
-  </div>
+
+        <div class="slide" id="slide-4">
+      <div class="slide-content" style="position:relative;flex-direction:column;">
+        <svg id="banjo-svg" viewBox="0 0 960 360" style="max-width:960px;height:auto;background:#0d0d0d;display:block;font-family:'Courier New',monospace;cursor:crosshair;">
+          <defs>
+            <style>
+              .tab-line { stroke:#888; stroke-width:1.5; }
+              .bar-line { stroke:#555; stroke-width:2; }
+              .label  { fill:#999; font-size:14px; font-weight:bold; }
+              .fret   { fill:#e0e0e0; font-size:16px; font-weight:bold; text-anchor:middle; }
+              .time   { fill:#ccc; font-size:18px; font-weight:bold; }
+              .title  { fill:#aaa; font-size:13px; text-anchor:middle; }
+              .annot  { fill:#666; font-size:11px; text-anchor:middle; }
+              .margin { fill:#888; font-size:13px; text-anchor:end; }
+            </style>
+          </defs>
+          <text x="480" y="30" class="title">5-String Banjo Tab — Click a staff line to add a note</text>
+          <text x="75" y="112" class="margin" dominant-baseline="middle">1st (D)</text>
+          <text x="75" y="142" class="margin" dominant-baseline="middle">2nd (B)</text>
+          <text x="75" y="172" class="margin" dominant-baseline="middle">3rd (G)</text>
+          <text x="75" y="202" class="margin" dominant-baseline="middle">4th (D)</text>
+          <text x="75" y="232" class="margin" dominant-baseline="middle">5th (g)</text>
+          <line x1="90" y1="112" x2="930" y2="112" class="tab-line"/>
+          <line x1="90" y1="142" x2="930" y2="142" class="tab-line"/>
+          <line x1="90" y1="172" x2="930" y2="172" class="tab-line"/>
+          <line x1="90" y1="202" x2="930" y2="202" class="tab-line"/>
+          <line x1="90" y1="232" x2="930" y2="232" class="tab-line"/>
+          <line x1="170" y1="97" x2="170" y2="247" class="bar-line"/>
+          <line x1="360" y1="97" x2="360" y2="247" class="bar-line"/>
+          <line x1="550" y1="97" x2="550" y2="247" class="bar-line"/>
+          <line x1="740" y1="97" x2="740" y2="247" class="bar-line"/>
+          <line x1="930" y1="97" x2="930" y2="247" class="bar-line"/>
+          <line x1="925" y1="97" x2="925" y2="247" class="bar-line"/>
+          <line x1="931" y1="97" x2="931" y2="247" class="bar-line"/>
+          <line x1="86" y1="112" x2="86" y2="232" stroke="#888" stroke-width="2"/>
+          <line x1="86" y1="112" x2="80" y2="112" stroke="#888" stroke-width="1.5"/>
+          <line x1="86" y1="232" x2="80" y2="232" stroke="#888" stroke-width="1.5"/>
+          <line x1="217" y1="97" x2="217" y2="247" stroke="#444" stroke-width="0.7" stroke-dasharray="4,6"/>
+          <line x1="265" y1="97" x2="265" y2="247" stroke="#444" stroke-width="0.7" stroke-dasharray="4,6"/>
+          <line x1="312" y1="97" x2="312" y2="247" stroke="#444" stroke-width="0.7" stroke-dasharray="4,6"/>
+          <line x1="407" y1="97" x2="407" y2="247" stroke="#444" stroke-width="0.7" stroke-dasharray="4,6"/>
+          <line x1="455" y1="97" x2="455" y2="247" stroke="#444" stroke-width="0.7" stroke-dasharray="4,6"/>
+          <line x1="502" y1="97" x2="502" y2="247" stroke="#444" stroke-width="0.7" stroke-dasharray="4,6"/>
+          <line x1="597" y1="97" x2="597" y2="247" stroke="#444" stroke-width="0.7" stroke-dasharray="4,6"/>
+          <line x1="645" y1="97" x2="645" y2="247" stroke="#444" stroke-width="0.7" stroke-dasharray="4,6"/>
+          <line x1="692" y1="97" x2="692" y2="247" stroke="#444" stroke-width="0.7" stroke-dasharray="4,6"/>
+          <line x1="787" y1="97" x2="787" y2="247" stroke="#444" stroke-width="0.7" stroke-dasharray="4,6"/>
+          <line x1="835" y1="97" x2="835" y2="247" stroke="#444" stroke-width="0.7" stroke-dasharray="4,6"/>
+          <line x1="882" y1="97" x2="882" y2="247" stroke="#444" stroke-width="0.7" stroke-dasharray="4,6"/>
+          <circle id="click-flash" cx="0" cy="0" r="12" fill="none" stroke="#ffcc00" stroke-width="2" opacity="0" style="transition:opacity 0.3s;">
+            <animate attributeName="opacity" values="0.8;0" dur="0.5s" fill="freeze"/>
+          </circle>
+        </svg>
+        <div id="fret-popup" style="display:none;position:absolute;z-index:10;background:#222;border:1px solid #666;border-radius:6px;padding:6px 10px;">
+          <input type="number" id="fret-input" min="0" max="24" value="0" style="width:60px;background:#111;color:#e0e0e0;border:1px solid #555;border-radius:4px;padding:4px 8px;font-size:16px;font-family:'Courier New',monospace;text-align:center;">
+          <button id="fret-ok" style="background:#444;color:#e0e0e0;border:1px solid #666;border-radius:4px;padding:4px 10px;margin-left:4px;cursor:pointer;font-size:14px;">✓</button>
+          <button id="fret-cancel" style="background:#333;color:#999;border:1px solid #555;border-radius:4px;padding:4px 10px;margin-left:2px;cursor:pointer;font-size:14px;">✗</button>
+        </div>
+        <div class="audio-controls" style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:8px;">
+          <div style="display:flex;gap:12px;align-items:center;">
+            <button id="play-btn" style="background:#2a6e2a;color:#fff;border:1px solid #4a9e4a;border-radius:6px;padding:6px 20px;cursor:pointer;font-size:16px;font-family:inherit;">▶ Play</button>
+            <button id="pause-btn" style="background:#6e2a2a;color:#fff;border:1px solid #9e4a4a;border-radius:6px;padding:6px 20px;cursor:pointer;font-size:16px;font-family:inherit;display:none;">⏸ Pause</button>
+            <span style="color:#888;font-size:13px;">Click fret positions to add notes, then Play</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <button id="vol-btn" style="background:#444;color:#fff;border:1px solid #666;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:14px;font-family:inherit;">🔊</button>
+            <div id="vol-slider-wrap" style="display:none;align-items:center;gap:8px;">
+              <input type="range" id="vol-slider" min="0" max="100" value="80" style="width:100px;height:4px;accent-color:#4a9e4a;">
+              <span id="vol-pct" style="color:#aaa;font-size:12px;min-width:28px;">80%</span>
+            </div>
+          </div>
+        </div>
+      <script>
+        // Beat snap positions (x-coords in viewBox space) across 4 measures, 4 beats each
+        var snapX = [
+          193.75, 241.25, 288.75, 336.25,
+          383.75, 431.25, 478.75, 526.25,
+          573.75, 621.25, 668.75, 716.25,
+          763.75, 811.25, 858.75, 906.25
+        ];
+
+        // String line y-positions
+        var strings = [112, 142, 172, 202, 232];
+        var stringLabels = ['1st (D)','2nd (B)','3rd (G)','4th (D)','5th (g)'];
+
+        var pendingX = 0, pendingY = 0, pendingString = 0;
+
+        // Create a namespace inside the SVG for notes
+        var ns = 'http://www.w3.org/2000/svg';
+        var svg = document.getElementById("banjo-svg");
+        var popup = document.getElementById("fret-popup");
+        var input = document.getElementById("fret-input");
+        var flash = document.getElementById("click-flash");
+        var okBtn = document.getElementById("fret-ok");
+        var cancelBtn = document.getElementById("fret-cancel");
+
+        function viewBoxFromEvent(e) {
+          var rect = svg.getBoundingClientRect();
+          var vb = svg.getAttribute('viewBox').split(' ').map(Number);
+          var scaleX = vb[2] / rect.width;
+          var scaleY = vb[3] / rect.height;
+          var vx = (e.clientX - rect.left) * scaleX + vb[0];
+          var vy = (e.clientY - rect.top) * scaleY + vb[1];
+          return { x: vx, y: vy };
+        }
+
+        function snapToString(vy) {
+          var closest = 0;
+          var closestDist = Infinity;
+          for (var i = 0; i < strings.length; i++) {
+            var d = Math.abs(vy - strings[i]);
+            if (d < closestDist) { closestDist = d; closest = i; }
+          }
+          return closest;
+        }
+
+        function snapToBeat(vx) {
+          var closest = 0;
+          var closestDist = Infinity;
+          for (var i = 0; i < snapX.length; i++) {
+            var d = Math.abs(vx - snapX[i]);
+            if (d < closestDist) { closestDist = d; closest = i; }
+          }
+          return closest;
+        }
+
+        function placeNote(beatIdx, stringIdx, fretNum) {
+          var x = snapX[beatIdx];
+          var y = strings[stringIdx];
+
+          // Remove any existing note at this exact string+beat
+          var existing = svg.querySelectorAll('text.interactive-fret');
+          for (var i = 0; i < existing.length; i++) {
+            var ex = existing[i];
+            if (parseFloat(ex.getAttribute('x')) === x && parseFloat(ex.getAttribute('y')) === y) {
+              ex.remove();
+            }
+          }
+
+          var text = document.createElementNS(ns, 'text');
+          text.setAttribute('x', x);
+          text.setAttribute('y', y - 2);
+          text.setAttribute('class', 'fret interactive-fret');
+          text.setAttribute('dominant-baseline', 'middle');
+          text.setAttribute('text-anchor', 'middle');
+          text.setAttribute('font-size', '16');
+          text.textContent = fretNum;
+          svg.appendChild(text);
+
+          // Flash feedback
+          flash.setAttribute('cx', x);
+          flash.setAttribute('cy', y);
+          flash.setAttribute('opacity', '0.8');
+          setTimeout(function(){ flash.setAttribute('opacity', '0'); }, 100);
+        }
+
+        function showPopup(screenX, screenY, vx, vy) {
+          pendingX = vx;
+          pendingY = vy;
+          pendingString = snapToString(vy);
+          var container = popup.parentElement;
+          var rect = container.getBoundingClientRect();
+          popup.style.left = (screenX - rect.left - 50) + 'px';
+          popup.style.top = (screenY - rect.top - 40) + 'px';
+          popup.style.display = 'block';
+          input.value = '0';
+          input.focus();
+          input.select();
+        }
+
+        function hidePopup() {
+          popup.style.display = 'none';
+        }
+
+        function confirmFret() {
+          var val = input.value.trim();
+          if (val === '') { hidePopup(); return; }
+          var beatIdx = snapToBeat(pendingX);
+          var stringIdx = snapToString(pendingY);
+          placeNote(beatIdx, stringIdx, val);
+          hidePopup();
+        }
+
+        svg.addEventListener('click', function(e) {
+          // Ignore clicks on the title text area (y < 50)
+          var vb = viewBoxFromEvent(e);
+          if (vb.y < 50 || vb.y > 260 || vb.x < 100 || vb.x > 920) return;
+
+          var rect = svg.getBoundingClientRect();
+          var beatIdx = snapToBeat(vb.x);
+          var stringIdx = snapToString(vb.y);
+          var sx = e.clientX;
+          var sy = e.clientY;
+
+          // Check if there's already a note here — if so, remove it (toggle)
+          var x = snapX[beatIdx];
+          var y = strings[stringIdx];
+          var existing = svg.querySelectorAll('text.interactive-fret');
+          var found = false;
+          for (var i = 0; i < existing.length; i++) {
+            var ex = existing[i];
+            if (parseFloat(ex.getAttribute('x')) === x && parseFloat(ex.getAttribute('y')) === y) {
+              ex.remove();
+              found = true;
+              break;
+            }
+          }
+          if (found) return;
+
+          showPopup(sx, sy, vb.x, vb.y);
+        });
+
+        okBtn.addEventListener('click', confirmFret);
+        cancelBtn.addEventListener('click', hidePopup);
+        input.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') confirmFret();
+          if (e.key === 'Escape') hidePopup();
+        });
+
+        // Close popup if clicking outside
+        document.addEventListener('click', function(e) {
+          if (popup.style.display === 'block' && !popup.contains(e.target) && e.target !== svg) {
+            hidePopup();
+          }
+        });
+
+      </script>
+      <div class="slide-title">Banjo Tab Template — Click to add notes</div>
+    </div>
+    <div class="slide" id="slide-5">
+      <div class="slide-content">
+        <iframe src="EpsteinTimeline/index.html" title="Epstein Files Timeline"></iframe>
+      </div>
+      <div class="slide-title"><a href="EpsteinTimeline/" target="_blank">Epstein Files Timeline &#8599;</a></div>
+    </div>
+    <div class="slide" id="slide-6">
+      <div class="slide-content">
+        <img src="dingleberryexpress.png" alt="Dingleberry Express">
+      </div>
+      <div class="slide-title">Dingleberry Express</div>
+    </div>
+
 
   <div class="dots">
     <span class="dot active" data-index="0"></span>
     <span class="dot" data-index="1"></span>
     <span class="dot" data-index="2"></span>
     <span class="dot" data-index="3"></span>
+    <span class="dot" data-index="4"></span>
+    <span class="dot" data-index="5"></span>
+    <span class="dot" data-index="6"></span>
   </div>
+
+
+      <script>
+      // Audio engine — Web Audio API banjo synthesis
+      (function(){
+        var audioCtx = null;
+        var masterGain = null;
+        var isPlaying = false;
+        var playTimeout = null;
+        var isMuted = false;
+
+        // Open G tuning (gDGBD) — string 5 (top) to string 1 (bottom)
+        var TUNING_FREQS = {
+          5: 392.00,  // G4  (g)
+          4: 293.66,  // D4  (D)
+          3: 196.00,  // G3  (G)
+          2: 246.94,  // B3  (B)
+          1: 146.83   // D3  (D)
+        };
+
+        var BEAT_DURATION = 60 / 120; // 0.5s per beat at 120 BPM
+        var snapX = [
+          193.75, 241.25, 288.75, 336.25,
+          383.75, 431.25, 478.75, 526.25,
+          573.75, 621.25, 668.75, 716.25,
+          763.75, 811.25, 858.75, 906.25
+        ];
+        var strings = [112, 142, 172, 202, 232];
+
+        function getAudioCtx() {
+          if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            masterGain = audioCtx.createGain();
+            masterGain.gain.setValueAtTime(0.7, audioCtx.currentTime);
+            masterGain.connect(audioCtx.destination);
+          }
+          return audioCtx;
+        }
+
+        function getFreq(stringNum, fret) {
+          return TUNING_FREQS[stringNum] * Math.pow(2, fret / 12);
+        }
+
+        function playNote(freq, startTime) {
+          var ctx = getAudioCtx();
+          var sampleRate = ctx.sampleRate;
+          var bufferLength = Math.round(sampleRate / freq);
+          var buffer = ctx.createBuffer(1, bufferLength, sampleRate);
+          var data = buffer.getChannelData(0);
+          
+          // Fill with random noise = the "pluck"
+          for (var i = 0; i < bufferLength; i++) {
+            data[i] = (Math.random() * 2 - 1) * 0.7;
+          }
+          
+          var source = ctx.createBufferSource();
+          source.buffer = buffer;
+          
+          // === Banjo Karplus-Strong ===
+          
+          // Delay line — one full wavelength (determines pitch)
+          var delay = ctx.createDelay();
+          delay.delayTime.value = bufferLength / sampleRate;
+          
+          // Feedback gain — banjo decays fast so low feedback
+          var fbGain = ctx.createGain();
+          fbGain.gain.value = 0.30;
+          
+          // Lowpass filter in the feedback loop — smooths the string each cycle
+          var fbFilter = ctx.createBiquadFilter();
+          fbFilter.type = "lowpass";
+          fbFilter.frequency.value = freq * 5;
+          
+          // Highpass before the string — banjo is thin, cut the mud
+          var hpFilter = ctx.createBiquadFilter();
+          hpFilter.type = "highpass";
+          hpFilter.frequency.value = 250;
+          
+          // === Pick-attack transient (3ms noise burst) ===
+          var attackLen = Math.round(sampleRate * 0.003);
+          var attBuf = ctx.createBuffer(1, attackLen, sampleRate);
+          var attData = attBuf.getChannelData(0);
+          for (var i = 0; i < attackLen; i++) {
+            attData[i] = (Math.random() * 2 - 1) * 0.5 * (1 - i / attackLen);
+          }
+          var attSrc = ctx.createBufferSource();
+          attSrc.buffer = attBuf;
+          
+          var attHp = ctx.createBiquadFilter();
+          attHp.type = "highpass";
+          attHp.frequency.value = 600;
+          
+          var attGain = ctx.createGain();
+          attGain.gain.setValueAtTime(0, startTime);
+          attGain.gain.linearRampToValueAtTime(0.3, startTime + 0.001);
+          attGain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.025);
+          
+          // === Output envelope ===
+          var envGain = ctx.createGain();
+          var vol = isMuted ? 0 : (masterGain ? masterGain.gain.value : 0.7);
+          envGain.gain.setValueAtTime(0, startTime);
+          envGain.gain.linearRampToValueAtTime(vol, startTime + 0.001);
+          envGain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.08);
+          
+          // === Routing ===
+          // String: source -> hpFilter -> delay -> fbFilter -> fbGain -> delay (feedback loop)
+          //                                          delay -> envGain -> master
+          // Pick:   attSrc -> attHp -> attGain -> master
+          
+          source.connect(hpFilter);
+          hpFilter.connect(delay);
+          delay.connect(fbFilter);
+          fbFilter.connect(fbGain);
+          fbGain.connect(delay);  // Feedback loop
+          
+          // Output tap
+          delay.connect(envGain);
+          envGain.connect(masterGain || ctx.destination);
+          
+          // Pick attack layer
+          attSrc.connect(attHp);
+          attHp.connect(attGain);
+          attGain.connect(masterGain || ctx.destination);
+          
+          source.start(startTime);
+          source.stop(startTime + 0.08);
+          attSrc.start(startTime);
+          attSrc.stop(startTime + 0.025);
+        }
+
+        function collectNotes() {
+          var notes = [];
+          var svg = document.getElementById('banjo-svg');
+          var texts = svg.querySelectorAll('text.interactive-fret');
+          texts.forEach(function(text) {
+            var x = parseFloat(text.getAttribute('x'));
+            var y = parseFloat(text.getAttribute('y'));
+            var fret = parseInt(text.textContent);
+            if (isNaN(fret) || fret < 0) return;
+            // Find closest string
+            var minDist = Infinity, stringNum = 0;
+            for (var s = 0; s < strings.length; s++) {
+              var d = Math.abs(y - strings[s]);
+              if (d < minDist) { minDist = d; stringNum = s + 1; }
+            }
+            // Find closest beat
+            var minDistX = Infinity, beatIdx = 0;
+            for (var b = 0; b < snapX.length; b++) {
+              var dx = Math.abs(x - snapX[b]);
+              if (dx < minDistX) { minDistX = dx; beatIdx = b; }
+            }
+            if (stringNum >= 1 && stringNum <= 5 && beatIdx >= 0 && beatIdx <= 15) {
+              notes.push({ stringNum: stringNum, fret: fret, beatIndex: beatIdx, freq: getFreq(stringNum, fret) });
+            }
+          });
+          return notes;
+        }
+
+        function hexToRgb(hex, alpha) {
+          var r = parseInt(hex.slice(1,3), 16);
+          var g = parseInt(hex.slice(3,5), 16);
+          var b = parseInt(hex.slice(5,7), 16);
+          return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+        }
+
+        var playheadRects = [];
+
+        function clearPlayhead() {
+          playheadRects.forEach(function(r) { if (r.parentNode) r.parentNode.removeChild(r); });
+          playheadRects = [];
+        }
+
+        function showPlayhead(beat) {
+          clearPlayhead();
+          if (beat < 0 || beat >= snapX.length) return;
+          var svg = document.getElementById('banjo-svg');
+          var ns = 'http://www.w3.org/2000/svg';
+          var x = snapX[beat] - 8;
+          // Create a translucent highlight rect spanning all strings
+          var rect = document.createElementNS(ns, 'rect');
+          rect.setAttribute('x', x);
+          rect.setAttribute('y', 102);
+          rect.setAttribute('width', 16);
+          rect.setAttribute('height', 140);
+          rect.setAttribute('fill', 'rgba(255, 204, 0, 0.18)');
+          rect.setAttribute('rx', '3');
+          // Insert before the first note text to keep it behind notes
+          var firstText = svg.querySelector('text.interactive-fret');
+          if (firstText) {
+            svg.insertBefore(rect, firstText);
+          } else {
+            svg.appendChild(rect);
+          }
+          playheadRects.push(rect);
+        }
+
+        var scheduledPlayhead = [];
+
+        function playTab() {
+          if (isPlaying) return;
+          var notes = collectNotes();
+          if (notes.length === 0) {
+            // Flash a message or just return
+            return;
+          }
+
+          var ctx = getAudioCtx();
+          if (ctx.state === 'suspended') ctx.resume();
+
+          isPlaying = true;
+          document.getElementById('play-btn').style.display = 'none';
+          document.getElementById('pause-btn').style.display = 'inline-flex';
+
+          // Group notes by beat
+          var beatMap = {};
+          notes.forEach(function(n) {
+            if (!beatMap[n.beatIndex]) beatMap[n.beatIndex] = [];
+            beatMap[n.beatIndex].push(n);
+          });
+
+          var beats = Object.keys(beatMap).map(Number).sort(function(a,b){return a-b;});
+          var startTime = ctx.currentTime + 0.1;
+
+          // Schedule audio
+          beats.forEach(function(beat) {
+            var t = startTime + beat * BEAT_DURATION;
+            beatMap[beat].forEach(function(n) { playNote(n.freq, t); });
+          });
+
+          // Schedule playhead
+          scheduledPlayhead = [];
+          beats.forEach(function(beat) {
+            var delay = beat * BEAT_DURATION * 1000;
+            var id = setTimeout(function() { showPlayhead(beat); }, delay);
+            scheduledPlayhead.push(id);
+          });
+
+          // Schedule stop
+          var lastBeat = beats.length > 0 ? beats[beats.length - 1] : 0;
+          var duration = (lastBeat + 1) * BEAT_DURATION;
+          playTimeout = setTimeout(function() {
+            isPlaying = false;
+            document.getElementById('play-btn').style.display = 'inline-flex';
+            document.getElementById('pause-btn').style.display = 'none';
+            clearPlayhead();
+            scheduledPlayhead.forEach(function(id) { clearTimeout(id); });
+            scheduledPlayhead = [];
+          }, duration * 1000 + 200);
+        }
+
+        function pauseTab() {
+          isPlaying = false;
+          if (playTimeout) { clearTimeout(playTimeout); playTimeout = null; }
+          scheduledPlayhead.forEach(function(id) { clearTimeout(id); });
+          scheduledPlayhead = [];
+          clearPlayhead();
+          document.getElementById('play-btn').style.display = 'inline-flex';
+          document.getElementById('pause-btn').style.display = 'none';
+        }
+
+        // Wire up buttons
+        document.getElementById('play-btn').addEventListener('click', playTab);
+        document.getElementById('pause-btn').addEventListener('click', pauseTab);
+
+        // Volume control
+        var volBtn = document.getElementById('vol-btn');
+        var volSliderWrap = document.getElementById('vol-slider-wrap');
+        var volSlider = document.getElementById('vol-slider');
+        var volPct = document.getElementById('vol-pct');
+        var volVisible = false;
+        
+        volBtn.addEventListener('click', function() {
+          volVisible = !volVisible;
+          volSliderWrap.style.display = volVisible ? 'flex' : 'none';
+          if (volVisible) volSlider.focus();
+        });
+        
+        volSlider.addEventListener('input', function() {
+          var pct = parseInt(this.value);
+          volPct.textContent = pct + '%';
+          var vol = pct / 100 * 0.7;
+          if (masterGain) {
+            masterGain.gain.setValueAtTime(vol, getAudioCtx().currentTime);
+          }
+          if (pct === 0) {
+            volBtn.textContent = '🔇';
+          } else if (pct < 30) {
+            volBtn.textContent = '🔈';
+          } else if (pct < 70) {
+            volBtn.textContent = '🔉';
+          } else {
+            volBtn.textContent = '🔊';
+          }
+        });
+      })();
+      </script>
 
   <script>
     const slides = document.querySelectorAll('.slide');
