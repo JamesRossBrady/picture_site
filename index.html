@@ -131,28 +131,28 @@
 
     <div class="slide active" id="slide-0">
       <div class="slide-content">
-        <img src="Epstein_Reams/Epstein_Reams.png" alt="Epstein Reams">
+        <img src="Epstein_Reams/Epstein_Reams_web.png" alt="Epstein Reams">
       </div>
       <div class="slide-title"><a href="Epstein_Reams/">Epstein Reams</a></div>
     </div>
 
     <div class="slide" id="slide-1">
       <div class="slide-content">
-        <iframe src="TrumpCorruptionAndPardons/index.html" title="Trump Corruption and Pardons"></iframe>
+        <iframe data-src="TrumpCorruptionAndPardons/index.html" title="Trump Corruption and Pardons"></iframe>
       </div>
       <div class="slide-title"><a href="TrumpCorruptionAndPardons/" target="_blank">Trump Corruption &amp; Pardons &#8599;</a></div>
     </div>
 
     <div class="slide" id="slide-2">
       <div class="slide-content">
-        <img src="ArtisticAnalysis.png" alt="Artistic Analysis">
+        <img data-src="ArtisticAnalysis_web.png" alt="Artistic Analysis">
       </div>
       <div class="slide-title">Artistic Analysis</div>
     </div>
 
     <div class="slide" id="slide-3">
       <div class="slide-content">
-        <iframe src="AnimalGraphic/index.html" title="Animal Graphic"></iframe>
+        <iframe data-src="AnimalGraphic/index.html" title="Animal Graphic"></iframe>
       </div>
       <div class="slide-title"><a href="AnimalGraphic/" target="_blank">Animal Graphic &#8599;</a></div>
     </div>
@@ -388,21 +388,28 @@
     </div>
     <div class="slide" id="slide-5">
       <div class="slide-content">
-        <iframe src="EpsteinTimeline/index.html" title="Epstein Files Timeline"></iframe>
+        <iframe data-src="EpsteinTimeline/index.html" title="Epstein Files Timeline"></iframe>
       </div>
       <div class="slide-title"><a href="EpsteinTimeline/" target="_blank">Epstein Files Timeline &#8599;</a></div>
     </div>
     <div class="slide" id="slide-6">
       <div class="slide-content">
-        <img src="dingleberryexpress.png" alt="Dingleberry Express">
+        <img data-src="dingleberryexpress.png" alt="Dingleberry Express">
       </div>
       <div class="slide-title">Dingleberry Express</div>
     </div>
     <div class="slide" id="slide-7">
       <div class="slide-content">
-        <img src="OldKinderhook.png" alt="Old Kinderhook">
+        <img data-src="OldKinderhook_web.png" alt="Old Kinderhook">
       </div>
       <div class="slide-title">Old Kinderhook</div>
+    </div>
+
+    <div class="slide" id="slide-8">
+      <div class="slide-content">
+        <iframe data-src="us_debt_interactive.html" title="US National Debt and Interest"></iframe>
+      </div>
+      <div class="slide-title">U.S. National Debt &amp; Interest</div>
     </div>
 
 
@@ -415,6 +422,7 @@
     <span class="dot" data-index="5"></span>
     <span class="dot" data-index="6"></span>
     <span class="dot" data-index="7"></span>
+    <span class="dot" data-index="8"></span>
   </div>
 
 
@@ -717,6 +725,16 @@
     const slides = document.querySelectorAll('.slide');
     const dots = document.querySelectorAll('.dot');
     let current = 0;
+    const loaded = new Set();
+
+    function loadSlide(i) {
+      if (loaded.has(i)) return;
+      loaded.add(i);
+      slides[i].querySelectorAll('[data-src]').forEach(el => {
+        el.src = el.getAttribute('data-src');
+        el.removeAttribute('data-src');
+      });
+    }
 
     function show(index) {
       slides[current].classList.remove('active');
@@ -724,7 +742,10 @@
       current = ((index % slides.length) + slides.length) % slides.length;
       slides[current].classList.add('active');
       dots[current].classList.add('active');
+      loadSlide(current);
     }
+
+    loadSlide(0);
 
     document.getElementById('prev').addEventListener('click', () => show(current - 1));
     document.getElementById('next').addEventListener('click', () => show(current + 1));

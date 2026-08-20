@@ -1,0 +1,5 @@
+# Python virtual environment (machine-specific)
+call_for_fire_game/venv/
+
+# Large ESRI geodatabase source data (1.6 GB, not needed to run the game)
+call_for_fire_game/mgrs_13t_100m/

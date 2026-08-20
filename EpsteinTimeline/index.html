@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Epstein Files Timeline</title>
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --bg-card: #1a1a2e;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #c0392b;
+      --accent2: #e67e22;
+      --line: #333;
+      --dot: #555;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+      min-height: 100vh;
+    }
+
+    #app {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #222;
+    }
+
+    header h1 {
+      font-size: clamp(22px, 3vw, 32px);
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+    }
+
+    header .subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* Timeline vertical line */
+    .timeline {
+      position: relative;
+      padding-left: 40px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 14px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--line);
+    }
+
+    .event {
+      position: relative;
+      margin-bottom: 48px;
+      padding: 20px 24px;
+      background: var(--bg-card);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+      transition: border-color 0.2s;
+    }
+
+    .event:hover {
+      border-left-color: var(--accent2);
+    }
+
+    /* Timeline dot on the line */
+    .event::before {
+      content: '';
+      position: absolute;
+      left: -33px;
+      top: 24px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 3px solid var(--bg);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+
+    .event-date {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent2);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .event-title {
+      font-size: clamp(16px, 2vw, 20px);
+      font-weight: 600;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .event-title .hoax {
+      color: var(--accent);
+    }
+
+    .event-title .dems {
+      color: #e74c3c;
+    }
+
+    .event-video {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      aspect-ratio: 9/16;
+      margin: 16px 0 0;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .event-video iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .event-description {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+      #app { padding: 20px 16px 60px; }
+      .timeline { padding-left: 32px; }
+      .event { padding: 16px; }
+      .event::before { left: -27px; width: 12px; height: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>The Epstein Files Timeline</h1>
+      <div class="subtitle">Curated events &amp; analysis</div>
+    </header>
+
+    <div class="timeline">
+      <div class="event">
+        <div class="event-date">July 21, 2025</div>
+        <div class="event-title">
+          I know <span class="hoax">the Epstein Files</span> is a <span class="hoax">hoax</span>, it's started by <span class="dems">Democrats</span>
+        </div>
+        <div class="event-video">
+          <iframe src="https://www.youtube.com/embed/_HZVkt6_EdY" title="Epstein Files Hoax" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <div class="event-description">
+          Breaking analysis on the Epstein Files narrative.
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Call For Fire — MGRS 13T Map</title>
+<style>
+:root {
+  --bg: #0d0d0d; --panel: #111; --text: #e0e0e0; --muted: #888;
+  --accent: #c9a227; --line: #333; --line-strong: #555;
+  --corruption: #e74c3c; --green: #2ecc71; --blue: #3498db; --orange: #e67e22;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow: hidden; display: flex;
+}
+#app { display:flex; width:100vw; height:100vh; }
+#map-wrap { flex: 1 1 75%; position:relative; min-width:0; }
+canvas#map { width:100%; height:100%; display:block; cursor:crosshair; background:var(--bg); }
+
+#panel {
+  flex: 0 0 280px; background: var(--panel); border-left: 1px solid #222;
+  overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px;
+}
+#panel h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 0 0 4px 0; }
+#panel h3 { font-size: 12px; color: var(--muted); margin: 0 0 4px; text-transform: uppercase; letter-spacing: .5px; }
+
+.tool-buttons { display: flex; gap: 4px; flex-wrap: wrap; }
+.tool-btn {
+  flex: 1; min-width: 55px; padding: 8px 6px; border: 1px solid #333;
+  background: #1a1a1a; color: var(--muted); cursor: pointer;
+  font-size: 11px; font-family: inherit; text-align: center; border-radius: 3px;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.tool-btn:hover { background: #222; color: #ccc; }
+.tool-btn.active { background: #2a2410; border-color: var(--accent); color: var(--accent); }
+
+.readout { font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--accent); }
+.readout span { color: var(--muted); font-size: 10px; display: block; }
+
+#coord-display { background: #0a0a0a; border: 1px solid #222; border-radius: 4px; padding: 10px; }
+#coord-display .coord-line { margin: 2px 0; font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+#coord-display .coord-line .label { color: var(--muted); font-size: 10px; }
+#coord-display .coord-line .value { color: var(--accent); }
+
+#precision-select { display: flex; gap: 4px; margin-top: 6px; }
+.prec-btn {
+  padding: 3px 6px; border: 1px solid #333; background: #1a1a1a;
+  color: var(--muted); cursor: pointer; font-size: 10px; border-radius: 2px;
+}
+.prec-btn.active { border-color: var(--accent); color: var(--accent); background: #2a2410; }
+
+.color-swatches { display: flex; gap: 6px; margin-top: 4px; }
+.swatch {
+  width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid transparent;
+}
+.swatch.active { border-color: #fff; }
+
+#measurements-list { font-size: 11px; max-height: 140px; overflow-y: auto; }
+.meas-item { padding: 4px 6px; border-bottom: 1px solid #1a1a1a; font-family: ui-monospace, Menlo, monospace; display: flex; justify-content: space-between; color: var(--text); }
+.meas-item .dist { color: var(--accent); }
+.meas-item .del { color: var(--corruption); cursor: pointer; margin-left: 8px; }
+
+.action-btn {
+  padding: 6px 10px; border: 1px solid #444; background: #1a1a1a;
+  color: var(--muted); cursor: pointer; font-size: 11px; border-radius: 3px;
+}
+.action-btn:hover { background: #222; color: #ccc; }
+.action-btn.warn:hover { background: #3a1a1a; border-color: var(--corruption); color: var(--corruption); }
+
+#status {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 5px 10px;
+  font: 12px ui-monospace, Menlo, monospace; color: var(--accent);
+  background: rgba(0,0,0,.7); pointer-events: none;
+  display: flex; justify-content: space-between;
+}
+
+@media (max-width: 760px) {
+  #app { flex-direction: column; }
+  #map-wrap { flex: 1 1 60%; }
+  #panel { flex: 0 0 auto; max-height: 40vh; border-left: none; border-top: 1px solid #222; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="map-wrap">
+    <canvas id="map"></canvas>
+    <div id="status">
+      <span id="status-mgrs">13T -- ---- ----</span>
+      <span id="status-utm"></span>
+    </div>
+  </div>
+  <aside id="panel">
+    <h2>Call For Fire — MGRS 13T</h2>
+    <div class="tool-buttons">
+      <button class="tool-btn active" data-tool="pan">&#9992; Pan</button>
+      <button class="tool-btn" data-tool="protractor">&#9673; Protractor</button>
+      <button class="tool-btn" data-tool="ruler">&#9633; Ruler</button>
+      <button class="tool-btn" data-tool="pencil">&#9998; Pencil</button>
+    </div>
+
+    <div id="protractor-info" style="display:none;">
+      <h3>Protractor</h3>
+      <div class="readout" id="protractor-readout">Azimuth: — mils / —°</div>
+      <div style="margin-top:4px; font-size:10px; color:var(--muted);">
+        Click map to place &bull; Drag to move &bull; Drag dot to rotate &bull; Wheel to fine-tune
+      </div>
+    </div>
+
+    <div id="ruler-info" style="display:none;">
+      <h3>Ruler</h3>
+      <div class="readout" id="ruler-readout">Click &amp; drag to measure</div>
+      <div id="measurements-list"></div>
+    </div>
+
+    <div id="pencil-info" style="display:none;">
+      <h3>Pencil</h3>
+      <div class="color-swatches" id="swatches"></div>
+    </div>
+
+    <div id="coord-display">
+      <div class="coord-line"><span class="label">MGRS</span> <span class="value" id="cd-mgrs">—</span></div>
+      <div class="coord-line"><span class="label">UTM</span> <span class="value" id="cd-utm">—</span></div>
+      <div class="coord-line"><span class="label">Lat/Lon</span> <span class="value" id="cd-latlon">—</span></div>
+      <div id="precision-select">
+        <span style="font-size:10px;color:var(--muted);margin-right:4px;">Prec:</span>
+        <button class="prec-btn" data-prec="100000">10km</button>
+        <button class="prec-btn" data-prec="10000">1km</button>
+        <button class="prec-btn active" data-prec="100">100m</button>
+        <button class="prec-btn" data-prec="10">10m</button>
+        <button class="prec-btn" data-prec="1">1m</button>
+      </div>
+    </div>
+
+    <div>
+      <button class="action-btn" id="btn-reset">&#8634; Reset View</button>
+      <button class="action-btn warn" id="btn-clear-drawing" style="margin-left:4px;">Clear Drawing</button>
+      <button class="action-btn" id="btn-clear-ruler" style="margin-left:4px;">Clear Ruler</button>
+    </div>
+  </aside>
+</div>
+
+<script>
+(function() {
+"use strict";
+
+// ─── Constants ───────────────────────────────────────────────
+const ZONE = 13, LON0 = -105, K0 = 0.9996, FE = 500000, FN = 0;
+const A = 6378137.0, F = 1/298.257223563;
+const E2 = F*(2-F), EP2 = E2/(1-E2);
+const DEG = Math.PI/180;
+const COL_SETS = ['ABCDEFGH','JKLMNPQR','STUVWXYZ'];
+const ROW_SETS = ['ABCDEFGHJKLMNPQRSTUV', 'FGHJKLMNPQRSTUVABCDE'];
+const BANDS = 'CDEFGHJKLMNPQRSTUVWX';
+
+// Grid levels: size in meters
+const LEVELS = [
+  { size: 100000, stroke: 'rgba(255,255,255,0.45)', w: 1.5, labelFont: 13 },
+  { size: 10000,  stroke: 'rgba(255,255,255,0.22)', w: 1,   labelFont: 11 },
+  { size: 1000,   stroke: 'rgba(255,255,255,0.12)', w: .75, labelFont: 10 },
+  { size: 100,    stroke: 'rgba(255,255,255,0.06)', w: .5,  labelFont: 9  },
+];
+
+const PENCIL_COLORS = ['#ffcc00','#e74c3c','#3498db','#e0e0e0','#2ecc71'];
+
+// Zone 13T geographic boundaries
+const ZONE_LAT_S = 40, ZONE_LAT_N = 48, ZONE_LON_W = -108, ZONE_LON_E = -102;
+
+// ─── UTM / MGRS Math ────────────────────────────────────────
+function latLonToUTM(lat, lon) {
+  const phi = lat * DEG, lam = lon * DEG, lam0 = LON0 * DEG;
+  const sinPhi = Math.sin(phi), cosPhi = Math.cos(phi);
+  const N = A / Math.sqrt(1 - E2 * sinPhi * sinPhi);
+  const T = Math.tan(phi) * Math.tan(phi);
+  const C = EP2 * cosPhi * cosPhi;
+  const dLam = lam - lam0;
+  const A1 = dLam * cosPhi;
+
+  const e2 = E2, e3 = e2*e2, e4 = e3*e2;
+  const M = A * ((1 - e2/4 - 3*e3/64 - 5*e4/256) * phi
+    - (3*e2/8 + 3*e3/32 + 45*e4/1024) * Math.sin(2*phi)
+    + (15*e3/256 + 45*e4/1024) * Math.sin(4*phi)
+    - (35*e4/3072) * Math.sin(6*phi));
+
+  const A13 = A1*A1*A1, A15 = A13*A1*A1;
+  const easting = K0*N*(A1 + (1-T+C)*A13/6 + (5-18*T+T*T+72*C-58*EP2)*A15/120) + FE;
+  const northing = K0*(M + N*Math.tan(phi)*(A1*A1/2 + (5-T+9*C+4*C*C)*A13*A1/24
+    + (61-58*T+T*T+600*C-330*EP2)*A15*A1/720)) + FN;
+  return { easting, northing };
+}
+
+function utmToLatLon(easting, northing) {
+  const x = easting - FE, y = northing;
+  const M = y / K0;
+  const e1 = (1 - Math.sqrt(1-E2)) / (1 + Math.sqrt(1-E2));
+  const e12 = e1*e1, e13 = e12*e1, e14 = e13*e1;
+  const mu = M / (A * (1 - E2/4 - 3*E2*E2/64 - 5*E2*E2*E2/256));
+  const phi1 = mu + (3*e1/2 - 27*e13/32)*Math.sin(2*mu)
+    + (21*e12/16 - 55*e14/32)*Math.sin(4*mu)
+    + (151*e13/96)*Math.sin(6*mu) + (1097*e14/512)*Math.sin(8*mu);
+  const sinP1 = Math.sin(phi1), cosP1 = Math.cos(phi1);
+  const N1 = A / Math.sqrt(1 - E2*sinP1*sinP1);
+  const T1 = Math.tan(phi1)*Math.tan(phi1);
+  const C1 = EP2*cosP1*cosP1;
+  const R1 = A*(1-E2) / Math.pow(1 - E2*sinP1*sinP1, 1.5);
+  const D = x / (N1*K0);
+  const D2=D*D, D3=D2*D, D4=D3*D, D5=D4*D, D6=D5*D;
+
+  const lat = (phi1 - (N1*Math.tan(phi1)/R1) * (D2/2 - (5+3*T1+10*C1-4*C1*C1-9*EP2)*D4/24
+    + (61+90*T1+298*C1+45*T1*T1-252*EP2-3*C1*C1)*D6/720)) / DEG;
+  const lon = (LON0*DEG + (D - (1+2*T1+C1)*D3/6
+    + (5-2*C1+28*T1-3*C1*C1+8*EP2+24*T1*T1)*D5/120) / cosP1) / DEG;
+  return { lat, lon };
+}
+
+function getBandLetter(lat) { return BANDS[Math.floor((lat + 80) / 8)] || 'X'; }
+
+function utmToMGRS(easting, northing, lat) {
+  const col = Math.floor(easting / 100000); // 1-indexed, ranges ~1-8 within a zone
+  const row = Math.floor(northing / 100000) % 20;
+  const colSet = COL_SETS[(ZONE - 1) % 3];
+  const rowSet = ROW_SETS[(ZONE - 1) % 2];
+  const colLetter = (col >= 1 && col - 1 < colSet.length) ? colSet[col - 1] : '?';
+  const rowLetter = (row >= 0 && row < rowSet.length) ? rowSet[row] : '?';
+  const band = getBandLetter(lat);
+  const e100k = col * 100000, n100k = row * 100000;
+  const eRem = easting - e100k, nRem = northing - n100k;
+  return { gzd: '13' + band, sq100k: colLetter + rowLetter, eRem, nRem, colLetter, rowLetter, band };
+}
+
+function formatMGRS(easting, northing, lat, prec) {
+  const m = utmToMGRS(easting, northing, lat);
+  let digits;
+  if (prec >= 100000) digits = 0;
+  else if (prec >= 10000) digits = 2;
+  else if (prec >= 1000) digits = 4;
+  else if (prec >= 100) digits = 6;
+  else if (prec >= 10) digits = 8;
+  else digits = 10;
+  if (digits === 0) return m.gzd + ' ' + m.sq100k;
+  const half = digits / 2;
+  const eStr = String(Math.floor(m.eRem)).padStart(5, '0').substring(0, half);
+  const nStr = String(Math.floor(m.nRem)).padStart(5, '0').substring(0, half);
+  return m.gzd + m.sq100k + ' ' + eStr + ' ' + nStr;
+}
+
+function milsFromBearing(deg) { return Math.round(((deg % 360 + 360) % 360) * 6400 / 360) % 6400; }
+function bearingFromMils(m) { return ((m % 6400 + 6400) % 6400) * 360 / 6400; }
+
+// ─── Web Mercator (EPSG:3857) ────────────────────────────────
+const WM_R = 6378137.0;
+function latLonToWM(lat, lon) {
+  const phi = lat * DEG;
+  return {
+    x: WM_R * lon * DEG,
+    y: WM_R * Math.log(Math.tan(Math.PI / 4 + phi / 2))
+  };
+}
+function wmToLatLon(x, y) {
+  return {
+    lat: (2 * Math.atan(Math.exp(y / WM_R)) - Math.PI / 2) / DEG,
+    lon: (x / WM_R) / DEG
+  };
+}
+// UTM grid point → Web Mercator (via lat/lon)
+function utmToWM(easting, northing) {
+  const ll = utmToLatLon(easting, northing);
+  return latLonToWM(ll.lat, ll.lon);
+}
+
+// ─── Tile loading ────────────────────────────────────────────
+const TILE_URL = 'https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/';
+const TILE_SIZE = 256;
+const tileCache = {};
+const loadingTiles = {};
+
+function tileKey(z, x, y) { return z + '/' + x + '/' + y; }
+
+function getTileBounds(z, x, y) {
+  const n = Math.pow(2, z);
+  const xMin = (x / n) * 2 * Math.PI * WM_R - Math.PI * WM_R;
+  const xMax = ((x + 1) / n) * 2 * Math.PI * WM_R - Math.PI * WM_R;
+  const yMax = Math.PI * WM_R - (y / n) * 2 * Math.PI * WM_R;
+  const yMin = Math.PI * WM_R - ((y + 1) / n) * 2 * Math.PI * WM_R;
+  return { xMin, xMax, yMin, yMax };
+}
+
+function loadTile(z, x, y) {
+  const key = tileKey(z, x, y);
+  if (tileCache[key] || loadingTiles[key]) return;
+  loadingTiles[key] = true;
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function() {
+    tileCache[key] = img;
+    delete loadingTiles[key];
+    invalidate();
+  };
+  img.onerror = function() {
+    delete loadingTiles[key];
+  };
+  img.src = TILE_URL + z + '/' + y + '/' + x;
+}
+
+// ─── View transform ──────────────────────────────────────────
+function worldToScreen(x, y, state) {
+  return {
+    sx: (x - state.view.cx) * state.view.scale + state.W / 2,
+    sy: (state.view.cy - y) * state.view.scale + state.H / 2
+  };
+}
+function screenToWorld(sx, sy, state) {
+  return {
+    e: state.view.cx + (sx - state.W / 2) / state.view.scale,
+    n: state.view.cy - (sy - state.H / 2) / state.view.scale
+  };
+}
+
+// Compute zone bounds in Web Mercator
+const zoneWMCorners = [
+  latLonToWM(ZONE_LAT_S, ZONE_LON_W),
+  latLonToWM(ZONE_LAT_S, ZONE_LON_E),
+  latLonToWM(ZONE_LAT_N, ZONE_LON_W),
+  latLonToWM(ZONE_LAT_N, ZONE_LON_E),
+];
+const ZONE_X_MIN = Math.min(...zoneWMCorners.map(c => c.x));
+const ZONE_X_MAX = Math.max(...zoneWMCorners.map(c => c.x));
+const ZONE_Y_MIN = Math.min(...zoneWMCorners.map(c => c.y));
+const ZONE_Y_MAX = Math.max(...zoneWMCorners.map(c => c.y));
+
+// ─── State ───────────────────────────────────────────────────
+const state = {
+  view: { cx: (ZONE_X_MIN+ZONE_X_MAX)/2, cy: (ZONE_Y_MIN+ZONE_Y_MAX)/2, scale: 0.0015 },
+  tool: 'pan',
+  protractor: { placed: false, e: 0, n: 0, rotMils: 0, size: 140 },
+  measurements: [],
+  rulerTemp: null,
+  strokes: [],
+  strokeColor: PENCIL_COLORS[0],
+  precision: 100,
+  hover: null,
+  interaction: null,
+  W: 0, H: 0,
+  dirty: false,
+};
+Object.defineProperty(state.protractor, 'rotDeg', {
+  get() { return bearingFromMils(this.rotMils); }
+});
+
+// ─── Canvas setup ────────────────────────────────────────────
+const canvas = document.getElementById('map'), ctx = canvas.getContext('2d');
+let rafId = null;
+
+function resize() {
+  const wrap = document.getElementById('map-wrap');
+  const dpr = window.devicePixelRatio || 1;
+  state.W = wrap.clientWidth;
+  state.H = wrap.clientHeight;
+  canvas.width = state.W * dpr;
+  canvas.height = state.H * dpr;
+  canvas.style.width = state.W + 'px';
+  canvas.style.height = state.H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  invalidate();
+}
+window.addEventListener('resize', resize);
+
+function invalidate() { if (!state.dirty) { state.dirty = true; rafId = requestAnimationFrame(render); } }
+function makeDirty() { state.dirty = true; }
+
+// ─── Render ──────────────────────────────────────────────────
+function render() {
+  state.dirty = false;
+  rafId = null;
+  const {W, H} = state;
+
+  try {
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#0d0d0d';
+    ctx.fillRect(0, 0, W, H);
+
+    drawTiles();
+    drawGrid();
+
+    // DIAGNOSTIC: fixed reference cross at zone center + view center readout
+    const refWM = latLonToWM((ZONE_LAT_S+ZONE_LAT_N)/2, (ZONE_LON_W+ZONE_LON_E)/2);
+    const ref = worldToScreen(refWM.x, refWM.y, state);
+    ctx.strokeStyle = '#00ff00';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(ref.sx - 15, ref.sy); ctx.lineTo(ref.sx + 15, ref.sy);
+    ctx.moveTo(ref.sx, ref.sy - 15); ctx.lineTo(ref.sx, ref.sy + 15);
+    ctx.stroke();
+    // View center in UTM
+    const vcLL = wmToLatLon(state.view.cx, state.view.cy);
+    const vcUTM = latLonToUTM(vcLL.lat, vcLL.lon);
+    ctx.fillStyle = '#00ff00';
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('ctr UTME='+Math.round(vcUTM.easting)+' N='+Math.round(vcUTM.northing), 10, H - 20);
+    ctx.fillText('scale='+state.view.scale.toFixed(5), 10, H - 6);
+    drawPencilStrokes();
+    drawRulerMeasurements();
+    if (state.rulerTemp) drawRulerLine(state.rulerTemp.e1, state.rulerTemp.n1, state.rulerTemp.e2, state.rulerTemp.n2, 'rgba(201,162,39,0.6)', true);
+    if (state.protractor.placed) drawProtractor();
+    drawHover();
+  } catch (err) {
+    // Show errors directly on canvas
+    ctx.fillStyle = '#ff0000';
+    ctx.font = '14px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('ERROR: ' + err.message, 20, 40);
+    ctx.fillText(err.stack ? err.stack.substring(0, 200) : '', 20, 60);
+    console.error(err);
+  }
+}
+
+function drawGrid() {
+  const {W, H} = state;
+  const v = state.view;
+  const halfW = W / 2 / v.scale, halfH = H / 2 / v.scale;
+
+  // Visible bounds in Web Mercator
+  const wx0 = v.cx - halfW, wx1 = v.cx + halfW;
+  const wy0 = v.cy - halfH, wy1 = v.cy + halfH;
+
+  // Visible lat/lon bounds (with margin)
+  const swLL = wmToLatLon(wx0, wy0);
+  const neLL = wmToLatLon(wx1, wy1);
+  const latMin = Math.max(ZONE_LAT_S, swLL.lat - 0.2);
+  const latMax = Math.min(ZONE_LAT_N, neLL.lat + 0.2);
+
+  // UTM northing range at zone center
+  const midLon = (ZONE_LON_W + ZONE_LON_E) / 2;
+  const utmN0 = latLonToUTM(latMin, midLon).northing;
+  const utmN1 = latLonToUTM(latMax, midLon).northing;
+  // UTM easting range at mid latitude
+  const midLat = (latMin + latMax) / 2;
+  const utmE0 = latLonToUTM(midLat, ZONE_LON_W).easting;
+  const utmE1 = latLonToUTM(midLat, ZONE_LON_E).easting;
+
+  // Draw zone boundary
+  ctx.strokeStyle = 'rgba(201,162,39,0.25)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([8, 4]);
+  ctx.beginPath();
+  const bnd = zoneWMCorners.map(c => worldToScreen(c.x, c.y, state));
+  ctx.moveTo(bnd[0].sx, bnd[0].sy);
+  ctx.lineTo(bnd[1].sx, bnd[1].sy);
+  ctx.lineTo(bnd[3].sx, bnd[3].sy);
+  ctx.lineTo(bnd[2].sx, bnd[2].sy);
+  ctx.closePath();
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Helper: convert a UTM grid point to screen coords via WM
+  function utmPt(e, n) {
+    const ll = utmToLatLon(e, n);
+    const wm = latLonToWM(ll.lat, ll.lon);
+    return worldToScreen(wm.x, wm.y, state);
+  }
+
+  for (const level of LEVELS) {
+    const px = level.size * state.view.scale;
+    if (px < 6) continue;
+
+    const showLabels = (px >= 60 && px <= 500) || (level.size === 100000 && px >= 90);
+
+    const eStart = Math.ceil(utmE0 / level.size) * level.size;
+    const nStart = Math.ceil(utmN0 / level.size) * level.size;
+
+    ctx.strokeStyle = level.stroke;
+    ctx.lineWidth = level.w;
+    ctx.beginPath();
+
+    // Vertical lines: constant UTM easting, span full northing range
+    for (let e = eStart; e <= utmE1; e += level.size) {
+      const p0 = utmPt(e, utmN0);
+      const p1 = utmPt(e, utmN1);
+      ctx.moveTo(p0.sx, p0.sy);
+      ctx.lineTo(p1.sx, p1.sy);
+    }
+
+    // Horizontal lines: constant UTM northing, span full easting range
+    for (let n = nStart; n <= utmN1; n += level.size) {
+      const p0 = utmPt(utmE0, n);
+      const p1 = utmPt(utmE1, n);
+      ctx.moveTo(p0.sx, p0.sy);
+      ctx.lineTo(p1.sx, p1.sy);
+    }
+    ctx.stroke();
+
+    // Labels at grid square centers
+    if (showLabels) {
+      ctx.font = level.labelFont + 'px ui-monospace, Menlo, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      for (let e = eStart; e + level.size <= utmE1; e += level.size) {
+        for (let n = nStart; n + level.size <= utmN1; n += level.size) {
+          const midE = e + level.size / 2, midN = n + level.size / 2;
+          const p = utmPt(midE, midN);
+          if (p.sx < -50 || p.sx > W + 50 || p.sy < -50 || p.sy > H + 50) continue;
+
+          const lat = utmToLatLon(e, n).lat;
+          let label;
+          if (level.size === 100000) {
+            const m = utmToMGRS(e, n, lat);
+            label = m.gzd + m.sq100k;
+          } else if (level.size === 10000) {
+            const m = utmToMGRS(e, n, lat);
+            label = m.sq100k + String(Math.floor(m.eRem / 10000)) + String(Math.floor(m.nRem / 10000));
+          } else {
+            const m = utmToMGRS(e, n, lat);
+            const half = level.size === 1000 ? 2 : 3;
+            label = String(Math.floor(m.eRem / level.size)).padStart(half, '0')
+                  + String(Math.floor(m.nRem / level.size)).padStart(half, '0');
+          }
+          // Halo
+          ctx.fillStyle = 'rgba(0,0,0,0.55)';
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+          ctx.strokeText(label, p.sx, p.sy);
+          ctx.fillStyle = '#c9a227';
+          ctx.fillText(label, p.sx, p.sy);
+        }
+      }
+    }
+  }
+}
+
+function drawTiles() {
+  const {W, H} = state;
+  // Determine zoom level based on scale (meters per pixel)
+  const mpp = 1 / state.view.scale;
+  const zw = Math.log2(2 * Math.PI * WM_R / (mpp * TILE_SIZE));
+  const z = Math.max(3, Math.min(18, Math.round(zw)));
+  const nTiles = Math.pow(2, z);
+
+  // Visible bounds in Web Mercator
+  const wx0 = state.view.cx - W / 2 / state.view.scale;
+  const wx1 = state.view.cx + W / 2 / state.view.scale;
+  const wy0 = state.view.cy - H / 2 / state.view.scale;
+  const wy1 = state.view.cy + H / 2 / state.view.scale;
+
+  const worldW = 2 * Math.PI * WM_R;
+  const txMin = Math.max(0, Math.floor((wx0 + Math.PI * WM_R) / worldW * nTiles));
+  const txMax = Math.min(nTiles - 1, Math.floor((wx1 + Math.PI * WM_R) / worldW * nTiles));
+  const tyMin = Math.max(0, Math.floor((Math.PI * WM_R - wy1) / worldW * nTiles));
+  const tyMax = Math.min(nTiles - 1, Math.floor((Math.PI * WM_R - wy0) / worldW * nTiles));
+
+  // Clip to 13T zone boundary so only 13T gets satellite imagery
+  ctx.save();
+  ctx.beginPath();
+  const clip = zoneWMCorners.map(c => worldToScreen(c.x, c.y, state));
+  ctx.moveTo(clip[0].sx, clip[0].sy);  // SW
+  ctx.lineTo(clip[1].sx, clip[1].sy);  // SE
+  ctx.lineTo(clip[3].sx, clip[3].sy);  // NE
+  ctx.lineTo(clip[2].sx, clip[2].sy);  // NW
+  ctx.closePath();
+  ctx.clip();
+
+  // Draw loaded tiles, request missing ones
+  for (let tx = txMin; tx <= txMax; tx++) {
+    for (let ty = tyMin; ty <= tyMax; ty++) {
+      const key = tileKey(z, tx, ty);
+      if (tileCache[key]) {
+        const b = getTileBounds(z, tx, ty);
+        const sw = worldToScreen(b.xMin, b.yMin, state);
+        const ne = worldToScreen(b.xMax, b.yMax, state);
+        const tw = ne.sx - sw.sx, th = sw.sy - ne.sy;
+        if (tw > 2 && th > 2) {
+          ctx.drawImage(tileCache[key], sw.sx, ne.sy, tw, th);
+        }
+      } else {
+        loadTile(z, tx, ty);
+      }
+    }
+  }
+
+  ctx.restore();
+}
+
+function drawPencilStrokes() {
+  for (const stroke of state.strokes) {
+    if (stroke.length < 2) continue;
+    ctx.beginPath();
+    const p0 = worldToScreen(stroke[0].e, stroke[0].n, state);
+    ctx.moveTo(p0.sx, p0.sy);
+    for (let i = 1; i < stroke.length; i++) {
+      const p = worldToScreen(stroke[i].e, stroke[i].n, state);
+      ctx.lineTo(p.sx, p.sy);
+    }
+    ctx.strokeStyle = state.strokeColor;
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+  }
+}
+
+function drawRulerMeasurements() {
+  for (const m of state.measurements) {
+    drawRulerLine(m.e1, m.n1, m.e2, m.n2, '#c9a227', false);
+  }
+}
+
+function drawRulerLine(e1, n1, e2, n2, color, isTemp) {
+  const p1 = worldToScreen(e1, n1, state);
+  const p2 = worldToScreen(e2, n2, state);
+  const dist = Math.hypot(e2 - e1, n2 - n1);
+  const bearDeg = (Math.atan2(e2 - e1, n2 - n1) * 180 / Math.PI + 360) % 360;
+  const bearMil = milsFromBearing(bearDeg);
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = isTemp ? 1.5 : 2;
+  if (isTemp) ctx.setLineDash([4, 4]); else ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.moveTo(p1.sx, p1.sy);
+  ctx.lineTo(p2.sx, p2.sy);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Endpoint squares
+  ctx.fillStyle = color;
+  ctx.fillRect(p1.sx - 3, p1.sy - 3, 6, 6);
+  ctx.fillRect(p2.sx - 3, p2.sy - 3, 6, 6);
+
+  // Midpoint label
+  const mx = (p1.sx + p2.sx) / 2, my = (p1.sy + p2.sy) / 2;
+  const label = dist >= 1000 ? (dist/1000).toFixed(2) + ' km' : Math.round(dist) + ' m';
+  ctx.font = '11px ui-monospace, Menlo, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(0,0,0,0.7)';
+  const tw = ctx.measureText(label + ' | ' + bearMil + ' mil').width;
+  ctx.fillRect(mx - tw/2 - 4, my - 18, tw + 8, 18);
+  ctx.fillStyle = color;
+  ctx.fillText(label + ' | ' + bearMil + ' mil', mx, my - 6);
+}
+
+function drawProtractor() {
+  const { protractor: p } = state;
+  const center = worldToScreen(p.e, p.n, state);
+  const cx = center.sx, cy = center.sy, S = p.size;
+  if (cx < -S*1.5 || cx > state.W+S*1.5 || cy < -S*1.5 || cy > state.H+S*1.5) return;
+
+  const aRad = p.rotDeg * Math.PI / 180;
+  // Bearing convention: 0=N (up), 90=E (right). Screen: x=sin, y=-cos
+  const aX = Math.sin(aRad), aY = -Math.cos(aRad);
+
+  // ── Square outer frame with degree markings on edges ──
+  const hs = S, qs = S * 0.72; // half-square, quarter-square (for inner grid)
+
+  // Background
+  ctx.fillStyle = 'rgba(0,0,0,0.7)';
+  ctx.fillRect(cx - hs, cy - hs, hs * 2, hs * 2);
+
+  // Inner grid lines (small squares for coordinate measurement)
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 0.5;
+  const gridStep = qs / 5;
+  for (let i = -5; i <= 5; i++) {
+    ctx.beginPath();
+    ctx.moveTo(cx - qs, cy + i * gridStep);
+    ctx.lineTo(cx + qs, cy + i * gridStep);
+    ctx.moveTo(cx + i * gridStep, cy - qs);
+    ctx.lineTo(cx + i * gridStep, cy + qs);
+    ctx.stroke();
+  }
+
+  // Square border
+  ctx.strokeStyle = 'rgba(201,162,39,0.5)';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(cx - hs, cy - hs, hs * 2, hs * 2);
+
+  // Degree ticks along the outer edge of the square (in mils)
+  // Top: W to E via N → 4800→0→1600 mils (left to right)
+  drawEdgeTicks(cx - hs, cy - hs, cx + hs, cy - hs, 0, 1, 4800);
+  // Right: N to S via E → 1600→3200 mils (top to bottom)
+  drawEdgeTicks(cx + hs, cy - hs, cx + hs, cy + hs, 1, 0, 1600);
+  // Bottom: E to W via S → 3200→4800 mils (right to left)
+  drawEdgeTicks(cx + hs, cy + hs, cx - hs, cy + hs, 0, -1, 3200);
+  // Left: S to N via W → 4800→0 mils (bottom to top)
+  drawEdgeTicks(cx - hs, cy + hs, cx - hs, cy - hs, -1, 0, 4800);
+
+  // ── Circular mil scale inside ──
+  const milR = qs - 2;
+  // Inner fill for circlar area
+  ctx.fillStyle = 'rgba(13,13,13,0.5)';
+  ctx.beginPath();
+  ctx.arc(cx, cy, milR, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, milR, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(201,162,39,0.5)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  const milInnerR = milR - 10, milOuterR = milR - 2;
+  for (let mil = 0; mil < 6400; mil += 20) {
+    const deg = bearingFromMils(mil);
+    const rad = deg * Math.PI / 180;
+    const sx = Math.sin(rad), sy = -Math.cos(rad);
+    const isMajor = mil % 100 === 0, isLabel = mil % 400 === 0;
+    const ir = isMajor ? milInnerR - 4 : milInnerR;
+    const or = isMajor ? milOuterR : milOuterR - 4;
+    ctx.beginPath();
+    ctx.moveTo(cx + sx * ir, cy + sy * ir);
+    ctx.lineTo(cx + sx * or, cy + sy * or);
+    ctx.strokeStyle = isMajor ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.18)';
+    ctx.lineWidth = isMajor ? 1 : 0.5;
+    ctx.stroke();
+    if (isLabel) {
+      const label = mil === 0 ? '0/64' : String(mil);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 8px ui-monospace, Menlo, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, cx + sx * (milInnerR - 7), cy + sy * (milInnerR - 7));
+    }
+  }
+
+  // ── Azimuth indicator ──
+  const aLen = milInnerR - 6;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + aX * aLen, cy + aY * aLen);
+  ctx.strokeStyle = '#ff4444';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Arrow tip at end of azimuth line
+  const tx = cx + aX * aLen, ty = cy + aY * aLen;
+  // Perpendicular offsets for arrowhead: left wing uses (-aY, aX), right wing uses (aY, -aX)
+  ctx.beginPath();
+  ctx.moveTo(tx, ty);
+  ctx.lineTo(tx - aX * 9 - aY * 5, ty - aY * 9 + aX * 5);
+  ctx.lineTo(tx - aX * 9 + aY * 5, ty - aY * 9 - aX * 5);
+  ctx.closePath();
+  ctx.fillStyle = '#ff4444';
+  ctx.fill();
+
+  // Center dot
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Rotation handle (red dot on the circle at current azimuth)
+  const hx = cx + aX * milR, hy = cy + aY * milR;
+  ctx.fillStyle = '#ff4444';
+  ctx.beginPath();
+  ctx.arc(hx, hy, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+}
+
+function drawEdgeTicks(x1, y1, x2, y2, nx, ny, milBase) {
+  // 9 major ticks per edge at 400-mil intervals
+  const dx = x2 - x1, dy = y2 - y1;
+  for (let i = 0; i <= 8; i++) {
+    const t = i / 8;
+    const bx = x1 + dx * t;
+    const by = y1 + dy * t;
+    const tx = bx + nx * 10;
+    const ty = by + ny * 10;
+    ctx.beginPath();
+    ctx.moveTo(bx, by);
+    ctx.lineTo(tx, ty);
+    ctx.strokeStyle = i % 2 === 0 ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = i % 2 === 0 ? 1.2 : 0.5;
+    ctx.stroke();
+    if (i % 2 === 0) {
+      const mils = ((milBase + i * 400) % 6400);
+      const label = mils === 0 ? '0/64' : String(mils);
+      ctx.fillStyle = '#c9a227';
+      ctx.font = 'bold 9px ui-monospace, Menlo, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, bx + nx * 16, by + ny * 16);
+    }
+  }
+}
+
+function drawHover() {
+  if (!state.hover || state.tool !== 'pan') return;
+  const {sx, sy} = worldToScreen(state.hover.e, state.hover.n, state);
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(sx, 0); ctx.lineTo(sx, state.H);
+  ctx.moveTo(0, sy); ctx.lineTo(state.W, sy);
+  ctx.stroke();
+}
+
+// ─── Cursor readout update ──────────────────────────────────
+function updateReadouts(wx, wy) {
+  const ll = wmToLatLon(wx, wy);
+  const utm = latLonToUTM(ll.lat, ll.lon);
+  const mgrs = formatMGRS(utm.easting, utm.northing, ll.lat, state.precision);
+  const utmStr = Math.round(utm.easting) + 'E ' + Math.round(utm.northing) + 'N';
+  const llStr = ll.lat.toFixed(5) + ', ' + ll.lon.toFixed(5);
+
+  document.getElementById('status-mgrs').textContent = mgrs;
+  document.getElementById('status-utm').textContent = utmStr;
+  document.getElementById('cd-mgrs').textContent = mgrs;
+  document.getElementById('cd-utm').textContent = utmStr;
+  document.getElementById('cd-latlon').textContent = llStr;
+}
+
+// ─── Panel helpers ──────────────────────────────────────────
+function setTool(tool) {
+  state.tool = tool;
+  state.interaction = null;
+  state.rulerTemp = null;
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.toggle('active', b.dataset.tool === tool));
+  document.getElementById('protractor-info').style.display = tool === 'protractor' ? 'block' : 'none';
+  document.getElementById('ruler-info').style.display = tool === 'ruler' ? 'block' : 'none';
+  document.getElementById('pencil-info').style.display = tool === 'pencil' ? 'block' : 'none';
+  canvas.style.cursor = tool === 'pencil' ? 'crosshair' : tool === 'ruler' ? 'crosshair' : 'crosshair';
+  invalidate();
+}
+
+function updateMeasurementsList() {
+  const list = document.getElementById('measurements-list');
+  if (state.measurements.length === 0) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:10px;">No measurements yet</div>';
+    return;
+  }
+  list.innerHTML = state.measurements.map((m, i) => {
+    const dist = Math.hypot(m.e2 - m.e1, m.n2 - m.n1);
+    const dStr = dist >= 1000 ? (dist/1000).toFixed(2)+'km' : Math.round(dist)+'m';
+    const bear = milsFromBearing((Math.atan2(m.e2-m.e1, m.n2-m.n1)*180/Math.PI+360)%360);
+    return '<div class="meas-item"><span>' + dStr + ' @ ' + bear + ' mil</span><span class="del" data-i="'+i+'">&times;</span></div>';
+  }).join('');
+  document.querySelectorAll('#measurements-list .del').forEach(el => {
+    el.addEventListener('click', function(e) {
+      e.stopPropagation();
+      state.measurements.splice(parseInt(this.dataset.i), 1);
+      updateMeasurementsList();
+      invalidate();
+    });
+  });
+}
+
+function updateProtractorReadout() {
+  const el = document.getElementById('protractor-readout');
+  if (el) el.textContent = 'Azimuth: ' + state.protractor.rotMils + ' mils / ' + state.protractor.rotDeg.toFixed(1) + '°';
+}
+
+// ─── Protractor hit testing ─────────────────────────────────
+function protractorHandleDist(sx, sy) {
+  const p = state.protractor;
+  const center = worldToScreen(p.e, p.n, state);
+  const aRad = p.rotDeg * Math.PI / 180;
+  const qs = p.size * 0.72;
+  const hx = center.sx + Math.sin(aRad) * qs;
+  const hy = center.sy - Math.cos(aRad) * qs;
+  return Math.hypot(sx - hx, sy - hy);
+}
+function protractorBodyDist(sx, sy) {
+  const p = state.protractor;
+  const center = worldToScreen(p.e, p.n, state);
+  const S = p.size;
+  // Body = within the square
+  const dx = Math.abs(sx - center.sx), dy = Math.abs(sy - center.sy);
+  if (dx <= S && dy <= S) return Math.max(dx, dy);
+  return Math.hypot(Math.max(0, dx - S), Math.max(0, dy - S)) + S;
+}
+
+// ─── Event handling ─────────────────────────────────────────
+canvas.addEventListener('pointerdown', function(e) {
+  const rect = canvas.getBoundingClientRect();
+  const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+  const world = screenToWorld(sx, sy, state);
+
+  if (state.tool === 'pan') {
+    state.interaction = { type: 'pan', sx, sy, vcx: state.view.cx, vcy: state.view.cy };
+    canvas.setPointerCapture(e.pointerId);
+  } else if (state.tool === 'protractor') {
+    const handleD = protractorHandleDist(sx, sy);
+    const bodyD = protractorBodyDist(sx, sy);
+    if (state.protractor.placed && handleD <= 14) {
+      state.interaction = { type: 'protractor-rotate', sx, sy, startMils: state.protractor.rotMils };
+      canvas.setPointerCapture(e.pointerId);
+    } else if (state.protractor.placed && bodyD <= state.protractor.size + 12) {
+      state.interaction = { type: 'protractor-move', sx, sy, startE: state.protractor.e, startN: state.protractor.n };
+      canvas.setPointerCapture(e.pointerId);
+    } else if (state.protractor.placed) {
+      // Click outside placed protractor — adjust angle to point at click location
+      const center = worldToScreen(state.protractor.e, state.protractor.n, state);
+      const aDeg = (Math.atan2(sx - center.sx, -(sy - center.sy)) * 180 / Math.PI + 360) % 360;
+      state.protractor.rotMils = milsFromBearing(aDeg);
+      invalidate();
+      updateProtractorReadout();
+    } else {
+      // Place protractor at click
+      state.protractor.placed = true;
+      state.protractor.e = world.e;
+      state.protractor.n = world.n;
+      invalidate();
+      updateProtractorReadout();
+    }
+  } else if (state.tool === 'ruler') {
+    state.interaction = { type: 'ruler', e1: world.e, n1: world.n };
+    state.rulerTemp = { e1: world.e, n1: world.n, e2: world.e, n2: world.n };
+    canvas.setPointerCapture(e.pointerId);
+    invalidate();
+  } else if (state.tool === 'pencil') {
+    state.interaction = { type: 'pencil', points: [{ e: world.e, n: world.n }] };
+    state.strokes.push([{ e: world.e, n: world.n }]);
+    canvas.setPointerCapture(e.pointerId);
+    invalidate();
+  }
+});
+
+canvas.addEventListener('pointermove', function(e) {
+  const rect = canvas.getBoundingClientRect();
+  const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+  const world = screenToWorld(sx, sy, state);
+
+  // Always update hover
+  state.hover = { e: world.e, n: world.n };
+  updateReadouts(world.e, world.n);
+
+  if (!state.interaction) { invalidate(); return; }
+
+  if (state.interaction.type === 'pan') {
+    const dx = sx - state.interaction.sx, dy = sy - state.interaction.sy;
+    state.view.cx = state.interaction.vcx - dx / state.view.scale;
+    state.view.cy = state.interaction.vcy + dy / state.view.scale;
+    clampView();
+    invalidate();
+  } else if (state.interaction.type === 'protractor-rotate') {
+    const center = worldToScreen(state.protractor.e, state.protractor.n, state);
+    const aDeg = (Math.atan2(sx - center.sx, -(sy - center.sy)) * 180 / Math.PI + 360) % 360;
+    state.protractor.rotMils = milsFromBearing(aDeg);
+    updateProtractorReadout();
+    invalidate();
+  } else if (state.interaction.type === 'protractor-move') {
+    const dx = sx - state.interaction.sx, dy = sy - state.interaction.sy;
+    state.protractor.e = state.interaction.startE + dx / state.view.scale;
+    state.protractor.n = state.interaction.startN - dy / state.view.scale;
+    invalidate();
+  } else if (state.interaction.type === 'ruler') {
+    state.rulerTemp.e2 = world.e;
+    state.rulerTemp.n2 = world.n;
+    const dist = Math.hypot(world.e - state.rulerTemp.e1, world.n - state.rulerTemp.n1);
+    const bear = milsFromBearing((Math.atan2(world.e - state.rulerTemp.e1, world.n - state.rulerTemp.n1)*180/Math.PI+360)%360);
+    document.getElementById('ruler-readout').textContent =
+      (dist >= 1000 ? (dist/1000).toFixed(2)+' km' : Math.round(dist)+' m') + ' @ ' + bear + ' mil';
+    invalidate();
+  } else if (state.interaction.type === 'pencil') {
+    const stroke = state.strokes[state.strokes.length - 1];
+    stroke.push({ e: world.e, n: world.n });
+    invalidate();
+  }
+});
+
+canvas.addEventListener('pointerup', function(e) {
+  if (!state.interaction) return;
+  if (state.interaction.type === 'ruler') {
+    if (state.rulerTemp) {
+      const dist = Math.hypot(state.rulerTemp.e2 - state.rulerTemp.e1, state.rulerTemp.n2 - state.rulerTemp.n1);
+      if (dist > 10) {
+        state.measurements.push({...state.rulerTemp});
+        updateMeasurementsList();
+      }
+      state.rulerTemp = null;
+    }
+    document.getElementById('ruler-readout').textContent = 'Click & drag to measure';
+  }
+  state.interaction = null;
+  canvas.releasePointerCapture(e.pointerId);
+  invalidate();
+});
+
+canvas.addEventListener('wheel', function(e) {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+
+  // Check if hovering over protractor for rotation
+  if (state.tool === 'protractor' && state.protractor.placed) {
+    const bodyD = protractorBodyDist(sx, sy);
+    if (bodyD <= state.protractor.size + 12) {
+      const delta = e.deltaY > 0 ? -20 : 20;
+      state.protractor.rotMils = (state.protractor.rotMils + delta + 6400) % 6400;
+      updateProtractorReadout();
+      invalidate();
+      return;
+    }
+  }
+
+  // Zoom to cursor
+  const world = screenToWorld(sx, sy, state);
+  const factor = e.deltaY > 0 ? 0.8 : 1.25;
+  const newScale = state.view.scale * factor;
+  const MIN = 0.0005, MAX = 10;
+  if (newScale < MIN || newScale > MAX) return;
+
+  state.view.scale = newScale;
+  state.view.cx = world.e - (sx - state.W / 2) / state.view.scale;
+  state.view.cy = world.n + (sy - state.H / 2) / state.view.scale;
+  clampView();
+  invalidate();
+}, { passive: false });
+
+canvas.addEventListener('pointerleave', function() {
+  state.hover = null;
+  invalidate();
+});
+
+function clampView() {
+  const halfW = state.W / 2 / state.view.scale, halfH = state.H / 2 / state.view.scale;
+  state.view.cx = Math.max(ZONE_X_MIN + halfW, Math.min(ZONE_X_MAX - halfW, state.view.cx));
+  state.view.cy = Math.max(ZONE_Y_MIN + halfH, Math.min(ZONE_Y_MAX - halfH, state.view.cy));
+}
+
+// ─── Panel button handlers ──────────────────────────────────
+document.querySelectorAll('.tool-btn').forEach(btn => {
+  btn.addEventListener('click', () => setTool(btn.dataset.tool));
+});
+
+document.querySelectorAll('.prec-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.prec-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    state.precision = parseInt(this.dataset.prec);
+    if (state.hover) updateReadouts(state.hover.e, state.hover.n);
+  });
+});
+
+// Color swatches
+const swatchContainer = document.getElementById('swatches');
+PENCIL_COLORS.forEach((color, i) => {
+  const div = document.createElement('div');
+  div.className = 'swatch' + (i === 0 ? ' active' : '');
+  div.style.background = color;
+  div.addEventListener('click', function() {
+    state.strokeColor = color;
+    document.querySelectorAll('#swatches .swatch').forEach(s => s.classList.remove('active'));
+    this.classList.add('active');
+  });
+  swatchContainer.appendChild(div);
+});
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+  state.view.cx = (ZONE_X_MIN + ZONE_X_MAX) / 2;
+  state.view.cy = (ZONE_Y_MIN + ZONE_Y_MAX) / 2;
+  state.view.scale = 0.0015;
+  invalidate();
+});
+
+document.getElementById('btn-clear-drawing').addEventListener('click', () => {
+  state.strokes = [];
+  invalidate();
+});
+
+document.getElementById('btn-clear-ruler').addEventListener('click', () => {
+  state.measurements = [];
+  updateMeasurementsList();
+  invalidate();
+});
+
+// ─── Keyboard shortcuts ─────────────────────────────────────
+window.addEventListener('keydown', function(e) {
+  if (e.key === 'p') setTool('pan');
+  else if (e.key === 'o') setTool('protractor');
+  else if (e.key === 'r') setTool('ruler');
+  else if (e.key === 'd') setTool('pencil');
+  else if (e.key === 'Escape') {
+    if (state.tool === 'protractor' && state.protractor.placed) {
+      state.protractor.placed = false;
+      invalidate();
+      updateProtractorReadout();
+    }
+  }
+});
+
+// ─── Init ────────────────────────────────────────────────────
+resize();
+setTool('pan');
+updateMeasurementsList();
+
+// Self-test
+(function test() {
+  // UTM round-trip
+  const points = [
+    [40, -108], [40, -102], [48, -108], [48, -102], [44, -105]
+  ];
+  for (const [lat, lon] of points) {
+    const utm = latLonToUTM(lat, lon);
+    const ll = utmToLatLon(utm.easting, utm.northing);
+    const ok = Math.abs(ll.lat - lat) < 0.001 && Math.abs(ll.lon - lon) < 0.001;
+    if (!ok) console.warn('UTM round-trip fail:', lat, lon, ll);
+  }
+
+  // MGRS vector: (500000, 4873000) at ~44N should be 13TEJ
+  const mgrs = utmToMGRS(500000, 4873000, 44);
+  console.log('MGRS test (expect 13TEJ):', mgrs.gzd + mgrs.sq100k,
+    'col=' + mgrs.colLetter, 'row=' + mgrs.rowLetter, 'band=' + mgrs.band);
+
+  console.log('Zone 13T WM bounds: X[' + Math.round(ZONE_X_MIN) + ', ' + Math.round(ZONE_X_MAX) +
+    '] Y[' + Math.round(ZONE_Y_MIN) + ', ' + Math.round(ZONE_Y_MAX) + ']');
+  console.log('Map initialized w/ satellite imagery. Tools: Pan(p) | Protractor(o) | Ruler(r) | Pencil(d)');
+})();
+
+})();
+</script>
+</body>
+</html>
