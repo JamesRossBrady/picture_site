@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prime Numbers 0–1000</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; }
+  body {
+    background: #0d0d0d;
+    color: #e0e0e0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 14px 22px;
+    border-bottom: 1px solid #222;
+  }
+  #header h1 { font-size: 17px; color: #e0e0e0; font-weight: 700; letter-spacing: 0.3px; }
+  #header .legend { font-size: 12px; color: #888; display: flex; align-items: center; gap: 6px; }
+  #header .legend .swatch {
+    display: inline-block;
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    vertical-align: middle;
+  }
+  #header .legend .swatch.prime  { background: #ff6b6b; }
+  #header .legend .swatch.factor { background: #86e0a8; }
+  #header .hint { margin-left: auto; font-size: 12px; color: #555; }
+  #scroll {
+    flex: 1;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    cursor: grab;
+    scrollbar-color: #666 #1a1a1a;
+  }
+  #scroll:active { cursor: grabbing; }
+  #scroll svg { display: block; height: 100%; }
+
+  /* Bigger, always-visible horizontal scrollbar */
+  #scroll::-webkit-scrollbar { height: 22px; }
+  #scroll::-webkit-scrollbar-track { background: #1a1a1a; border-radius: 11px; }
+  #scroll::-webkit-scrollbar-thumb { background: #666; border-radius: 11px; border: 4px solid #1a1a1a; }
+  #scroll::-webkit-scrollbar-thumb:hover { background: #888; }
+</style>
+</head>
+<body>
+  <div id="header">
+    <h1>Prime Numbers 0–1000</h1>
+    <div class="legend"><span class="swatch prime"></span>prime</div>
+    <div class="legend"><span class="swatch factor"></span>factor — each prime has its own color</div>
+    <div class="hint">scroll &rarr; or drag to explore</div>
+  </div>
+  <div id="scroll">
+    <svg id="line"></svg>
+  </div>
+
+<script>
+(function () {
+  var MAX = 1000;
+  var SPACING = 36;       // px per integer on the x-axis
+  var PAD = 70;           // left/right padding
+  var WIDTH = PAD * 2 + MAX * SPACING;
+  var HEIGHT = 310;
+  var BASELINE = 230;
+
+  // Sieve of Eratosthenes
+  var isPrime = new Array(MAX + 1).fill(true);
+  isPrime[0] = isPrime[1] = false;
+  for (var i = 2; i * i <= MAX; i++) {
+    if (isPrime[i]) for (var j = i * i; j <= MAX; j += i) isPrime[j] = false;
+  }
+
+  // Prime factorization with multiplicity: 12 -> [2,2,3]
+  function factorize(n) {
+    var f = [], m = n;
+    for (var p = 2; p * p <= m; p++) {
+      while (m % p === 0) { f.push(p); m /= p; }
+    }
+    if (m > 1) f.push(m);
+    return f;
+  }
+
+  var NS = 'http://www.w3.org/2000/svg';
+  var svg = document.getElementById('line');
+  svg.setAttribute('viewBox', '0 0 ' + WIDTH + ' ' + HEIGHT);
+  svg.setAttribute('width', WIDTH);
+  svg.setAttribute('height', HEIGHT);
+
+  function x(n) { return PAD + n * SPACING; }
+  function el(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  // Baseline
+  svg.appendChild(el('line', {
+    x1: x(0), y1: BASELINE, x2: x(MAX), y2: BASELINE,
+    stroke: '#555', 'stroke-width': 2
+  }));
+
+  var CIRCLE_R = 10;
+  var CIRCLE_STEP = 24;   // vertical spacing between stacked circles
+  var BOTTOM_CY = BASELINE - 18;
+
+  // Color map for repeated factors: same prime value -> same color,
+  // so twins (x2) and triplets (x3) of a factor visually match.
+  var primes = [];
+  for (var p = 2; p <= MAX; p++) if (isPrime[p]) primes.push(p);
+  var primeIndex = {};
+  for (var pi = 0; pi < primes.length; pi++) primeIndex[primes[pi]] = pi;
+  function factorColor(v) {
+    // Golden-angle hue per prime value -> each prime gets a distinct color,
+    // so repeated factors match and single factors are all different.
+    var h = (primeIndex[v] * 137.508) % 360;
+    return 'hsl(' + h.toFixed(1) + ',65%,72%)';
+  }
+
+  for (var n = 0; n <= MAX; n++) {
+    var xx = x(n);
+
+    // tick marks below the line
+    var len, color;
+    if (n % 10 === 0)      { len = 14; color = '#888'; }
+    else if (n % 5 === 0)  { len = 9;  color = '#555'; }
+    else                   { len = 5;  color = '#2c2c2c'; }
+    svg.appendChild(el('line', {
+      x1: xx, y1: BASELINE, x2: xx, y2: BASELINE + len,
+      stroke: color, 'stroke-width': 1
+    }));
+
+    // label every 10
+    if (n % 10 === 0) {
+      var lbl = el('text', {
+        x: xx, y: BASELINE + 30, 'text-anchor': 'middle',
+        fill: '#999', 'font-size': 14
+      });
+      lbl.textContent = n;
+      svg.appendChild(lbl);
+    }
+
+    // factor stack: primes = 1 red circle, composites = factor circles
+    if (n >= 2) {
+      if (isPrime[n]) {
+        var cy0 = BOTTOM_CY;
+        svg.appendChild(el('circle', { cx: xx, cy: cy0, r: CIRCLE_R, fill: '#ff6b6b' }));
+        var tp = el('text', {
+          x: xx, y: cy0 + 3, 'text-anchor': 'middle',
+          fill: '#1a1a1a', 'font-size': 9, 'font-weight': 'bold'
+        });
+        tp.textContent = n;
+        svg.appendChild(tp);
+      } else {
+        var factors = factorize(n);
+        for (var i = 0; i < factors.length; i++) {
+          var f = factors[i];
+          var cy = BOTTOM_CY - i * CIRCLE_STEP;
+          svg.appendChild(el('circle', { cx: xx, cy: cy, r: CIRCLE_R, fill: factorColor(f) }));
+          var t = el('text', {
+            x: xx, y: cy + 3, 'text-anchor': 'middle',
+            fill: '#1a1a1a', 'font-size': 9, 'font-weight': 'bold'
+          });
+          t.textContent = f;
+          svg.appendChild(t);
+        }
+      }
+    }
+  }
+
+  // Translate vertical wheel into horizontal scroll
+  var scroll = document.getElementById('scroll');
+  scroll.addEventListener('wheel', function (e) {
+    if (e.deltaY !== 0) { e.preventDefault(); scroll.scrollLeft += e.deltaY; }
+  }, { passive: false });
+})();
+</script>
+</body>
+</html>
