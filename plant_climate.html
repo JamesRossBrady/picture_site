@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plant Climate</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; }
+  body {
+    background: #0d0d0d; color: #e0e0e0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    display: flex; overflow: hidden;
+  }
+
+  #sidebar {
+    width: 220px; flex-shrink: 0;
+    background: #101012; border-right: 1px solid #222;
+    padding: 22px 16px; display: flex; flex-direction: column; gap: 4px;
+  }
+  #sidebar h2 {
+    font-size: 14px; color: #888; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 14px;
+  }
+  .plant-btn {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    background: transparent; border: 1px solid transparent; border-radius: 8px;
+    color: #ccc; font-size: 14px; font-family: inherit; padding: 10px 12px;
+    cursor: pointer; text-align: left; transition: background 0.15s, border-color 0.15s;
+  }
+  .plant-btn:hover { background: #1c1c20; }
+  .plant-btn.active { background: #232329; border-color: #444; color: #fff; }
+  .plant-btn .dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+
+  #main { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 22px 28px; gap: 16px; overflow: auto; }
+  #header { display: flex; align-items: center; gap: 22px; }
+  #plant-title { font-size: 20px; font-weight: 700; letter-spacing: 0.3px; }
+
+  #legend { display: flex; gap: 22px; align-items: center; font-size: 12px; color: #aaa; }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .legend-item .band { width: 26px; height: 11px; border-radius: 3px; }
+  .legend-item .line { width: 26px; height: 0; border-top: 2px dashed #999; }
+
+  .chart-panel {
+    background: #141416; border: 1px solid #222; border-radius: 10px;
+    padding: 16px 18px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .chart-title { font-size: 13px; color: #aaa; letter-spacing: 0.4px; }
+  .chart-panel svg { width: 100%; height: auto; display: block; }
+</style>
+</head>
+<body>
+  <div id="sidebar">
+    <h2>Plants</h2>
+    <div id="plant-list"></div>
+  </div>
+
+  <div id="main">
+    <div id="header">
+      <div id="plant-title"></div>
+      <div id="legend">
+        <div class="legend-item"><span class="band" id="legend-plant-band"></span><span id="legend-plant-label"></span></div>
+        <div class="legend-item"><span class="line"></span>Colorado Plateau</div>
+      </div>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-title">Temperature (&deg;C)</div>
+      <svg id="chart-temp"></svg>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-title">Humidity (%)</div>
+      <svg id="chart-humidity"></svg>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-title">Solar Incidence (kWh/m&sup2;/day)</div>
+      <svg id="chart-solar"></svg>
+    </div>
+  </div>
+
+<script>
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// "typical" monthly value, plus a tolerance (half-width of the viable band)
+const PLANTS = {
+  apple: {
+    label: 'Apple Trees', color: '#66bb6a',
+    temp:     [-2,  0,  5, 11, 16, 20, 23, 22, 18, 12,  5,  0],
+    humidity: [70, 68, 65, 62, 63, 65, 66, 67, 68, 70, 72, 73],
+    solar:    [2.0, 3.0, 4.5, 5.5, 6.5, 7.0, 7.0, 6.0, 4.5, 3.0, 2.0, 1.5],
+    tol: { temp: 7, humidity: 12, solar: 1.5 },
+  },
+  monkfruit: {
+    label: 'Monk Fruit', color: '#ffa726',
+    temp:     [12, 14, 17, 21, 25, 28, 30, 30, 27, 23, 18, 14],
+    humidity: [78, 80, 82, 84, 85, 86, 84, 83, 82, 80, 78, 77],
+    solar:    [3.0, 3.0, 3.5, 4.0, 4.5, 4.5, 5.0, 5.0, 4.5, 4.0, 3.5, 3.0],
+    tol: { temp: 4, humidity: 7, solar: 1.0 },
+  },
+  pine: {
+    label: 'Pine Trees', color: '#42a5f5',
+    temp:     [-10, -8, -2,  5, 11, 15, 18, 16, 11,  4, -3, -8],
+    humidity: [75, 74, 70, 65, 62, 63, 66, 68, 72, 75, 77, 77],
+    solar:    [0.5, 1.5, 3.0, 4.5, 5.5, 6.0, 5.5, 4.0, 2.5, 1.2, 0.6, 0.3],
+    tol: { temp: 10, humidity: 15, solar: 1.5 },
+  },
+};
+
+// Reference climate: Colorado Plateau (semi-arid high desert, high elevation)
+const COLORADO = {
+  temp:     [-2,  0,  3,  7, 12, 17, 20, 19, 14,  8,  3, -1],
+  humidity: [55, 52, 46, 38, 32, 28, 42, 48, 42, 40, 48, 54],
+  solar:    [3.0, 3.8, 5.0, 6.2, 7.0, 7.4, 6.8, 6.2, 5.4, 4.4, 3.2, 2.8],
+};
+
+const AXES = {
+  temp:     { min: -25, max: 35 },
+  humidity: { min:  40, max: 100 },
+  solar:    { min:   0, max:   9 },
+};
+
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+function drawChart(svgEl, upper, lower, refData, min, max, color) {
+  const W = 900, H = 220;
+  const L = 56, R = 20, T = 14, B = 34;
+  const pw = W - L - R, ph = H - T - B;
+  const x = i => L + i / (upper.length - 1) * pw;
+  const clamp = v => Math.min(max, Math.max(min, v));
+  const y = v => T + (1 - (clamp(v) - min) / (max - min)) * ph;
+  const REF_COLOR = '#999999';
+
+  svgEl.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  svgEl.innerHTML = '';
+
+  // horizontal gridlines + y labels
+  for (let i = 0; i <= 4; i++) {
+    const val = min + (max - min) * i / 4;
+    const yy = y(val);
+    svgEl.appendChild(el('line', { x1: L, y1: yy, x2: W - R, y2: yy, stroke: '#222', 'stroke-width': 1 }));
+    const t = el('text', { x: L - 8, y: yy + 4, 'text-anchor': 'end', fill: '#888', 'font-size': 12 });
+    t.textContent = Math.round(val);
+    svgEl.appendChild(t);
+  }
+
+  // x labels (months)
+  upper.forEach((v, i) => {
+    const t = el('text', { x: x(i), y: H - 8, 'text-anchor': 'middle', fill: '#888', 'font-size': 12 });
+    t.textContent = MONTHS[i];
+    svgEl.appendChild(t);
+  });
+
+  // Colorado Plateau reference line (dashed, behind)
+  let rd = 'M ' + x(0) + ' ' + y(refData[0]);
+  for (let i = 1; i < refData.length; i++) rd += ' L ' + x(i) + ' ' + y(refData[i]);
+  svgEl.appendChild(el('path', {
+    d: rd, fill: 'none', stroke: REF_COLOR, 'stroke-width': 2,
+    'stroke-dasharray': '6 5', 'stroke-linejoin': 'round', 'stroke-linecap': 'round'
+  }));
+
+  // viable band (upper -> lower -> close)
+  let d = 'M ' + x(0) + ' ' + y(upper[0]);
+  for (let i = 1; i < upper.length; i++) d += ' L ' + x(i) + ' ' + y(upper[i]);
+  for (let i = lower.length - 1; i >= 0; i--) d += ' L ' + x(i) + ' ' + y(lower[i]);
+  d += ' Z';
+  svgEl.appendChild(el('path', { d: d, fill: color, opacity: 0.25, stroke: 'none' }));
+
+  // band edges
+  const edgePath = arr => {
+    let p = 'M ' + x(0) + ' ' + y(arr[0]);
+    for (let i = 1; i < arr.length; i++) p += ' L ' + x(i) + ' ' + y(arr[i]);
+    return p;
+  };
+  svgEl.appendChild(el('path', { d: edgePath(upper), fill: 'none', stroke: color, 'stroke-width': 1.5, opacity: 0.8 }));
+  svgEl.appendChild(el('path', { d: edgePath(lower), fill: 'none', stroke: color, 'stroke-width': 1.5, opacity: 0.8 }));
+}
+
+function render(key) {
+  const plant = PLANTS[key];
+  const band = (arr, tol) => ({ upper: arr.map(v => v + tol), lower: arr.map(v => v - tol) });
+
+  document.getElementById('plant-title').textContent = plant.label;
+  document.getElementById('plant-title').style.color = plant.color;
+  document.getElementById('legend-plant-label').textContent = plant.label + ' (viable range)';
+  document.getElementById('legend-plant-band').style.background = plant.color;
+
+  const t = band(plant.temp, plant.tol.temp);
+  const h = band(plant.humidity, plant.tol.humidity);
+  const s = band(plant.solar, plant.tol.solar);
+
+  drawChart(document.getElementById('chart-temp'), t.upper, t.lower, COLORADO.temp, AXES.temp.min, AXES.temp.max, plant.color);
+  drawChart(document.getElementById('chart-humidity'), h.upper, h.lower, COLORADO.humidity, AXES.humidity.min, AXES.humidity.max, plant.color);
+  drawChart(document.getElementById('chart-solar'), s.upper, s.lower, COLORADO.solar, AXES.solar.min, AXES.solar.max, plant.color);
+
+  document.querySelectorAll('.plant-btn').forEach(b => b.classList.toggle('active', b.dataset.plant === key));
+}
+
+// build sidebar
+const list = document.getElementById('plant-list');
+let activeKey = null;
+for (const [key, plant] of Object.entries(PLANTS)) {
+  const btn = document.createElement('button');
+  btn.className = 'plant-btn';
+  btn.dataset.plant = key;
+  btn.innerHTML = '<span class="dot" style="background:' + plant.color + '"></span>' + plant.label;
+  btn.addEventListener('click', () => { activeKey = key; render(key); });
+  list.appendChild(btn);
+}
+
+render('apple');
+</script>
+</body>
+</html>
