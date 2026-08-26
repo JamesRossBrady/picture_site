@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tariff Timeline</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']]
+  }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; }
+  body {
+    background: #0d0d0d; color: #e0e0e0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  #header {
+    flex-shrink: 0; padding: 16px 26px 10px; border-bottom: 1px solid #222;
+  }
+  #header h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.3px; }
+  #legend { display: flex; gap: 22px; margin-top: 8px; font-size: 12px; color: #aaa; }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .legend-item .swatch { width: 18px; height: 12px; border-radius: 3px; }
+  .legend-item .swatch.mfn { background: #c94f4f; }
+  .legend-item .swatch.trump { background: #e8912d; }
+
+  .banner-note {
+    margin-top: 8px; font-size: 12px; color: #d8b26a;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .banner-note .link-icon { font-weight: 700; }
+
+  #scroll { flex: 1; overflow-y: auto; padding: 20px 20px 40px; }
+
+  .formula-box {
+    max-width: 1080px; margin: 0 auto 16px; padding: 18px 20px;
+    border: 1px solid #333; border-radius: 10px; background: #141416;
+    cursor: pointer; transition: border-color 0.15s;
+  }
+  .formula-box:hover { border-color: #d8b26a; }
+  .formula-box-title { font-size: 13px; color: #ccc; font-weight: 600; margin-bottom: 12px; }
+  .src-hint { font-size: 11px; color: #d8b26a; font-weight: 400; }
+  .formula-line { text-align: center; margin: 10px 0; }
+  .formula-note { font-size: 12px; color: #999; text-align: center; margin: 8px 0 0; line-height: 1.6; }
+
+  .timeline { position: relative; max-width: 1080px; margin: 0 auto; }
+  .timeline::before {
+    content: ''; position: absolute; left: 50%; top: 0; bottom: 0;
+    width: 2px; background: #3a3a3a; transform: translateX(-50%);
+  }
+
+  .head { text-align: center; margin-bottom: 12px; position: relative; z-index: 1; background: #0d0d0d; }
+  .head .date { font-size: 13px; color: #ccc; font-weight: 600; }
+  .col-labels { display: flex; margin-top: 8px; }
+  .col-label { flex: 1; min-width: 0; font-size: 12px; color: #bbb; font-weight: 600; }
+  .col-label.left { text-align: left; padding-right: 8px; }
+  .col-label.right { text-align: right; padding-left: 8px; }
+
+  .row { display: flex; align-items: center; margin-bottom: 5px; }
+  .half { flex: 1; min-width: 0; display: flex; align-items: center; }
+  .half.left { justify-content: flex-end; }
+  .half.right { justify-content: flex-start; }
+
+  .bar { height: 30px; border-radius: 5px; flex-shrink: 0; display: block; }
+  .bar.mfn { background: #c94f4f; cursor: pointer; }
+  .bar.mfn:hover { filter: brightness(1.2); }
+  .bar.trump { background: #e8912d; cursor: pointer; }
+  .bar.trump:hover { filter: brightness(1.2); }
+
+  .mfn-label {
+    flex-shrink: 0; white-space: nowrap;
+    color: #c94f4f; font-size: 12px; font-weight: 600; padding-right: 6px;
+  }
+  .trump-label {
+    flex-shrink: 0; white-space: nowrap;
+    color: #ccc; font-size: 13px; font-weight: 600; padding-left: 6px;
+  }
+  .trump-label .pct { color: #e8912d; font-weight: 700; padding-left: 4px; }
+
+  #notes {
+    max-width: 1080px; margin: 10px auto 0; padding: 14px 16px;
+    border: 1px solid #222; border-radius: 8px; background: #101012;
+    font-size: 12px; color: #999; line-height: 1.6;
+  }
+  #notes b { color: #ccc; }
+  #notes ul { margin: 8px 0 0 18px; }
+  #notes li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+  <div id="header">
+    <h1>Actual tariffs vs. Trump's "reciprocal" tariffs — Apr 2, 2025</h1>
+    <div id="legend">
+      <div class="legend-item"><span class="swatch mfn"></span>Actual MFN applied tariff (WTO)</div>
+      <div class="legend-item"><span class="swatch trump"></span>Trump's reciprocal tariff</div>
+    </div>
+    <div class="banner-note"><span class="link-icon">&#8599;</span> Click any bar to open its source — red = WITS tariff profile, amber = Newsweek chart.</div>
+  </div>
+
+  <div id="scroll">
+    <div class="formula-box" title="View the USTR 'Reciprocal Tariff Calculations' methodology (source)">
+      <div class="formula-box-title">How the "reciprocal" rate was actually calculated <span class="src-hint">&#8599; click for USTR source</span></div>
+      <div class="formula-line">
+        $$\Delta\tau_i = \frac{x_i - m_i}{\varepsilon \cdot \phi \cdot m_i}$$
+      </div>
+      <div class="formula-note">
+        where \(x_i\) = U.S. exports to country \(i\), \(m_i\) = U.S. imports from it, and the elasticities were set to \(\varepsilon = 4\), \(\phi = 0.25\), so \(\varepsilon\phi = 1\).
+      </div>
+      <div class="formula-line">
+        $$\Rightarrow \Delta\tau_i = \frac{x_i - m_i}{m_i} = \frac{\text{trade deficit}}{\text{imports}}$$
+      </div>
+      <div class="formula-line">
+        $$\text{Imposed "reciprocal" tariff}_i = \tfrac{1}{2}\,\Delta\tau_i \quad \text{(halved, "being kind")}$$
+      </div>
+    </div>
+
+    <div class="timeline">
+      <div class="head">
+        <div class="date">April 2, 2025</div>
+        <div class="col-labels">
+          <div class="col-label left">actual foreign tariff rates on US</div>
+          <div class="col-label right">Donald Trump's claimed foreign tariff rates</div>
+        </div>
+      </div>
+      <div id="rows"></div>
+    </div>
+
+    <div id="notes">
+      <b>Data sources:</b>
+      <ul>
+        <li><b>Right (amber) = Trump's "reciprocal" tariff</b> — as announced Apr 2, 2025 (from Newsweek / the White House list). Click an amber bar for the chart.</li>
+        <li><b>Left (red) = actual MFN applied tariff</b> — the real, most-favoured-nation rate each country actually levies on imports (incl. the U.S.), simple-average, from WTO <i>World Tariff Profiles</i>. Click a red bar for the country's WITS profile.</li>
+        <li>The White House's own "charged to the U.S.A." figure is <b>not</b> used here — that was deficit-derived, not a real tariff.</li>
+      </ul>
+    </div>
+  </div>
+
+<script>
+// [country, ISO3 code, actual MFN applied tariff (approx), Trump's reciprocal tariff]
+// Sorted by reciprocal descending. Bars link to their sources.
+const MAX_PCT = 50;
+const NEWSWEEK = 'https://www.newsweek.com/trump-reciprocal-tariff-chart-2054514';
+const DATA = [
+  ['Lesotho', 'LSO', 7.6, 50],
+  ['Cambodia', 'KHM', 10.6, 49],
+  ['Laos', 'LAO', 8.4, 48],
+  ['Madagascar', 'MDG', 12.0, 47],
+  ['Vietnam', 'VNM', 9.4, 46],
+  ['Sri Lanka', 'LKA', 8.2, 44],
+  ['Myanmar', 'MMR', 7.5, 44],
+  ['Syria', 'SYR', 14.0, 41],
+  ['Mauritius', 'MUS', 2.8, 40],
+  ['Iraq', 'IRQ', 11.0, 39],
+  ['Bangladesh', 'BGD', 14.4, 37],
+  ['Serbia', 'SRB', 7.8, 37],
+  ['Botswana', 'BWA', 7.6, 37],
+  ['Thailand', 'THA', 11.4, 36],
+  ['Bosnia & Herzegovina', 'BIH', 6.2, 35],
+  ['China', 'CHN', 7.5, 34],
+  ['North Macedonia', 'MKD', 6.3, 33],
+  ['Indonesia', 'IDN', 8.1, 32],
+  ['Taiwan', 'TWN', 6.3, 32],
+  ['Angola', 'AGO', 10.5, 32],
+  ['Fiji', 'FJI', 9.0, 32],
+  ['Switzerland', 'CHE', 1.9, 31],
+  ['Libya', 'LBY', 8.0, 31],
+  ['Moldova', 'MDA', 4.5, 31],
+  ['South Africa', 'ZAF', 7.6, 30],
+  ['Algeria', 'DZA', 14.0, 30],
+  ['Pakistan', 'PAK', 12.0, 29],
+  ['Tunisia', 'TUN', 15.0, 28],
+  ['Kazakhstan', 'KAZ', 6.8, 27],
+  ['India', 'IND', 17.0, 26],
+  ['South Korea', 'KOR', 13.4, 25],
+  ['Japan', 'JPN', 4.3, 24],
+  ['Malaysia', 'MYS', 6.5, 24],
+  ['Brunei', 'BRN', 0.8, 24],
+  ["C\u00f4te d'Ivoire", 'CIV', 12.5, 21],
+  ['European Union', 'EUN', 5.0, 20],
+  ['Jordan', 'JOR', 9.8, 20],
+  ['Nicaragua', 'NIC', 5.3, 18],
+  ['Zimbabwe', 'ZWE', 15.0, 18],
+  ['Israel', 'ISR', 4.7, 17],
+  ['Philippines', 'PHL', 6.1, 17],
+  ['Norway', 'NOR', 2.4, 15],
+  ['Venezuela', 'VEN', 12.0, 15],
+  ['Nigeria', 'NGA', 12.0, 14],
+  ['United Kingdom', 'GBR', 4.1, 10],
+  ['Brazil', 'BRA', 13.3, 10],
+  ['Singapore', 'SGP', 0.0, 10],
+  ['Chile', 'CHL', 6.0, 10],
+  ['Australia', 'AUS', 2.4, 10],
+  ['Turkey', 'TUR', 10.8, 10],
+  ['Colombia', 'COL', 5.8, 10],
+  ['Peru', 'PER', 2.5, 10],
+  ['Costa Rica', 'CRI', 4.8, 10],
+  ['Dominican Republic', 'DOM', 6.3, 10],
+  ['UAE', 'ARE', 4.7, 10],
+  ['New Zealand', 'NZL', 2.5, 10],
+  ['Argentina', 'ARG', 13.5, 10],
+  ['Ecuador', 'ECU', 9.5, 10],
+  ['Guatemala', 'GTM', 5.3, 10],
+  ['Honduras', 'HND', 5.0, 10],
+  ['Egypt', 'EGY', 19.0, 10],
+  ['Saudi Arabia', 'SAU', 5.3, 10],
+  ['El Salvador', 'SLV', 5.4, 10],
+  ['Trinidad & Tobago', 'TTO', 8.0, 10],
+  ['Morocco', 'MAR', 13.5, 10],
+  ['Afghanistan', 'AFG', 5.6, 10],
+];
+
+document.querySelector('.formula-box').addEventListener('click', () => {
+  window.open('https://ustr.gov/issue-areas/reciprocal-tariff-calculations', '_blank', 'noopener');
+});
+
+const rows = document.getElementById('rows');
+
+for (const [country, iso3, mfn, trump] of DATA) {
+  const row = document.createElement('div');
+  row.className = 'row';
+
+  // left: actual MFN applied tariff — clickable source link (WITS)
+  const left = document.createElement('div');
+  left.className = 'half left';
+  const mlabel = document.createElement('span');
+  mlabel.className = 'mfn-label';
+  mlabel.textContent = mfn.toFixed(1) + '%';
+  const mbar = document.createElement('a');
+  mbar.className = 'bar mfn';
+  mbar.style.width = (mfn / MAX_PCT * 100) + '%';
+  mbar.href = 'https://wits.worldbank.org/CountryProfile/en/Country/' + iso3;
+  mbar.target = '_blank';
+  mbar.rel = 'noopener noreferrer';
+  mbar.title = 'View ' + country + ' tariff data on WITS (source)';
+  left.appendChild(mlabel);
+  left.appendChild(mbar);
+
+  // right: Trump's reciprocal tariff — clickable source link (Newsweek)
+  const right = document.createElement('div');
+  right.className = 'half right';
+  const tbar = document.createElement('a');
+  tbar.className = 'bar trump';
+  tbar.style.width = (trump / MAX_PCT * 100) + '%';
+  tbar.href = NEWSWEEK;
+  tbar.target = '_blank';
+  tbar.rel = 'noopener noreferrer';
+  tbar.title = 'View the reciprocal tariff chart on Newsweek (source)';
+  const tlabel = document.createElement('span');
+  tlabel.className = 'trump-label';
+  const name = document.createElement('span');
+  name.textContent = country;
+  const pct = document.createElement('span');
+  pct.className = 'pct';
+  pct.textContent = trump + '%';
+  tlabel.appendChild(name);
+  tlabel.appendChild(pct);
+  right.appendChild(tbar);
+  right.appendChild(tlabel);
+
+  row.appendChild(left);
+  row.appendChild(right);
+  rows.appendChild(row);
+}
+</script>
+</body>
+</html>
