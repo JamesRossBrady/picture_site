@@ -13,12 +13,14 @@
     display: flex; overflow: hidden;
   }
 
-  #sidebar {
+  .side {
     width: 220px; flex-shrink: 0;
-    background: #101012; border-right: 1px solid #222;
+    background: #101012;
     padding: 22px 16px; display: flex; flex-direction: column; gap: 4px;
   }
-  #sidebar h2 {
+  .side.left { border-right: 1px solid #222; }
+  .side.right { border-left: 1px solid #222; }
+  .side h2 {
     font-size: 14px; color: #888; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 14px;
   }
   .plant-btn {
@@ -49,7 +51,7 @@
 </style>
 </head>
 <body>
-  <div id="sidebar">
+  <div class="side left">
     <h2>Plants</h2>
     <div id="plant-list"></div>
   </div>
@@ -74,6 +76,11 @@
       <div class="chart-title">Solar Incidence (kWh/m&sup2;/day)</div>
       <svg id="chart-solar"></svg>
     </div>
+  </div>
+
+  <div class="side right">
+    <h2>Animals</h2>
+    <div id="animal-list"></div>
   </div>
 
 <script>
