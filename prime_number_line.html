@@ -67,19 +67,66 @@
   }
   #scroll {
     flex: 1;
-    overflow-x: scroll;
-    overflow-y: hidden;
+    overflow: hidden;
     cursor: grab;
-    scrollbar-color: #666 #1a1a1a;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
   }
   #scroll:active { cursor: grabbing; }
   #scroll svg { display: block; height: 100%; }
 
-  /* Bigger, always-visible horizontal scrollbar */
-  #scroll::-webkit-scrollbar { height: 22px; }
-  #scroll::-webkit-scrollbar-track { background: #1a1a1a; border-radius: 11px; }
-  #scroll::-webkit-scrollbar-thumb { background: #666; border-radius: 11px; border: 4px solid #1a1a1a; }
-  #scroll::-webkit-scrollbar-thumb:hover { background: #888; }
+  /* Custom 81px-tall scrollbar with arrows on the thumb (works in all browsers) */
+  #scrollbar {
+    flex-shrink: 0;
+    height: 81px;
+    background: #1a1a1a;
+    border-top: 1px solid #222;
+    position: relative;
+    cursor: pointer;
+  }
+  #scrollbar-thumb {
+    position: absolute;
+    top: 3px;
+    height: 75px;
+    background: #666;
+    border-radius: 20px;
+    min-width: 166px;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    box-sizing: border-box;
+  }
+  #scrollbar-thumb:hover { background: #888; }
+  .thumb-arrow {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    font-size: 24px;
+    line-height: 0;
+    color: #fff;
+    user-select: none;
+    pointer-events: none;
+  }
+  /* tails (stems): centered on each arrowhead, running inward.
+     Width = height * 4 * 1.618 = 4px * 4 * 1.618 ≈ 26px, white, square edges. */
+  #thumb-left::after,
+  #thumb-right::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26px;
+    height: 4px;
+    background: #fff;
+  }
+  #thumb-left::after { left: 100%; }
+  #thumb-right::before { right: 100%; }
 </style>
 </head>
 <body>
@@ -88,7 +135,7 @@
       <h1>Prime Numbers 0–1000</h1>
       <div class="legend"><span class="swatch prime"></span>prime</div>
       <div class="legend"><span class="swatch factor"></span>factor — each prime has its own color</div>
-      <div class="hint">scroll &rarr; or drag to explore</div>
+      <div class="hint">grab &amp; slide to explore</div>
     </div>
     <div class="prime-check">
       <span>enter number for prime check:</span>
@@ -99,6 +146,12 @@
   <div id="scroll">
     <svg id="line"></svg>
   </div>
+  <div id="scrollbar">
+    <div id="scrollbar-thumb">
+      <span class="thumb-arrow" id="thumb-left">&#9664;</span>
+      <span class="thumb-arrow" id="thumb-right">&#9654;</span>
+    </div>
+  </div>
 
 <script>
 (function () {
@@ -106,8 +159,8 @@
   var SPACING = 36;       // px per integer on the x-axis
   var PAD = 70;           // left/right padding
   var WIDTH = PAD * 2 + MAX * SPACING;
-  var HEIGHT = 310;
-  var BASELINE = 230;
+  var HEIGHT = 340;
+  var BASELINE = 246;
 
   // Sieve of Eratosthenes
   var isPrime = new Array(MAX + 1).fill(true);
@@ -148,6 +201,7 @@
   var CIRCLE_R = 10;
   var CIRCLE_STEP = 24;   // vertical spacing between stacked circles
   var BOTTOM_CY = BASELINE - 18;
+  var LABEL_Y = 22;       // grey number labels sit here (above the tallest stack)
 
   // Color map for repeated factors: same prime value -> same color,
   // so twins (x2) and triplets (x3) of a factor visually match.
@@ -175,17 +229,8 @@
       stroke: color, 'stroke-width': 1
     }));
 
-    // label every 10
-    if (n % 10 === 0) {
-      var lbl = el('text', {
-        x: xx, y: BASELINE + 30, 'text-anchor': 'middle',
-        fill: '#999', 'font-size': 14
-      });
-      lbl.textContent = n;
-      svg.appendChild(lbl);
-    }
-
     // factor stack: primes = 1 red circle, composites = factor circles
+    var stackTop = null; // y of the stack's top edge (for the dashed stem)
     if (n >= 2) {
       if (isPrime[n]) {
         var cy0 = BOTTOM_CY;
@@ -196,6 +241,7 @@
         });
         tp.textContent = n;
         svg.appendChild(tp);
+        stackTop = cy0 - CIRCLE_R;
       } else {
         var factors = factorize(n);
         for (var i = 0; i < factors.length; i++) {
@@ -209,8 +255,54 @@
           t.textContent = f;
           svg.appendChild(t);
         }
+        stackTop = BOTTOM_CY - (factors.length - 1) * CIRCLE_STEP - CIRCLE_R;
       }
+
+      // dashed stem connecting the stack top up to the label line
+      svg.appendChild(el('line', {
+        x1: xx, y1: stackTop, x2: xx, y2: LABEL_Y + 4,
+        stroke: '#666', 'stroke-width': 1, 'stroke-dasharray': '3 4'
+      }));
     }
+
+    // grey number label for every number, all at the same level (above stacks)
+    var lbl = el('text', {
+      x: xx, y: LABEL_Y, 'text-anchor': 'middle',
+      fill: '#999', 'font-size': 9
+    });
+    lbl.textContent = n;
+    svg.appendChild(lbl);
+  }
+
+  // Mathematical constants marked below the number line
+  var CONSTANTS = [
+    { symbol: '\u03C6', value: 1.61803, dy: 0  }, // phi (golden ratio)
+    { symbol: 'e',      value: 2.71828, dy: 0  }, // Euler's number
+    { symbol: '\u03C0', value: 3.14159, dy: 24 }  // pi (offset down to avoid e)
+  ];
+  var CONST_CIRCLE_Y = BASELINE + 45;
+
+  for (var ci = 0; ci < CONSTANTS.length; ci++) {
+    var c = CONSTANTS[ci];
+    var cx = x(c.value);
+    var cy = CONST_CIRCLE_Y + c.dy;
+
+    // dashed line down from the baseline to the grey circle
+    svg.appendChild(el('line', {
+      x1: cx, y1: BASELINE, x2: cx, y2: cy - CIRCLE_R,
+      stroke: '#666', 'stroke-width': 1, 'stroke-dasharray': '3 4'
+    }));
+
+    // grey circle (same size as the factor circles)
+    svg.appendChild(el('circle', { cx: cx, cy: cy, r: CIRCLE_R, fill: '#999' }));
+
+    // black symbol inside the circle (same size as the other labels)
+    var clabel = el('text', {
+      x: cx, y: cy + 3, 'text-anchor': 'middle',
+      fill: '#1a1a1a', 'font-size': 9, 'font-weight': 'bold'
+    });
+    clabel.textContent = c.symbol;
+    svg.appendChild(clabel);
   }
 
   // Translate vertical wheel into horizontal scroll
@@ -218,6 +310,26 @@
   scroll.addEventListener('wheel', function (e) {
     if (e.deltaY !== 0) { e.preventDefault(); scroll.scrollLeft += e.deltaY; }
   }, { passive: false });
+
+  // Grab anywhere & slide (drag) to scroll the number line
+  var dragging = false;
+  var startX = 0, startLeft = 0;
+
+  scroll.addEventListener('pointerdown', function (e) {
+    dragging = true;
+    startX = e.clientX;
+    startLeft = scroll.scrollLeft;
+    scroll.setPointerCapture(e.pointerId);
+  });
+
+  scroll.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    scroll.scrollLeft = startLeft + (e.clientX - startX);
+  });
+
+  function stopDrag() { dragging = false; }
+  scroll.addEventListener('pointerup', stopDrag);
+  scroll.addEventListener('pointercancel', stopDrag);
 
   // Prime check input
   var input = document.getElementById('prime-input');
@@ -247,11 +359,58 @@
   }
 
   input.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' || e.key === 'Tab') {
       e.preventDefault();
       checkPrime();
     }
   });
+
+  // Custom scrollbar (works in all browsers)
+  var scrollbar = document.getElementById('scrollbar');
+  var thumb = document.getElementById('scrollbar-thumb');
+
+  function updateThumb() {
+    var trackW = scrollbar.clientWidth;
+    var contentW = scroll.scrollWidth;
+    var viewW = scroll.clientWidth;
+    var maxScroll = contentW - viewW;
+    var thumbW = Math.max(60, (viewW / contentW) * trackW);
+    thumb.style.width = thumbW + 'px';
+    var maxLeft = trackW - thumbW;
+    var left = maxScroll > 0 ? (scroll.scrollLeft / maxScroll) * maxLeft : 0;
+    thumb.style.left = left + 'px';
+  }
+
+  scroll.addEventListener('scroll', updateThumb);
+
+  var thumbDragging = false;
+  var thumbStartX = 0, thumbStartLeft = 0;
+
+  thumb.addEventListener('pointerdown', function (e) {
+    thumbDragging = true;
+    thumbStartX = e.clientX;
+    thumbStartLeft = thumb.offsetLeft;
+    thumb.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+
+  thumb.addEventListener('pointermove', function (e) {
+    if (!thumbDragging) return;
+    var trackW = scrollbar.clientWidth;
+    var thumbW = thumb.offsetWidth;
+    var maxLeft = trackW - thumbW;
+    var newLeft = Math.max(0, Math.min(maxLeft, thumbStartLeft + (e.clientX - thumbStartX)));
+    thumb.style.left = newLeft + 'px';
+    var maxScroll = scroll.scrollWidth - scroll.clientWidth;
+    if (maxLeft > 0) scroll.scrollLeft = (newLeft / maxLeft) * maxScroll;
+  });
+
+  function stopThumbDrag() { thumbDragging = false; }
+  thumb.addEventListener('pointerup', stopThumbDrag);
+  thumb.addEventListener('pointercancel', stopThumbDrag);
+
+  updateThumb();
+  window.addEventListener('resize', updateThumb);
 })();
 </script>
 </body>
