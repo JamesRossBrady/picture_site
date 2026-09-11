@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fighting Game — Prisoner's Dilemma</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; }
+  body {
+    background: #0d0d0d; color: #e0e0e0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+
+  #header {
+    flex-shrink: 0; padding: 14px 24px;
+    border-bottom: 1px solid #222;
+    display: flex; align-items: center; gap: 16px;
+  }
+  #header h1 { font-size: 17px; font-weight: 700; letter-spacing: 0.3px; }
+  #header .sub { font-size: 12px; color: #666; }
+
+  #main { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+  /* Top: players + diagram */
+  #top {
+    flex: 1; min-height: 0;
+    display: grid; grid-template-columns: 1fr 1.4fr 1fr;
+    gap: 16px; padding: 0;
+  }
+
+  .player {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+    background: #141416; border: 1px solid #222; border-radius: 12px; padding: 0;
+    cursor: pointer; transition: background 0.2s, border-color 0.2s;
+  }
+  .player.selected {
+    background: #2a2a31;
+    border-color: #ffcc00;
+  }
+  .player .avatar {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: #222; border: 2px solid #444;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 42px; color: #555;
+    overflow: hidden;
+  }
+  .player .avatar img {
+    width: 100%; height: 100%;
+    object-fit: cover; border-radius: 50%;
+    display: block;
+  }
+  .player .name { font-size: 20px; font-weight: 700; letter-spacing: 0.4px; }
+  #player-1 .name { color: #4ade80; }
+  #player-2 .name { color: #ef4444; }
+  .player .tag { font-size: 12px; color: #888; }
+
+  /* Prisoner's Dilemma diagram */
+  #diagram {
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 12px;
+    background: #141416; border: 1px solid #222; border-radius: 12px; padding: 18px;
+  }
+  .matrix .caesar-label {
+    grid-column: 2 / 4;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; color: #e0e0e0; letter-spacing: 0.5px;
+  }
+  #diagram .board-row {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%;
+  }
+  #diagram .axis-jesus {
+    font-size: 15px; font-weight: 700; color: #e0e0e0; letter-spacing: 0.5px;
+    transform: translateY(46px) rotate(-60deg);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  #diagram .board-row .matrix { min-width: 0; }
+
+  /* Round controls */
+  #diagram .controls {
+    display: flex; align-items: center; gap: 10px;
+  }
+  #diagram .rounds-label {
+    font-size: 12px; color: #888; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  #diagram .rounds-input {
+    width: 64px; background: #0d0d0d; color: #e0e0e0;
+    border: 1px solid #333; border-radius: 8px;
+    padding: 6px 10px; font-size: 14px; font-family: inherit; text-align: center;
+  }
+  #diagram .rounds-input:focus { outline: none; border-color: #666; }
+  #diagram .play-btn {
+    background: #2a6e2a; color: #fff; border: 1px solid #4a9e4a;
+    border-radius: 6px; padding: 6px 14px;
+    cursor: pointer; font-size: 13px; font-family: inherit;
+    transition: background 0.2s;
+  }
+  #diagram .play-btn:hover { background: #368036; }
+
+  /* Game mode controls */
+  #diagram .mode-controls {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+    align-self: flex-start;
+  }
+  #diagram .top-controls {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    align-self: stretch;
+  }
+  #diagram .mode-label {
+    font-size: 12px; color: #888; font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  #diagram .mode-btn {
+    background: #1c1c20; color: #bbb;
+    border: 1px solid #333; border-radius: 6px;
+    padding: 5px 12px; font-size: 13px; font-family: inherit;
+    cursor: pointer; transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  #diagram .mode-btn:hover { background: #2a2a31; color: #fff; }
+  #diagram .mode-btn.selected {
+    background: #2a2a31; color: #fff; border-color: #ffcc00;
+  }
+
+  .matrix {
+    display: grid;
+    grid-template-columns: 72px 1fr 1fr;
+    grid-template-rows: 40px 40px 1fr 1fr;
+    gap: 6px;
+    width: 100%; max-width: 380px;
+  }
+  .matrix .corner { display: flex; align-items: center; justify-content: center; }
+  .matrix .col-label, .matrix .row-label {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: #bbb;
+    background: #1c1c20; border-radius: 6px;
+  }
+  .matrix .cell {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 15px; font-weight: 700;
+    background: #1c1c20; border-radius: 8px; padding: 10px;
+    min-height: 60px;
+  }
+  .matrix .cell .p1 { color: #4ade80; }  /* cooperate payoff tint */
+  .matrix .cell .p2 { color: #ef4444; }  /* defect payoff tint */
+  .matrix .cell.coop { border: 1px solid #2a4a2a; }
+  .matrix .cell.def  { border: 1px solid #4a2a2a; }
+  .matrix .cell.highlight,
+  .matrix .row-label.highlight,
+  .matrix .col-label.highlight {
+    background: rgba(255, 204, 0, 0.25);
+  }
+  .matrix .cell.flash,
+  .matrix .row-label.flash,
+  .matrix .col-label.flash {
+    background: rgba(255, 204, 0, 0.6);
+  }
+
+  /* Bottom: player textboxes */
+  #bottom {
+    flex: 1; min-height: 0;
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: minmax(0, 1fr);
+    gap: 16px; padding: 0 20px 16px;
+  }
+  .textbox-wrap {
+    display: flex; flex-direction: column; gap: 8px;
+    background: #141416; border: 1px solid #222; border-radius: 12px; padding: 12px;
+    min-height: 0; overflow: hidden;
+  }
+  .textbox-wrap .label { font-size: 12px; color: #888; font-weight: 600; }
+  .textbox-wrap .label.scoreboard-label { text-align: center; }
+  .textbox-wrap textarea {
+    flex: 1; resize: none;
+    background: #0d0d0d; color: #e0e0e0;
+    border: 1px solid #333; border-radius: 8px;
+    padding: 12px; font-size: 14px; font-family: inherit; line-height: 1.5;
+  }
+  .textbox-wrap textarea:focus { outline: none; border-color: #666; }
+  .textbox-wrap textarea:disabled { opacity: 0.4; cursor: not-allowed; }
+  .palette {
+    display: flex; gap: 6px;
+  }
+  .palette.disabled { opacity: 0.4; pointer-events: none; }
+  .token {
+    padding: 4px 10px;
+    background: #1c1c20; border: 1px solid #333; border-radius: 6px;
+    font-size: 12px; color: #ccc;
+    cursor: grab; user-select: none;
+  }
+  .token:active { cursor: grabbing; }
+  .program-box {
+    flex: 1;
+    min-height: 60px;
+    display: flex; flex-wrap: wrap; align-content: flex-start;
+    gap: 6px;
+    background: #0d0d0d; border: 1px solid #333; border-radius: 8px;
+    padding: 8px;
+    overflow-y: auto;
+  }
+  .program-box.disabled { opacity: 0.4; }
+  .program-chip {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; user-select: none;
+  }
+  .program-chip.cooperate { color: #4ade80; border: 1px solid #2a4a2a; background: #14231a; }
+  .program-chip.defect { color: #ef4444; border: 1px solid #4a2a2a; background: #231416; }
+  .scoreboard {
+    flex: 1;
+    display: flex; flex-direction: column;
+    background: #0d0d0d; border: 1px solid #333; border-radius: 8px;
+    color: #e0e0e0; overflow: hidden; min-height: 0;
+  }
+  .scoreboard-header {
+    flex-shrink: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid #333;
+    font-size: 13px; font-weight: 700;
+  }
+  .sb-jesus { color: #4ade80; }
+  .sb-caesar { color: #ef4444; }
+  .scoreboard-viewport {
+    flex: 1; min-height: 0;
+    display: flex;
+  }
+  .scoreboard-body {
+    flex: 1; overflow: hidden;
+    padding: 8px 12px; min-height: 0;
+  }
+  .sb-scrollbar {
+    flex-shrink: 0;
+    width: 10px;
+    margin: 4px 4px 4px 0;
+    background: #141416;
+    border-radius: 8px;
+    position: relative;
+    cursor: pointer;
+  }
+  .sb-thumb {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    background: #555;
+    border-radius: 8px;
+  }
+  .sb-thumb:hover { background: #666; }
+  .sb-line {
+    display: flex; align-items: center; gap: 12px;
+    padding: 4px 0;
+    border-bottom: 1px solid #1e1e22;
+    font-size: 13px;
+  }
+  .sb-name { min-width: 52px; font-weight: 600; }
+  .sb-move { min-width: 76px; color: #ccc; }
+  .sb-row-caesar { justify-content: flex-end; }
+  .sb-side {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sb-score {
+    min-width: 36px;
+    text-align: center;
+    color: #ccc;
+  }
+  .sb-total { font-weight: 700; color: #fff; }
+  .match-result {
+    flex-shrink: 0;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffcc00;
+  }
+</style>
+</head>
+<body>
+  <div id="header">
+    <h1>Fighting Game</h1>
+    <span class="sub">Prisoner's Dilemma — layout scaffold</span>
+  </div>
+
+  <div id="main">
+    <div id="top">
+      <div class="player" id="player-1">
+        <div class="avatar"><img src="jesus.jpg" alt="Jesus"></div>
+        <div class="name">Jesus</div>
+      </div>
+
+      <div id="diagram">
+        <div class="top-controls">
+          <span class="mode-label">game mode:</span>
+          <div class="controls">
+            <label class="rounds-label" for="rounds-input">rounds</label>
+            <input class="rounds-input" id="rounds-input" type="number" min="1" value="10">
+            <button class="play-btn" id="play-btn" title="Play game" aria-label="Play game">play game</button>
+          </div>
+        </div>
+        <div class="mode-controls">
+          <button class="mode-btn selected" id="mode-manual">manual</button>
+          <button class="mode-btn" id="mode-program">program</button>
+        </div>
+        <div class="board-row">
+          <div class="axis-jesus">Jesus</div>
+          <div class="matrix">
+          <div class="corner"></div>
+          <div class="caesar-label">Caesar</div>
+
+          <div class="corner"></div>
+          <div class="col-label" data-col="defect">Defect</div>
+          <div class="col-label" data-col="cooperate">Cooperate</div>
+
+          <div class="row-label" data-row="defect">Defect</div>
+          <div class="cell def" data-row="defect" data-col="defect"><span class="p1">-5</span><span class="p2">-5</span></div>
+          <div class="cell coop" data-row="defect" data-col="cooperate"><span class="p1">0</span><span class="p2">-10</span></div>
+
+          <div class="row-label" data-row="cooperate">Cooperate</div>
+          <div class="cell coop" data-row="cooperate" data-col="defect"><span class="p1">-10</span><span class="p2">0</span></div>
+          <div class="cell def" data-row="cooperate" data-col="cooperate"><span class="p1">-3</span><span class="p2">-3</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="player" id="player-2">
+        <div class="avatar"><img src="ceasar.svg" alt="Caesar"></div>
+        <div class="name">Caesar</div>
+      </div>
+    </div>
+
+    <div id="bottom">
+      <div class="textbox-wrap">
+        <div class="label">Jesus — program</div>
+        <div class="palette">
+          <span class="token" draggable="true" data-move="cooperate">cooperate</span>
+          <span class="token" draggable="true" data-move="defect">defect</span>
+        </div>
+        <div class="program-box" id="jesus-program"></div>
+      </div>
+      <div class="textbox-wrap">
+        <div class="label scoreboard-label">Scoreboard</div>
+        <div class="scoreboard">
+          <div class="scoreboard-header">
+            <div class="sb-side">
+              <span class="sb-jesus">Jesus</span>
+              <span class="sb-score sb-total" id="jesus-total">0</span>
+            </div>
+            <div class="sb-side">
+              <span class="sb-score sb-total" id="caesar-total">0</span>
+              <span class="sb-caesar">Caesar</span>
+            </div>
+          </div>
+          <div class="scoreboard-viewport">
+            <div class="scoreboard-body"></div>
+            <div class="sb-scrollbar"><div class="sb-thumb"></div></div>
+          </div>
+        </div>
+        <div class="match-result" id="match-result"></div>
+      </div>
+      <div class="textbox-wrap">
+        <div class="label">Caesar — program</div>
+        <div class="palette">
+          <span class="token" draggable="true" data-move="cooperate">cooperate</span>
+          <span class="token" draggable="true" data-move="defect">defect</span>
+        </div>
+        <div class="program-box" id="caesar-program"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const players = document.querySelectorAll('.player');
+    players.forEach(p => {
+      p.addEventListener('click', () => {
+        const wasSelected = p.classList.contains('selected');
+        players.forEach(q => q.classList.remove('selected'));
+        if (!wasSelected) p.classList.add('selected');
+      });
+    });
+
+    // Game mode selection (exclusive)
+    const modeButtons = document.querySelectorAll('.mode-btn');
+    modeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        modeButtons.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        updateModeUI();
+      });
+    });
+
+    function updateModeUI() {
+      const isManual = document.getElementById('mode-manual').classList.contains('selected');
+      document.querySelectorAll('.palette').forEach(p => {
+        p.classList.toggle('disabled', isManual);
+      });
+      document.querySelectorAll('.program-box').forEach(b => {
+        b.classList.toggle('disabled', isManual);
+      });
+    }
+
+    updateModeUI();
+
+    // Drag-and-drop "cooperate" / "defect" tokens into the program boxes
+    const tokens = document.querySelectorAll('.token');
+    tokens.forEach(token => {
+      token.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', token.dataset.move);
+        e.dataTransfer.effectAllowed = 'copy';
+      });
+    });
+
+    const programBoxes = document.querySelectorAll('.program-box');
+    programBoxes.forEach(box => {
+      box.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+      });
+      box.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (isManualMode()) return;
+        const move = e.dataTransfer.getData('text/plain');
+        if (move !== 'cooperate' && move !== 'defect') return;
+        if (box.children.length >= getRounds()) {
+          showError(`This program is full — ${getRounds()} moves max.`);
+          return;
+        }
+        addChip(box, move);
+      });
+    });
+
+    function addChip(box, move) {
+      const chip = document.createElement('span');
+      chip.className = 'program-chip ' + move;
+      chip.textContent = move;
+      chip.title = 'Click to remove';
+      chip.addEventListener('click', () => chip.remove());
+      box.appendChild(chip);
+    }
+
+    // Game state
+    let gameStarted = false;
+    let roundsPlayed = 0;
+    let totalRounds = 10;
+    let programRunning = false;
+
+    function isManualMode() {
+      return document.getElementById('mode-manual').classList.contains('selected');
+    }
+
+    function getRounds() {
+      const r = parseInt(document.getElementById('rounds-input').value, 10);
+      return (isNaN(r) || r < 1) ? 1 : r;
+    }
+
+    function showError(message) {
+      const el = document.getElementById('match-result');
+      el.textContent = message;
+      el.style.color = '#ef4444';
+    }
+
+    function checkProgramsFull() {
+      const needed = getRounds();
+      const jCount = document.getElementById('jesus-program').children.length;
+      const cCount = document.getElementById('caesar-program').children.length;
+      if (jCount >= needed && cCount >= needed) return true;
+      const jShort = needed - jCount;
+      const cShort = needed - cCount;
+      let msg;
+      if (jShort > 0 && cShort > 0) {
+        msg = `Both programs are incomplete — Jesus needs ${jShort} more, Caesar needs ${cShort} more.`;
+      } else if (jShort > 0) {
+        msg = `Jesus's program needs ${jShort} more move(s).`;
+      } else {
+        msg = `Caesar's program needs ${cShort} more move(s).`;
+      }
+      showError(msg);
+      return false;
+    }
+
+    function startGame() {
+      if (programRunning) return;
+      if (!isManualMode() && !checkProgramsFull()) return;
+      totalRounds = getRounds();
+      roundsPlayed = 0;
+      jesusTotal = 0;
+      caesarTotal = 0;
+      updateTotals();
+      document.querySelector('.scoreboard-body').innerHTML = '';
+      const resultEl = document.getElementById('match-result');
+      resultEl.textContent = '';
+      resultEl.style.color = '';
+      updateScrollbar();
+      gameStarted = true;
+
+      if (!isManualMode()) {
+        runProgram();
+      }
+    }
+
+    function endGame() {
+      const resultEl = document.getElementById('match-result');
+      resultEl.style.color = '';
+      if (jesusTotal > caesarTotal) {
+        resultEl.textContent = 'Jesus wins!';
+      } else if (caesarTotal > jesusTotal) {
+        resultEl.textContent = 'Caesar wins!';
+      } else {
+        resultEl.textContent = 'Tie!';
+      }
+    }
+
+    function randomMove() {
+      return Math.random() < 0.5 ? 'defect' : 'cooperate';
+    }
+
+    function collectMoves(programId) {
+      const box = document.getElementById(programId);
+      return Array.from(box.children).map(chip => chip.textContent);
+    }
+
+    function highlightMove(player, move) {
+      const selector = (player === 'jesus') ? `[data-row="${move}"]` : `[data-col="${move}"]`;
+      document.querySelectorAll(selector).forEach(el => {
+        el.classList.add('flash');
+        setTimeout(() => el.classList.remove('flash'), 900);
+      });
+    }
+
+    function runProgram() {
+      programRunning = true;
+      const jMoves = collectMoves('jesus-program');
+      const cMoves = collectMoves('caesar-program');
+      let round = 0;
+
+      function playRound() {
+        if (round >= totalRounds) {
+          programRunning = false;
+          endGame();
+          return;
+        }
+        const jMove = jMoves[round];
+        const cMove = cMoves[round];
+
+        const jesusFirst = Math.random() < 0.5;
+        const firstPlayer = jesusFirst ? 'jesus' : 'caesar';
+        const firstMove = jesusFirst ? jMove : cMove;
+
+        highlightMove(firstPlayer, firstMove);
+
+        setTimeout(() => {
+          const secondPlayer = jesusFirst ? 'caesar' : 'jesus';
+          const secondMove = jesusFirst ? cMove : jMove;
+          highlightMove(secondPlayer, secondMove);
+
+          addScoreboardLine(jMove, cMove, jesusFirst);
+          roundsPlayed++;
+          round++;
+
+          setTimeout(playRound, 1000);
+        }, 1000);
+      }
+
+      setTimeout(playRound, 1000);
+    }
+
+    document.getElementById('play-btn').addEventListener('click', startGame);
+
+    // Row highlight on hover (only when Jesus is selected)
+    const rowLabels = document.querySelectorAll('.row-label');
+    rowLabels.forEach(label => {
+      label.addEventListener('mouseenter', () => {
+        if (!gameStarted || !isManualMode()) return;
+        if (!document.getElementById('player-1').classList.contains('selected')) return;
+        setHighlight(`[data-row="${label.dataset.row}"]`, true);
+      });
+      label.addEventListener('mouseleave', () => {
+        setHighlight(`[data-row="${label.dataset.row}"]`, false);
+      });
+    });
+
+    // Column highlight on hover (only when Caesar is selected)
+    const colLabels = document.querySelectorAll('.col-label');
+    colLabels.forEach(label => {
+      label.addEventListener('mouseenter', () => {
+        if (!gameStarted || !isManualMode()) return;
+        if (!document.getElementById('player-2').classList.contains('selected')) return;
+        setHighlight(`[data-col="${label.dataset.col}"]`, true);
+      });
+      label.addEventListener('mouseleave', () => {
+        setHighlight(`[data-col="${label.dataset.col}"]`, false);
+      });
+    });
+
+    function setHighlight(selector, on) {
+      document.querySelectorAll(selector).forEach(el => {
+        el.classList.toggle('highlight', on);
+      });
+    }
+
+    // Jesus makes a move: click a row label when Jesus is selected (Caesar random)
+    rowLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        if (!gameStarted || !isManualMode()) return;
+        if (roundsPlayed >= totalRounds) return;
+        if (!document.getElementById('player-1').classList.contains('selected')) return;
+        const move = label.dataset.row; // Jesus's move
+        const oppMove = randomMove(); // Caesar plays random
+        addScoreboardLine(move, oppMove, true);
+        flash(`[data-col="${oppMove}"]`); // flash Caesar's column
+        roundsPlayed++;
+        if (roundsPlayed >= totalRounds) endGame();
+      });
+    });
+
+    // Caesar makes a move: click a column label when Caesar is selected (Jesus random)
+    colLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        if (!gameStarted || !isManualMode()) return;
+        if (roundsPlayed >= totalRounds) return;
+        if (!document.getElementById('player-2').classList.contains('selected')) return;
+        const move = label.dataset.col; // Caesar's move
+        const oppMove = randomMove(); // Jesus plays random
+        addScoreboardLine(oppMove, move, false);
+        flash(`[data-row="${oppMove}"]`); // flash Jesus's row
+        roundsPlayed++;
+        if (roundsPlayed >= totalRounds) endGame();
+      });
+    });
+
+    let jesusTotal = 0;
+    let caesarTotal = 0;
+
+    function addScoreboardLine(jesusMove, caesarMove, jesusFirst) {
+      const body = document.querySelector('.scoreboard-body');
+      const [jScore, cScore] = getScores(jesusMove, caesarMove);
+      jesusTotal += jScore;
+      caesarTotal += cScore;
+      updateTotals();
+
+      const jRow = makePlayerRow('jesus', jesusMove, jScore);
+      const cRow = makePlayerRow('caesar', caesarMove, cScore);
+
+      if (jesusFirst) {
+        body.appendChild(jRow);
+        body.appendChild(cRow);
+      } else {
+        body.appendChild(cRow);
+        body.appendChild(jRow);
+      }
+      body.scrollTop = body.scrollHeight;
+      updateScrollbar();
+    }
+
+    function makePlayerRow(player, move, score) {
+      const row = document.createElement('div');
+      row.className = 'sb-line sb-row-' + player;
+      const nameCls = (player === 'jesus') ? 'sb-jesus' : 'sb-caesar';
+      row.appendChild(makeSpan('sb-name ' + nameCls, capitalize(player)));
+      row.appendChild(makeSpan('sb-move', capitalize(move)));
+      row.appendChild(makeSpan('sb-score', score));
+      return row;
+    }
+
+    function updateTotals() {
+      document.getElementById('jesus-total').textContent = jesusTotal;
+      document.getElementById('caesar-total').textContent = caesarTotal;
+    }
+
+    function makeSpan(cls, text) {
+      const s = document.createElement('span');
+      s.className = cls;
+      s.textContent = text;
+      return s;
+    }
+
+    function capitalize(word) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    }
+
+    function getScores(jesusMove, caesarMove) {
+      const payoffs = {
+        'defect-defect': [-5, -5],
+        'defect-cooperate': [0, -10],
+        'cooperate-defect': [-10, 0],
+        'cooperate-cooperate': [-3, -3]
+      };
+      return payoffs[jesusMove + '-' + caesarMove] || [0, 0];
+    }
+
+    function flash(selector) {
+      document.querySelectorAll(selector).forEach(el => {
+        el.classList.add('flash');
+        setTimeout(() => el.classList.remove('flash'), 500);
+      });
+    }
+
+    // Custom cross-browser scoreboard scrollbar (single code path for all browsers)
+    const sbBody = document.querySelector('.scoreboard-body');
+    const sbTrack = document.querySelector('.sb-scrollbar');
+    const sbThumb = document.querySelector('.sb-thumb');
+
+    function updateScrollbar() {
+      const viewportH = sbBody.clientHeight;
+      const contentH = sbBody.scrollHeight;
+      const trackH = sbTrack.clientHeight;
+      if (contentH <= viewportH || trackH <= 0) {
+        sbThumb.style.height = '100%';
+        sbThumb.style.top = '0px';
+        return;
+      }
+      const thumbH = Math.max(20, (viewportH / contentH) * trackH);
+      const maxScroll = contentH - viewportH;
+      const maxTop = trackH - thumbH;
+      const top = maxScroll > 0 ? (sbBody.scrollTop / maxScroll) * maxTop : 0;
+      sbThumb.style.height = thumbH + 'px';
+      sbThumb.style.top = top + 'px';
+    }
+
+    sbBody.addEventListener('wheel', (e) => {
+      sbBody.scrollTop += e.deltaY;
+      updateScrollbar();
+    }, { passive: true });
+
+    let dragging = false;
+    let dragStartY = 0;
+    let dragStartTop = 0;
+
+    sbThumb.addEventListener('mousedown', (e) => {
+      dragging = true;
+      dragStartY = e.clientY;
+      dragStartTop = sbThumb.offsetTop;
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const trackH = sbTrack.clientHeight;
+      const thumbH = sbThumb.clientHeight;
+      const maxTop = trackH - thumbH;
+      const newTop = Math.max(0, Math.min(maxTop, dragStartTop + (e.clientY - dragStartY)));
+      sbThumb.style.top = newTop + 'px';
+      const contentH = sbBody.scrollHeight;
+      const viewportH = sbBody.clientHeight;
+      const maxScroll = contentH - viewportH;
+      sbBody.scrollTop = maxTop > 0 ? (newTop / maxTop) * maxScroll : 0;
+    });
+
+    document.addEventListener('mouseup', () => { dragging = false; });
+    window.addEventListener('resize', updateScrollbar);
+
+    updateScrollbar();
+  </script>
+</body>
+</html>
