@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gregg Shorthand Text Generator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0d0d0d;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 24px 40px 300px;
+    }
+
+    #legend {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 250px;
+      overflow-y: auto;
+      background: #101010;
+      border-right: 1px solid #222;
+      padding: 28px 18px 40px;
+      z-index: 5;
+    }
+
+    #legend h2 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 18px;
+    }
+
+    .legend-group { margin-bottom: 22px; }
+
+    .legend-group-title {
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 3px 0;
+    }
+
+    .legend-char {
+      width: 22px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #ccc;
+      text-align: right;
+    }
+
+    .legend-glyph {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      min-height: 26px;
+    }
+
+    .legend-glyph svg { height: 26px; width: auto; }
+
+    .legend-note {
+      font-size: 11px;
+      color: #555;
+      line-height: 1.5;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 720px) {
+      #legend { width: 180px; }
+      body { padding-left: 210px; }
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #eee;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #777;
+      margin-bottom: 26px;
+      text-align: center;
+      max-width: 640px;
+      line-height: 1.5;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 34px;
+    }
+
+    .controls label {
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    input[type="range"] {
+      width: 220px;
+      height: 4px;
+      accent-color: #b09a5a;
+      cursor: pointer;
+    }
+
+    input[type="number"] {
+      width: 74px;
+      background: #111;
+      color: #e0e0e0;
+      border: 1px solid #444;
+      border-radius: 5px;
+      padding: 6px 8px;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    .word-count {
+      font-size: 14px;
+      color: #999;
+      min-width: 60px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    button {
+      background: #2a2a2a;
+      color: #e0e0e0;
+      border: 1px solid #555;
+      border-radius: 6px;
+      padding: 7px 18px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    button:hover { background: #3a3a3a; border-color: #777; }
+
+    .output {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .english {
+      font-size: 22px;
+      line-height: 1.6;
+      color: #f0f0f0;
+      text-align: center;
+      margin-bottom: 22px;
+      max-width: 860px;
+    }
+
+    .divider {
+      width: 120px;
+      height: 1px;
+      background: #333;
+      margin: 0 auto 22px;
+    }
+
+    .gregg {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 14px 22px;
+      max-width: 900px;
+      min-height: 60px;
+    }
+
+    .gregg svg {
+      height: 40px;
+      width: auto;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <aside id="legend">
+    <h2>Sound Legend</h2>
+  </aside>
+
+  <h1>Gregg Shorthand Text Generator</h1>
+  <p class="subtitle">
+    Pick how many words to generate. The standard English text appears above, with a
+    Gregg-style shorthand rendering centered directly below it.
+  </p>
+
+  <div class="controls">
+    <label for="count">Words</label>
+    <input type="range" id="count-range" min="1" max="200" value="24">
+    <input type="number" id="count-num" min="1" max="200" value="24">
+    <span class="word-count" id="count-label">24</span>
+    <button id="generate">Generate</button>
+  </div>
+
+  <div class="output">
+    <div class="english" id="english"></div>
+    <div class="divider"></div>
+    <div class="gregg" id="gregg"></div>
+  </div>
+
+  <script>
+    (function () {
+      // ---- Word generation ----
+      const NOUNS = [
+        'time','year','people','way','day','man','woman','child','world','life',
+        'hand','part','eye','place','work','week','case','point','company','number',
+        'group','problem','fact','house','water','room','mother','father','area',
+        'money','story','book','city','night','job','school','car','door','friend',
+        'head','line','end','home','thing','sound','name','air','food','tree'
+      ];
+      const ADJECTIVES = [
+        'good','new','first','last','long','great','little','own','other','old',
+        'right','big','high','different','small','large','next','early','young',
+        'important','few','public','bad','same','nice','bright','dark','cold','warm'
+      ];
+      const VERBS = [
+        { b: 'have', s: 'has' }, { b: 'do', s: 'does' }, { b: 'say', s: 'says' },
+        { b: 'get', s: 'gets' }, { b: 'make', s: 'makes' }, { b: 'go', s: 'goes' },
+        { b: 'know', s: 'knows' }, { b: 'take', s: 'takes' }, { b: 'see', s: 'sees' },
+        { b: 'come', s: 'comes' }, { b: 'think', s: 'thinks' }, { b: 'look', s: 'looks' },
+        { b: 'want', s: 'wants' }, { b: 'give', s: 'gives' }, { b: 'use', s: 'uses' },
+        { b: 'find', s: 'finds' }, { b: 'tell', s: 'tells' }, { b: 'ask', s: 'asks' },
+        { b: 'work', s: 'works' }, { b: 'seem', s: 'seems' }, { b: 'feel', s: 'feels' },
+        { b: 'try', s: 'tries' }, { b: 'leave', s: 'leaves' }, { b: 'call', s: 'calls' },
+        { b: 'need', s: 'needs' }, { b: 'run', s: 'runs' }, { b: 'walk', s: 'walks' },
+        { b: 'play', s: 'plays' }, { b: 'read', s: 'reads' }, { b: 'write', s: 'writes' }
+      ];
+      const ADVERBS = [
+        'quickly','slowly','carefully','often','always','never','soon','well',
+        'really','just','quite','very'
+      ];
+
+      function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+      function sentence() {
+        const t = Math.floor(Math.random() * 4);
+        const adj = pick(ADJECTIVES);
+        const noun = pick(NOUNS);
+        const verb = pick(VERBS);
+        switch (t) {
+          case 0: return ['The', adj, noun, verb.s, 'the', pick(ADJECTIVES), pick(NOUNS)];
+          case 1: return ['A', adj, noun, verb.s, 'the', pick(NOUNS)];
+          case 2: return ['The', noun, verb.s, pick(ADVERBS)];
+          default: return [pick(NOUNS), verb.s, 'the', adj, pick(NOUNS)];
+        }
+      }
+
+      function generateWords(n) {
+        const words = [];
+        while (words.length < n) {
+          words.push.apply(words, sentence());
+        }
+        words.length = n;
+        return words;
+      }
+
+      function renderEnglish(words) {
+        let text = words.join(' ');
+        if (text.length > 0) {
+          text = text.charAt(0).toUpperCase() + text.slice(1) + '.';
+        }
+        return text;
+      }
+
+      // ---- Gregg-style shorthand rendering ----
+      const VOWELS = new Set(['a', 'e', 'i', 'o', 'u']);
+
+      // Each consonant maps to a glyph drawn on the baseline (y = 0) and an
+      // advance width (w). Every sound gets its own horizontal slot, so glyphs
+      // never stack or drift — the pen always moves left to right.
+      const STROKES = {
+        b: { d: 'C 3 13 11 13 14 0', w: 14 },
+        c: { d: 'L 9 -9', w: 10 },
+        d: { d: 'L 13 13', w: 14 },
+        f: { d: 'Q 5 -12 10 0', w: 10 },
+        g: { d: 'L 17 -17', w: 18 },
+        h: { d: '', w: 8, dot: true },
+        j: { d: 'C 2 10 9 13 11 6', w: 12 },
+        k: { d: 'L 9 -9', w: 10 },
+        l: { d: 'C 3 -13 11 -13 14 0', w: 14 },
+        m: { d: 'Q 11 -5 22 0', w: 22 },
+        n: { d: 'L 12 0', w: 12 },
+        p: { d: 'C 3 13 11 13 14 0', w: 14 },
+        q: { d: 'L 8 -8 L 13 4', w: 14 },
+        r: { d: 'L 9 -6', w: 10 },
+        s: { d: 'Q 5 -10 10 0', w: 10 },
+        t: { d: 'L 11 9', w: 12 },
+        v: { d: 'C 3 -13 13 -13 16 0', w: 16 },
+        w: { d: 'L 7 -7 L 15 0', w: 15 },
+        x: { d: 'L 7 -7 L 15 0', w: 15 },
+        y: { d: 'L 8 -4', w: 9 },
+        z: { d: 'Q 5 -10 10 0', w: 10 }
+      };
+
+      function renderGreggWord(word) {
+        const letters = word.toLowerCase().replace(/[^a-z]/g, '');
+        let x = 4;
+        let path = '';
+        const circles = [];
+        const dots = [];
+
+        for (let i = 0; i < letters.length; i++) {
+          const ch = letters[i];
+          const isVowel = VOWELS.has(ch) || (ch === 'y' && i > 0);
+          if (isVowel) {
+            circles.push({ x: x + 3, y: 0 });
+            x += 8;
+            continue;
+          }
+          const s = STROKES[ch];
+          if (!s) continue;
+          if (s.dot) {
+            dots.push({ x: x + 4, y: -8 });
+            x += s.w;
+            continue;
+          }
+          path += ' M ' + x + ' 0 ' + s.d;
+          x += s.w;
+        }
+
+        const width = Math.max(x + 3, 10);
+        let svg = '<svg viewBox="0 -18 ' + width + ' 36" xmlns="http://www.w3.org/2000/svg">';
+        if (path) {
+          svg += '<path d="' + path + '" fill="none" stroke="#e2e2e2" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>';
+        }
+        circles.forEach(function (c) {
+          svg += '<circle cx="' + c.x + '" cy="' + c.y + '" r="2.7" fill="none" stroke="#c9c9c9" stroke-width="1.2"/>';
+        });
+        dots.forEach(function (d) {
+          svg += '<circle cx="' + d.x + '" cy="' + d.y + '" r="1.7" fill="#e2e2e2"/>';
+        });
+        svg += '</svg>';
+        return svg;
+      }
+
+      // ---- Legend ----
+      const legendEl = document.getElementById('legend');
+      function legendGroup(title, letters) {
+        const group = document.createElement('div');
+        group.className = 'legend-group';
+        const h = document.createElement('div');
+        h.className = 'legend-group-title';
+        h.textContent = title;
+        group.appendChild(h);
+        letters.forEach(function (ch) {
+          const row = document.createElement('div');
+          row.className = 'legend-row';
+          const charEl = document.createElement('span');
+          charEl.className = 'legend-char';
+          charEl.textContent = ch.toUpperCase();
+          const glyphEl = document.createElement('span');
+          glyphEl.className = 'legend-glyph';
+          glyphEl.innerHTML = renderGreggWord(ch);
+          row.appendChild(charEl);
+          row.appendChild(glyphEl);
+          group.appendChild(row);
+        });
+        return group;
+      }
+      legendEl.appendChild(legendGroup('Vowels', ['a', 'e', 'i', 'o', 'u']));
+      legendEl.appendChild(legendGroup('Consonants', ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z']));
+      const note = document.createElement('div');
+      note.className = 'legend-note';
+      note.textContent = 'y = vowel after a consonant; h = raised dot.';
+      legendEl.appendChild(note);
+
+      // ---- Wiring ----
+      const rangeEl = document.getElementById('count-range');
+      const numEl = document.getElementById('count-num');
+      const labelEl = document.getElementById('count-label');
+      const englishEl = document.getElementById('english');
+      const greggEl = document.getElementById('gregg');
+
+      function getCount() {
+        let n = parseInt(numEl.value, 10);
+        if (isNaN(n) || n < 1) n = 1;
+        if (n > 200) n = 200;
+        return n;
+      }
+
+      function syncControls(n) {
+        rangeEl.value = n;
+        numEl.value = n;
+        labelEl.textContent = n;
+      }
+
+      function generate() {
+        const n = getCount();
+        syncControls(n);
+        const words = generateWords(n);
+        englishEl.textContent = renderEnglish(words);
+        greggEl.innerHTML = words.map(renderGreggWord).join('');
+      }
+
+      rangeEl.addEventListener('input', function () {
+        const n = parseInt(rangeEl.value, 10);
+        syncControls(n);
+        generate();
+      });
+      numEl.addEventListener('input', function () {
+        labelEl.textContent = numEl.value || '';
+      });
+      numEl.addEventListener('change', generate);
+      numEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') generate(); });
+      document.getElementById('generate').addEventListener('click', generate);
+
+      generate();
+    })();
+  </script>
+</body>
+</html>
