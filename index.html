@@ -61,6 +61,42 @@
       background: #000;
     }
 
+    .avatars-row {
+      display: flex;
+      gap: 48px;
+      align-items: flex-start;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .avatar-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 240px;
+    }
+
+    .avatar-card svg {
+      flex-shrink: 0;
+      display: block;
+    }
+
+    .avatar-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #e0e0e0;
+      margin-top: 12px;
+    }
+
+    .avatar-traits {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #999;
+      line-height: 1.55;
+      white-space: pre-line;
+    }
+
     .slide-content iframe {
       width: 100%;
       height: 100%;
@@ -152,7 +188,7 @@
 
     <div class="slide" id="slide-2">
       <div class="slide-content">
-        <img data-src="ArtisticAnalysis_web.png" alt="Artistic Analysis">
+        <img data-src="ArtisticAnalysis/ArtisticAnalysis_web.png" alt="Artistic Analysis">
       </div>
       <div class="slide-title">Artistic Analysis</div>
     </div>
@@ -401,41 +437,41 @@
     </div>
     <div class="slide" id="slide-6">
       <div class="slide-content">
-        <img data-src="dingleberryexpress.png" alt="Dingleberry Express">
+        <img data-src="DingleberryExpress/dingleberryexpress.png" alt="Dingleberry Express">
       </div>
       <div class="slide-title">Dingleberry Express</div>
     </div>
     <div class="slide" id="slide-7">
       <div class="slide-content">
-        <img data-src="OldKinderhook_web.png" alt="Old Kinderhook">
+        <img data-src="OldKinderhook/OldKinderhook_web.png" alt="Old Kinderhook">
       </div>
       <div class="slide-title">Old Kinderhook</div>
     </div>
 
     <div class="slide" id="slide-8">
       <div class="slide-content">
-        <iframe data-src="us_debt_interactive.html" title="US National Debt and Interest"></iframe>
+        <iframe data-src="UsDebt/us_debt_interactive.html" title="US National Debt and Interest"></iframe>
       </div>
       <div class="slide-title">U.S. National Debt &amp; Interest</div>
     </div>
 
     <div class="slide" id="slide-9">
       <div class="slide-content">
-        <iframe data-src="prime_number_line.html" title="Prime Numbers"></iframe>
+        <iframe data-src="PrimeNumberLine/prime_number_line.html" title="Prime Numbers"></iframe>
       </div>
       <div class="slide-title">Prime Numbers 0&ndash;1000</div>
     </div>
 
     <div class="slide" id="slide-10">
       <div class="slide-content">
-        <iframe data-src="plant_climate.html" title="Plant Climate"></iframe>
+        <iframe data-src="PlantClimate/plant_climate.html" title="Plant Climate"></iframe>
       </div>
       <div class="slide-title">Plant Climate</div>
     </div>
 
     <div class="slide" id="slide-11">
       <div class="slide-content">
-        <iframe data-src="tariff_timeline.html" title="Tariff Timeline"></iframe>
+        <iframe data-src="TariffTimeline/tariff_timeline.html" title="Tariff Timeline"></iframe>
       </div>
       <div class="slide-title">Tariff Timeline</div>
     </div>
@@ -449,9 +485,9 @@
 
     <div class="slide" id="slide-13">
       <div class="slide-content">
-        <iframe data-src="gregg_shorthand.html" title="Gregg Shorthand Text Generator"></iframe>
+        <iframe data-src="GreggShorthand/gregg_shorthand.html" title="Gregg Shorthand Text Generator"></iframe>
       </div>
-      <div class="slide-title"><a href="gregg_shorthand.html" target="_blank">Gregg Shorthand Text Generator &#8599;</a></div>
+      <div class="slide-title"><a href="GreggShorthand/gregg_shorthand.html" target="_blank">Gregg Shorthand Text Generator &#8599;</a></div>
     </div>
 
     <div class="slide" id="slide-14">
@@ -469,6 +505,96 @@ Werner Herzog's 2007 documentary "Encounters at the End of the World"
 if either party wants me to take it down, please email me at jamesrossbrady@proton.me</div>
     </div>
 
+    <div class="slide" id="slide-15">
+      <div class="slide-content">
+        <div class="avatars-row">
+          <div class="avatar-card">
+            <svg viewBox="0 0 120 170" width="120" height="170" role="img" aria-label="Randy">
+              <rect x="30" y="100" width="60" height="70" rx="14" fill="#6FB7D8"/>
+              <rect x="52" y="90" width="16" height="14" fill="#FFD9A0"/>
+              <circle cx="60" cy="52" r="34" fill="#FFD9A0"/>
+              <path d="M26 52 A34 34 0 0 1 94 52 Z" fill="#4A3728"/>
+              <circle cx="48" cy="54" r="3" fill="#1a1a1a"/>
+              <circle cx="72" cy="54" r="3" fill="#1a1a1a"/>
+              <path d="M46 70 q14 8 28 0" stroke="#4A3728" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <path d="M52 78 q8 5 16 0" stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            </svg>
+            <div class="avatar-name">Randy</div>
+            <div class="avatar-traits">chaotically immoral
+huge balls
+geology major, understands things according to their natural principle</div>
+          </div>
+
+          <div class="avatar-card">
+            <svg viewBox="0 0 120 170" width="120" height="170" role="img" aria-label="Cartman">
+              <rect x="22" y="100" width="76" height="70" rx="16" fill="#D8433E"/>
+              <rect x="22" y="156" width="76" height="14" rx="7" fill="#F2C14E"/>
+              <rect x="52" y="90" width="16" height="14" fill="#FFD9A0"/>
+              <circle cx="60" cy="52" r="34" fill="#FFD9A0"/>
+              <path d="M24 48 A36 36 0 0 1 96 48 Z" fill="#3EB6B8"/>
+              <rect x="24" y="40" width="72" height="8" fill="#F2C14E"/>
+              <circle cx="60" cy="14" r="7" fill="#F2C14E"/>
+              <circle cx="48" cy="56" r="3" fill="#1a1a1a"/>
+              <circle cx="72" cy="56" r="3" fill="#1a1a1a"/>
+              <path d="M52 68 q8 5 16 0" stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            </svg>
+            <div class="avatar-name">Cartman</div>
+            <div class="avatar-traits">driven by principle to be immoral
+made his enemy consume his family
+understands things according to their social principle</div>
+          </div>
+
+          <div class="avatar-card">
+            <svg viewBox="0 0 120 170" width="120" height="170" role="img" aria-label="Butters">
+              <rect x="30" y="100" width="60" height="70" rx="14" fill="#3EB6B8"/>
+              <rect x="52" y="90" width="16" height="14" fill="#FFD9A0"/>
+              <circle cx="60" cy="52" r="34" fill="#FFD9A0"/>
+              <path d="M26 52 A34 34 0 0 1 94 52 Z" fill="#FFE066"/>
+              <path d="M52 22 L60 6 L68 22 Z" fill="#FFE066"/>
+              <circle cx="48" cy="54" r="3" fill="#1a1a1a"/>
+              <circle cx="72" cy="54" r="3" fill="#1a1a1a"/>
+              <path d="M52 66 q8 5 16 0" stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            </svg>
+            <div class="avatar-name">Butters</div>
+            <div class="avatar-traits">naively immoral
+innocently started a prostitution ring at an elementary school
+does not understand anything</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-title">South Park Poll</div>
+    </div>
+
+    <div class="slide" id="slide-16">
+      <div class="slide-content">
+        <iframe data-src="filesystemMap/index.html" title="Filesystem Map"></iframe>
+      </div>
+      <div class="slide-title"><a href="filesystemMap/" target="_blank">Filesystem Map &#8599;</a></div>
+    </div>
+
+    <div class="slide" id="slide-17">
+      <div class="slide-content" style="background:#000538ff; border-radius:4px; flex-direction:column;">
+        <h2 style="flex-shrink:0; margin:0; padding:32px 20px 24px; text-align:center; color:#0cd500ff; font-size:30px; font-weight:700; letter-spacing:1px;">To Jenna</h2>
+        <div style="flex:1; width:100%; overflow-y:auto; padding:0 120px 40px; color:#0cd500ff; font-size:18px; line-height:1.75;">
+          <div id="jenna-date" style="text-align:left; margin-bottom:20px; color:#0cd500ff; font-size:16px; font-family:'Courier New',monospace;">&nbsp;</div>
+          <p>hey Jenna how's it going. looks like the Democrats took control of both houses in Congress, that's good. AZ's 5th Congressional district is close, but i really hope Mark Lamb takes it. Lee seems like a witchy person; the fact that it took an entire soda can's worth of camping fuel to burn her card (and the fact that i heard old timey fire-and-brimstone preaching while i did it) was pretty disturbing. plus i genuinely think Mark Lamb has the type of integrity Americans need in Congress. i got locked out of TruthSocial so i'm writing to you here now. the Democrats wont take control of Congress until next year, but hopefully the results of this election is the referendum the Republicans needed to work together with the Democrats to solve our common Orange Witch problem &amp; i can see you soon.</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function(){
+        function pad(n){ return (n < 10 ? '0' : '') + n; }
+        var d = new Date();
+        var utcMs = d.getTime() + d.getTimezoneOffset() * 60000;
+        var mst = new Date(utcMs - 7 * 3600000); // MST = UTC-7
+        var dateStr = mst.getFullYear() + '-' + pad(mst.getMonth() + 1) + '-' + pad(mst.getDate());
+        var timeStr = pad(mst.getHours()) + ':' + pad(mst.getMinutes()) + ':' + pad(mst.getSeconds()) + ' MST';
+        var el = document.getElementById('jenna-date');
+        if (el) el.textContent = dateStr + '  ' + timeStr;
+      })();
+    </script>
+
   <div class="dots">
     <span class="dot active" data-index="0"></span>
     <span class="dot" data-index="1"></span>
@@ -485,6 +611,9 @@ if either party wants me to take it down, please email me at jamesrossbrady@prot
     <span class="dot" data-index="12"></span>
     <span class="dot" data-index="13"></span>
     <span class="dot" data-index="14"></span>
+    <span class="dot" data-index="15"></span>
+    <span class="dot" data-index="16"></span>
+    <span class="dot" data-index="17"></span>
   </div>
 
 
@@ -817,5 +946,6 @@ if either party wants me to take it down, please email me at jamesrossbrady@prot
       if (e.key === 'ArrowRight') show(current + 1);
     });
   </script>
+  
 </body>
 </html>
